@@ -1,1 +1,219 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seller Registration - Edesvino</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 30px auto;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+
+    button,
+    .back {
+      width: 100%;
+      display: block;
+      padding: 13px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 7px;
+      background: #111827;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .back {
+      background: #e5e7eb;
+      color: #111827;
+      margin-top: 10px;
+    }
+
+    .success {
+      display: none;
+      text-align: center;
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      color: #065f46;
+      padding: 18px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .success h2 {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+
+    <h1>Seller Registration</h1>
+
+    <p class="subtitle">
+      Join Edesvino and start selling your products.
+    </p>
+
+    <form id="sellerForm">
+
+      <label for="name">Full Name</label>
+      <input
+        type="text"
+        id="name"
+        placeholder="Enter your full name"
+        required
+      >
+
+      <label for="store">Store / Business Name</label>
+      <input
+        type="text"
+        id="store"
+        placeholder="Enter your store name"
+        required
+      >
+
+      <label for="email">Email Address</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+        required
+      >
+
+      <label for="phone">Phone Number</label>
+      <input
+        type="tel"
+        id="phone"
+        placeholder="Enter your phone number"
+        required
+      >
+
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="Create a password"
+        required
+        minlength="6"
+      >
+
+      <button type="submit">
+        Create Seller Account
+      </button>
+
+    </form>
+
+    <div class="success" id="successMessage">
+
+      <h2>Registration Successful! 🎉</h2>
+
+      <p id="welcomeMessage"></p>
+
+      <a href="index.html" class="back">
+        Return to Edesvino
+      </a>
+
+    </div>
+
+    <a href="index.html" class="back">
+      ← Back to Marketplace
+    </a>
+
+  </div>
+
+</div>
+
+<script>
+
+  const sellerForm = document.getElementById("sellerForm");
+
+  sellerForm.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const store = document.getElementById("store").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const password = document.getElementById("password").value;
+
+    const seller = {
+      name: name,
+      store: store,
+      email: email,
+      phone: phone
+    };
+
+    localStorage.setItem("edesvinoSeller", JSON.stringify(seller));
+
+    document.getElementById("sellerForm").style.display = "none";
+
+    document.getElementById("successMessage").style.display = "block";
+
+    document.getElementById("welcomeMessage").textContent =
+      "Welcome to Edesvino, " + name + ". Your store " + store + " has been registered.";
+
+  });
+
+</script>
+
+</body>
+</html>
+
+
