@@ -1,1 +1,285 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edesvino — Buy. Sell. Grow.</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 12px;
+      font-size: 14px;
+    }
+
+    .hero {
+      background: white;
+      text-align: center;
+      padding: 70px 20px;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      color: #666;
+      margin-bottom: 25px;
+      font-size: 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      border-radius: 7px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 5px;
+      background: #111827;
+      color: white;
+    }
+
+    .btn.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 40px 20px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .product-image {
+      height: 150px;
+      background: #e5e7eb;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 45px;
+      margin-bottom: 15px;
+    }
+
+    .price {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .seller-box {
+      background: white;
+      padding: 30px 20px;
+      text-align: center;
+      margin-top: 40px;
+      border-radius: 12px;
+    }
+
+    footer {
+      background: #111827;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 600px) {
+      .nav {
+        flex-direction: column;
+      }
+
+      nav a {
+        margin: 0 5px;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo">Edesvino</div>
+
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#products">Shop</a>
+      <a href="#seller">Sell</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="home">
+  <h1>Welcome to Edesvino</h1>
+
+  <p>Buy. Sell. Grow.</p>
+
+  <p>
+    A simple online marketplace where buyers discover products
+    and sellers grow their businesses.
+  </p>
+
+  <a href="#products" class="btn">Shop Products</a>
+  <a href="#seller" class="btn secondary">Become a Seller</a>
+</section>
+
+<section class="container" id="products">
+
+  <h2 class="section-title">Featured Products</h2>
+
+  <div class="products">
+
+    <div class="card">
+      <div class="product-image">🛍️</div>
+
+      <h3>Sample Product</h3>
+
+      <p>Products from Edesvino sellers will appear here.</p>
+
+      <div class="price">₦0.00</div>
+
+      <button class="btn" onclick="buyProduct()">
+        Buy Now
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="product-image">📱</div>
+
+      <h3>Phone Accessories</h3>
+
+      <p>Quality accessories from Edesvino sellers.</p>
+
+      <div class="price">Coming Soon</div>
+
+      <button class="btn" onclick="comingSoon()">
+        View Product
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="product-image">👕</div>
+
+      <h3>Fashion</h3>
+
+      <p>Discover products from independent sellers.</p>
+
+      <div class="price">Coming Soon</div>
+
+      <button class="btn" onclick="comingSoon()">
+        View Product
+      </button>
+    </div>
+
+  </div>
+
+</section>
+
+<section class="container" id="seller">
+
+  <div class="seller-box">
+
+    <h2>Start Selling on Edesvino</h2>
+
+    <p>
+      Create your seller account and get your products in front
+      of customers.
+    </p>
+
+    <br>
+
+    <button class="btn" onclick="sellerRegister()">
+      Become a Seller
+    </button>
+
+  </div>
+
+</section>
+
+<footer>
+  <p>© 2026 Edesvino. All rights reserved.</p>
+  <p>Buy. Sell. Grow.</p>
+</footer>
+
+<script>
+
+  function buyProduct() {
+    alert("The Edesvino order system will be connected next.");
+  }
+
+  function comingSoon() {
+    alert("More products are coming soon.");
+  }
+
+  function sellerRegister() {
+    alert("Seller registration will be connected next.");
+  }
+
+</script>
+
+</body>
+</html>
+
