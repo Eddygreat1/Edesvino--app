@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>My Products - Edesvino</title>
 
 <style>
@@ -47,6 +48,7 @@ body {
   color: #555;
   line-height: 1.5;
 }
+  
 .back {
   display: block;
   width: 100%;
@@ -86,14 +88,44 @@ body {
   </a>
 
 </div>
-  
+
   <script>
 
 const container = document.getElementById("productsContainer");
 
-const products = JSON.parse(
+let products = JSON.parse(
   localStorage.getItem("edesvinoProducts") || "[]"
 );
+
+/* Remove exact duplicate products */
+const uniqueProducts = [];
+
+products.forEach(function(product) {
+
+  const alreadyExists = uniqueProducts.some(function(existing) {
+
+    return (
+      existing.name === product.name &&
+      existing.price === product.price &&
+      existing.description === product.description &&
+      existing.store === product.store
+    );
+
+  });
+
+  if (!alreadyExists) {
+    uniqueProducts.push(product);
+  }
+
+});
+
+/* Save the cleaned product list */
+localStorage.setItem(
+  "edesvinoProducts",
+  JSON.stringify(uniqueProducts)
+);
+
+products = uniqueProducts;
 
 if (products.length === 0) {
 
@@ -139,3 +171,13 @@ if (products.length === 0) {
 
 </body>
 </html>
+
+  
+  
+
+
+    
+
+
+    
+
