@@ -1,9 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>My Products - Edesvino</title>
 
 <style>
@@ -48,6 +48,7 @@ body {
   color: #555;
   line-height: 1.5;
 }
+
   
 .back {
   display: block;
@@ -76,16 +77,16 @@ body {
 
 <div class="container">
 
-  <div class="header">
-    <h1>Edesvino</h1>
-    <p>My Products</p>
-  </div>
+<div class="header">
+<h1>Edesvino</h1>
+<p>My Products</p>
+</div>
 
-  <div id="productsContainer"></div>
+<div id="productsContainer"></div>
 
-  <a href="dashboard.html" class="back">
-    ← Back to Seller Dashboard
-  </a>
+<a href="dashboard.html" class="back">
+← Back to Seller Dashboard
+</a>
 
 </div>
 
@@ -97,12 +98,11 @@ let products = JSON.parse(
   localStorage.getItem("edesvinoProducts") || "[]"
 );
 
-/* Remove exact duplicate products */
 const uniqueProducts = [];
 
 products.forEach(function(product) {
 
-  const alreadyExists = uniqueProducts.some(function(existing) {
+  const duplicate = uniqueProducts.some(function(existing) {
 
     return (
       existing.name === product.name &&
@@ -113,21 +113,18 @@ products.forEach(function(product) {
 
   });
 
-  if (!alreadyExists) {
+  if (!duplicate) {
     uniqueProducts.push(product);
   }
 
 });
 
-/* Save the cleaned product list */
 localStorage.setItem(
   "edesvinoProducts",
   JSON.stringify(uniqueProducts)
 );
 
-products = uniqueProducts;
-
-if (products.length === 0) {
+if (uniqueProducts.length === 0) {
 
   container.innerHTML = `
     <div class="empty">
@@ -138,7 +135,7 @@ if (products.length === 0) {
 
 } else {
 
-  products.forEach(function(product) {
+  uniqueProducts.forEach(function(product) {
 
     const productCard = document.createElement("div");
 
@@ -171,7 +168,6 @@ if (products.length === 0) {
 
 </body>
 </html>
-
   
   
 
