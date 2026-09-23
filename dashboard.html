@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,3 +17,161 @@ body {
   max-width: 600px;
   margin: auto;
 }
+
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  text-align: center;
+  border-radius: 12px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin-top: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+.seller-info {
+  line-height: 1.8;
+}
+
+button,
+a {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.back {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.logout {
+  background: #dc2626;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<h1>Edesvino</h1>
+<p>Seller Dashboard</p>
+</div>
+
+<div class="card" id="sellerInfo">
+<h2>Seller Information</h2>
+<p>Loading...</p>
+</div>
+
+<div class="card">
+<h2>Seller Menu</h2>
+
+<button onclick="addProduct()">➕ Add Product</button>
+
+<button onclick="myProducts()">📦 My Products</button>
+
+<button onclick="viewOrders()">🛒 Orders</button>
+
+<button onclick="viewSales()">💰 Sales & Earnings</button>
+
+<a href="index.html" class="back">
+← Back to Marketplace
+</a>
+
+<button onclick="logoutSeller()" class="logout">
+Logout
+</button>
+
+</div>
+
+</div>
+
+  <script>
+
+const sellerData = localStorage.getItem("edesvinoSeller");
+
+const sellerInfo = document.getElementById("sellerInfo");
+
+if (sellerData) {
+
+  const seller = JSON.parse(sellerData);
+
+  sellerInfo.innerHTML = `
+    <h2>Welcome, ${seller.name}!</h2>
+
+    <div class="seller-info">
+
+      <strong>Store:</strong>
+      ${seller.store}
+
+      <br>
+
+      <strong>Email:</strong>
+      ${seller.email}
+
+      <br>
+
+      <strong>Phone:</strong>
+      ${seller.phone}
+
+    </div>
+  `;
+
+} else {
+
+  sellerInfo.innerHTML = `
+    <h2>No Seller Account Found</h2>
+
+    <p>Please register as a seller first.</p>
+
+    <a href="register.html">
+      Register as Seller
+    </a>
+  `;
+
+}
+
+function addProduct() {
+  alert("Add Product will be connected next.");
+}
+
+function myProducts() {
+  alert("My Products will be connected next.");
+}
+
+function viewOrders() {
+  alert("Orders will be connected next.");
+}
+
+function viewSales() {
+  alert("Sales and Earnings will be connected next.");
+}
+
+function logoutSeller() {
+
+  localStorage.removeItem("edesvinoSeller");
+
+  window.location.href = "index.html";
+
+}
+
+</script>
+
+</body>
+</html>
