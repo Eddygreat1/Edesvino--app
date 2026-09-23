@@ -1,1 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Products - Edesvino</title>
 
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+}
+
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  text-align: center;
+  border-radius: 12px;
+}
+
+.product {
+  background: white;
+  padding: 20px;
+  margin-top: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.product h2 {
+  margin-top: 0;
+}
+
+.price {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.description {
+  color: #555;
+  line-height: 1.5;
+}
+.back {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 15px;
+  background: #111827;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.empty {
+  background: white;
+  padding: 20px;
+  margin-top: 15px;
+  border-radius: 12px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>Edesvino</h1>
+    <p>My Products</p>
+  </div>
+
+  <div id="productsContainer"></div>
+
+  <a href="dashboard.html" class="back">
+    ← Back to Seller Dashboard
+  </a>
+
+</div>
+  
+  <script>
+
+const container = document.getElementById("productsContainer");
+
+const products = JSON.parse(
+  localStorage.getItem("edesvinoProducts") || "[]"
+);
+
+if (products.length === 0) {
+
+  container.innerHTML = `
+    <div class="empty">
+      <h2>No Products Yet</h2>
+      <p>You have not added any products.</p>
+    </div>
+  `;
+
+} else {
+
+  products.forEach(function(product) {
+
+    const productCard = document.createElement("div");
+
+    productCard.className = "product";
+
+    productCard.innerHTML = `
+      <h2>${product.name}</h2>
+
+      <p class="price">
+        ₦${Number(product.price).toLocaleString()}
+      </p>
+
+      <p class="description">
+        ${product.description}
+      </p>
+
+      <p>
+        <strong>Store:</strong>
+        ${product.store}
+      </p>
+    `;
+
+    container.appendChild(productCard);
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>
