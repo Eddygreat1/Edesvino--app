@@ -277,6 +277,49 @@
     alert("Seller registration will be connected next.");
   }
 
+const savedProducts = JSON.parse(
+  localStorage.getItem("edesvinoProducts") || "[]"
+);
+
+if (savedProducts.length > 0) {
+
+  const productArea = document.querySelector(".products");
+
+  productArea.innerHTML = "";
+
+  savedProducts.forEach(function(product) {
+
+    productArea.innerHTML += `
+      <div class="card">
+
+        <div class="product-image">🛍️</div>
+
+        <h3>${product.name}</h3>
+
+        <p>${product.description}</p>
+
+        <div class="price">
+          ₦${Number(product.price).toLocaleString()}
+        </div>
+
+        <p>
+          <strong>Store:</strong> ${product.store}
+        </p>
+
+        <button class="btn"
+          onclick="buyProduct()">
+          Buy Now
+        </button>
+
+      </div>
+    `;
+
+  });
+
+}
+
+  
+  
 </script>
 
 </body>
