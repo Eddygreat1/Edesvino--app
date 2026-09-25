@@ -1,231 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edesvino - Customer Orders</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Orders - Edesvino</title>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fa;
-  margin: 0;
-  padding: 20px;
-}
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-.container {
-  max-width: 700px;
-  margin: auto;
-}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
 
-.header {
-  background: #111827;
-  color: white;
-  padding: 25px;
-  border-radius: 12px;
-  text-align: center;
-}
+    header {
+      background: #111;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
 
-.card {
-  background: white;
-  margin-top: 15px;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-}
+    main {
+      max-width: 700px;
+      margin: 25px auto;
+      padding: 15px;
+    }
 
-.order {
-  border-bottom: 1px solid #ddd;
-  padding: 15px 0;
-}
+    .order {
+      background: white;
+      padding: 20px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
 
-.order:last-child {
-  border-bottom: none;
-}
+    .order h2 {
+      margin-top: 0;
+    }
 
-.amount {
-  font-size: 20px;
-  font-weight: bold;
-}
+    .status-title {
+      font-weight: bold;
+      margin-top: 18px;
+      margin-bottom: 8px;
+    }
 
-.message {
-  text-align: center;
-  padding: 20px;
-}
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      background: white;
+    }
 
-.back {
-  display: block;
-  text-align: center;
-  margin-top: 20px;
-  color: #111827;
-  font-weight: bold;
-  text-decoration: none;
-}
-</style>
+    button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 10px;
+      text-decoration: none;
+      color: #111;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+<header>
+  <h1>Edesvino</h1>
+  <p>Customer Orders</p>
+</header>
 
-  <div class="header">
-    <h1>Edesvino</h1>
-    <p>Customer Orders</p>
-  </div>
+<main>
 
-  <div class="card">
-
-    <div id="message" class="message">
-      Loading your orders...
-    </div>
-
-    <div id="orders"></div>
-
+  <div id="orders">
+    Loading orders...
   </div>
 
   <a class="back" href="dashboard.html">
     ← Back to Seller Dashboard
   </a>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</main>
 
 <script>
+  const SUPABASE_URL = "https://lxszilqypuglxyfyukdg.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-const SUPABASE_URL =
-"https://lxszilqypuglxyfyukdg.supabase.co";
+  const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-const SUPABASE_KEY =
-"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+  async function loadOrders() {
 
-const supabaseClient =
-window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+    const ordersContainer =
+      document.getElementById("orders");
 
+    const {
+      data: { user }
+    } = await supabaseClient.auth.getUser();
 
-async function loadOrders() {
+    if (!user) {
+      window.location.replace("login.html");
+      return;
+    }
 
-  const message =
-  document.getElementById("message");
+    const { data: orders, error } =
+      await supabaseClient
+        .from("orders")
+        .select("*")
+        .eq("seller_id", user.id)
+        .order("created_at", { ascending: false });
 
-  const ordersDiv =
-  document.getElementById("orders");
+    if (error) {
+      console.error(error);
 
+      ordersContainer.innerHTML =
+        "<p>Unable to load orders.</p>";
 
-  const {
-    data: userData,
-    error: userError
-  } =
-  await supabaseClient.auth.getUser();
+      return;
+    }
 
+    if (!orders || orders.length === 0) {
 
-  if (userError || !userData.user) {
+      ordersContainer.innerHTML =
+        "<p>You have no orders yet.</p>";
 
-    window.location.replace("login.html");
+      return;
+    }
 
-    return;
+    ordersContainer.innerHTML =
+      orders.map(order => {
+
+        const status =
+          order.status || "Pending";
+
+        return `
+          <div class="order">
+
+            <h2>
+              ${escapeHtml(order.product_name)}
+            </h2>
+
+            <p>
+              <strong>Amount:</strong>
+              ₦${Number(order.price).toLocaleString()}
+            </p>
+
+            <p>
+              <strong>Customer:</strong>
+              ${escapeHtml(order.customer_name)}
+            </p>
+
+            <p>
+              <strong>Phone:</strong>
+              ${escapeHtml(order.customer_phone)}
+            </p>
+
+            <p>
+              <strong>Delivery Address:</strong>
+              ${escapeHtml(order.delivery_address)}
+            </p>
+
+            <p>
+              <strong>Order Date:</strong>
+              ${new Date(order.created_at).toLocaleString()}
+            </p>
+
+            <div class="status-title">
+              Order Status
+            </div>
+
+            <select id="status-${order.id}">
+
+              <option value="Pending"
+                ${status === "Pending" ? "selected" : ""}>
+                Pending
+              </option>
+
+              <option value="Confirmed"
+                ${status === "Confirmed" ? "selected" : ""}>
+                Confirmed
+              </option>
+
+              <option value="Shipped"
+                ${status === "Shipped" ? "selected" : ""}>
+                Shipped
+              </option>
+
+              <option value="Delivered"
+                ${status === "Delivered" ? "selected" : ""}>
+                Delivered
+              </option>
+
+              <option value="Cancelled"
+                ${status === "Cancelled" ? "selected" : ""}>
+                Cancelled
+              </option>
+
+            </select>
+
+            <button
+              onclick="updateStatus(${order.id})"
+              id="button-${order.id}">
+              Save Status
+            </button>
+
+            <div
+              class="message"
+              id="message-${order.id}">
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
   }
 
 
-  const user =
-  userData.user;
+  async function updateStatus(orderId) {
 
+    const select =
+      document.getElementById(
+        "status-" + orderId
+      );
 
-  const {
-    data: orders,
-    error
-  } =
-  await supabaseClient
-    .from("orders")
-    .select("*")
-    .eq("seller_id", user.id)
-    .order(
-      "created_at",
-      { ascending: false }
-    );
+    const button =
+      document.getElementById(
+        "button-" + orderId
+      );
 
+    const message =
+      document.getElementById(
+        "message-" + orderId
+      );
 
-  if (error) {
+    const newStatus =
+      select.value;
+
+    const {
+      data: { user }
+    } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+
+      window.location.replace(
+        "login.html"
+      );
+
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    const { error } =
+      await supabaseClient
+        .from("orders")
+        .update({
+          status: newStatus
+        })
+        .eq("id", orderId)
+        .eq("seller_id", user.id);
+
+    if (error) {
+
+      console.error(error);
+
+      message.textContent =
+        "Unable to update status.";
+
+      button.disabled = false;
+      button.textContent =
+        "Save Status";
+
+      return;
+    }
 
     message.textContent =
-    "Unable to load orders: " +
-    error.message;
+      "Status updated successfully!";
 
-    return;
+    button.disabled = false;
+    button.textContent =
+      "Save Status";
   }
 
 
-  message.style.display = "none";
+  function escapeHtml(value) {
 
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
 
-  if (!orders || orders.length === 0) {
-
-    message.style.display = "block";
-
-    message.textContent =
-    "You have no orders yet.";
-
-    return;
   }
 
 
-  orders.forEach(function(order) {
-
-    const item =
-    document.createElement("div");
-
-    item.className = "order";
-
-
-    item.innerHTML = `
-
-      <h2>
-        ${order.product_name}
-      </h2>
-
-      <div class="amount">
-        ₦${Number(
-          order.price
-        ).toLocaleString()}
-      </div>
-
-      <p>
-        <strong>Customer:</strong>
-        ${order.customer_name}
-      </p>
-
-      <p>
-        <strong>Phone:</strong>
-        ${order.customer_phone}
-      </p>
-
-      <p>
-        <strong>Delivery Address:</strong>
-        ${order.delivery_address}
-      </p>
-
-      <p>
-        <strong>Order Date:</strong>
-        ${new Date(
-          order.created_at
-        ).toLocaleString()}
-      </p>
-
-    `;
-
-
-    ordersDiv.appendChild(item);
-
-  });
-
-}
-
-
-loadOrders();
-
+  loadOrders();
 </script>
 
 </body>
