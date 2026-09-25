@@ -1,68 +1,76 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edesvino Seller Dashboard</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      margin: 0;
-      padding: 20px;
-    }
+<meta charset="UTF-8">
 
-    .container {
-      max-width: 700px;
-      margin: auto;
-    }
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-    .header {
-      background: #111827;
-      color: white;
-      padding: 25px;
-      border-radius: 12px;
-      text-align: center;
-    }
+<title>Edesvino Seller Dashboard</title>
 
-    .card {
-      background: white;
-      margin-top: 15px;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    }
+<style>
 
-    .button {
-      display: block;
-      text-decoration: none;
-      background: #111827;
-      color: white;
-      padding: 15px;
-      margin-top: 12px;
-      border-radius: 8px;
-      text-align: center;
-    }
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
 
-    .logout {
-      background: #b91c1c;
-      border: none;
-      width: 100%;
-      padding: 15px;
-      margin-top: 15px;
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+}
 
-    .message {
-      text-align: center;
-      padding: 20px;
-      font-weight: bold;
-    }
-  </style>
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.card {
+  background: white;
+  margin-top: 15px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.button {
+  display: block;
+  text-decoration: none;
+  background: #111827;
+  color: white;
+  padding: 15px;
+  margin-top: 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.logout {
+  background: #b91c1c;
+  border: none;
+  width: 100%;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.message {
+  text-align: center;
+  padding: 20px;
+  font-weight: bold;
+}
+
+</style>
+
 </head>
 
 <body>
@@ -70,15 +78,29 @@
 <div class="container">
 
   <div class="header">
+
     <h1>Edesvino</h1>
+
     <p>Seller Dashboard</p>
+
   </div>
+
+
+  <div id="loading" class="message">
+
+    Checking seller login...
+
+  </div>
+
 
   <div id="dashboard" style="display:none;">
 
     <div class="card">
 
-      <h2>Welcome, <span id="sellerName"></span>!</h2>
+      <h2>
+        Welcome,
+        <span id="sellerName"></span>!
+      </h2>
 
       <p>
         <strong>Store:</strong>
@@ -102,19 +124,23 @@
 
       <h2>Seller Tools</h2>
 
-      <a class="button" href="add-product.html">
+      <a class="button"
+         href="add-product.html">
         Add Product
       </a>
 
-      <a class="button" href="my-product.html">
+      <a class="button"
+         href="my-product.html">
         My Products
       </a>
 
-      <a class="button" href="orders.html">
+      <a class="button"
+         href="orders.html">
         Orders
       </a>
 
-      <a class="button" href="sales.html">
+      <a class="button"
+         href="sales.html">
         Sales & Earnings
       </a>
 
@@ -125,21 +151,19 @@
 
       <h2>Marketplace</h2>
 
-      <a class="button" href="index.html">
+      <a class="button"
+         href="index.html">
         ← Back to Marketplace
       </a>
 
-      <button class="logout" id="logoutButton">
+      <button
+        class="logout"
+        id="logoutButton">
         Logout
       </button>
 
     </div>
 
-  </div>
-
-
-  <div id="loading" class="message">
-    Checking seller login...
   </div>
 
 </div>
@@ -150,99 +174,90 @@
 <script>
 
 const SUPABASE_URL =
-  "https://lxszilqypuglxyfyukdg.supabase.co";
+"https://lxszilqypuglxyfyukdg.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
 
 const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 
-async function loadDashboard() {
+async function checkSellerLogin() {
 
-  const {
-    data,
-    error
-  } = await supabaseClient.auth.getUser();
+  const result =
+    await supabaseClient.auth.getSession();
+
+  const session =
+    result.data.session;
 
 
-  if (error || !data.user) {
+  if (!session) {
 
-    window.location.href = "login.html";
+    window.location.replace("login.html");
 
     return;
+
   }
 
 
-  const user = data.user;
+  const user =
+    session.user;
 
 
-  document.getElementById("sellerName").textContent =
-    user.user_metadata?.full_name ||
-    "Seller";
+  document.getElementById("sellerName")
+    .textContent =
+    user.user_metadata?.full_name || "Seller";
 
 
-  document.getElementById("storeName").textContent =
+  document.getElementById("storeName")
+    .textContent =
     user.user_metadata?.store_name ||
     "Edesvino Store";
 
 
-  document.getElementById("sellerEmail").textContent =
-    user.email ||
-    "";
+  document.getElementById("sellerEmail")
+    .textContent =
+    user.email || "";
 
 
-  document.getElementById("sellerPhone").textContent =
-    user.user_metadata?.phone ||
-    "";
+  document.getElementById("sellerPhone")
+    .textContent =
+    user.user_metadata?.phone || "";
 
 
-  document.getElementById("loading").style.display =
-    "none";
+  document.getElementById("loading")
+    .style.display = "none";
 
 
-  document.getElementById("dashboard").style.display =
-    "block";
+  document.getElementById("dashboard")
+    .style.display = "block";
+
 }
 
 
 document
-  .getElementById("logoutButton")
-  .addEventListener("click", async function() {
+.getElementById("logoutButton")
+.addEventListener("click", async function() {
 
-    this.disabled = true;
-    this.textContent = "Logging out...";
+  this.disabled = true;
 
-
-    const { error } =
-      await supabaseClient.auth.signOut();
+  this.textContent = "Logging out...";
 
 
-    if (error) {
-
-      alert(
-        "Logout failed: " +
-        error.message
-      );
-
-      this.disabled = false;
-      this.textContent = "Logout";
-
-      return;
-    }
+  await supabaseClient.auth.signOut();
 
 
-    window.location.href =
-      "login.html";
+  window.location.replace("login.html");
 
-  });
+});
 
 
-loadDashboard();
+checkSellerLogin();
 
 </script>
 
