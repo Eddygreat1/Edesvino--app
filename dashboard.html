@@ -1,76 +1,68 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edesvino Seller Dashboard</title>
 
-<title>Seller Dashboard - Edesvino</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+    }
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fa;
-  margin: 0;
-  padding: 20px;
-}
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-}
+    .header {
+      background: #111827;
+      color: white;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+    }
 
-.header {
-  background: #111827;
-  color: white;
-  padding: 25px;
-  text-align: center;
-  border-radius: 12px;
-}
+    .card {
+      background: white;
+      margin-top: 15px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
 
-.header h1 {
-  margin: 0 0 10px;
-}
+    .button {
+      display: block;
+      text-decoration: none;
+      background: #111827;
+      color: white;
+      padding: 15px;
+      margin-top: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
 
-.card {
-  background: white;
-  padding: 20px;
-  margin-top: 15px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-}
+    .logout {
+      background: #b91c1c;
+      border: none;
+      width: 100%;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-.card h2 {
-  margin-top: 0;
-}
-
-.button {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  margin-top: 12px;
-  background: #111827;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 8px;
-  box-sizing: border-box;
-  font-size: 16px;
-}
-
-.button.logout {
-  background: #b91c1c;
-}
-
-.info {
-  line-height: 1.7;
-}
-
-.welcome {
-  font-size: 18px;
-  font-weight: bold;
-}
-</style>
+    .message {
+      text-align: center;
+      padding: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
@@ -82,73 +74,177 @@ body {
     <p>Seller Dashboard</p>
   </div>
 
+  <div id="dashboard" style="display:none;">
 
-  <div class="card">
+    <div class="card">
 
-    <div class="welcome">
-      Welcome, Endurance Edirin Jackson!
-    </div>
-
-    <div class="info">
+      <h2>Welcome, <span id="sellerName"></span>!</h2>
 
       <p>
         <strong>Store:</strong>
-        Edesvino Digital Hub
+        <span id="storeName"></span>
       </p>
 
       <p>
         <strong>Email:</strong>
-        eddyspecial1978@gmail.com
+        <span id="sellerEmail"></span>
       </p>
 
       <p>
         <strong>Phone:</strong>
-        08068390109
+        <span id="sellerPhone"></span>
       </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Seller Tools</h2>
+
+      <a class="button" href="add-product.html">
+        Add Product
+      </a>
+
+      <a class="button" href="my-product.html">
+        My Products
+      </a>
+
+      <a class="button" href="orders.html">
+        Orders
+      </a>
+
+      <a class="button" href="sales.html">
+        Sales & Earnings
+      </a>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Marketplace</h2>
+
+      <a class="button" href="index.html">
+        ← Back to Marketplace
+      </a>
+
+      <button class="logout" id="logoutButton">
+        Logout
+      </button>
 
     </div>
 
   </div>
 
 
-  <div class="card">
-
-    <h2>Seller Tools</h2>
-
-    <a href="add-product.html" class="button">
-      Add Product
-    </a>
-
-    <a href="my-product.html" class="button">
-      My Products
-    </a>
-
-    <a href="orders.html" class="button">
-      Orders
-    </a>
-
-    <a href="sales.html" class="button">
-      Sales & Earnings
-    </a>
-
-  </div>
-
-
-  <div class="card">
-
-    <h2>Marketplace</h2>
-
-    <a href="index.html" class="button">
-      ← Back to Marketplace
-    </a>
-
-    <a href="index.html" class="button logout">
-      Logout
-    </a>
-
+  <div id="loading" class="message">
+    Checking seller login...
   </div>
 
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+async function loadDashboard() {
+
+  const {
+    data,
+    error
+  } = await supabaseClient.auth.getUser();
+
+
+  if (error || !data.user) {
+
+    window.location.href = "login.html";
+
+    return;
+  }
+
+
+  const user = data.user;
+
+
+  document.getElementById("sellerName").textContent =
+    user.user_metadata?.full_name ||
+    "Seller";
+
+
+  document.getElementById("storeName").textContent =
+    user.user_metadata?.store_name ||
+    "Edesvino Store";
+
+
+  document.getElementById("sellerEmail").textContent =
+    user.email ||
+    "";
+
+
+  document.getElementById("sellerPhone").textContent =
+    user.user_metadata?.phone ||
+    "";
+
+
+  document.getElementById("loading").style.display =
+    "none";
+
+
+  document.getElementById("dashboard").style.display =
+    "block";
+}
+
+
+document
+  .getElementById("logoutButton")
+  .addEventListener("click", async function() {
+
+    this.disabled = true;
+    this.textContent = "Logging out...";
+
+
+    const { error } =
+      await supabaseClient.auth.signOut();
+
+
+    if (error) {
+
+      alert(
+        "Logout failed: " +
+        error.message
+      );
+
+      this.disabled = false;
+      this.textContent = "Logout";
+
+      return;
+    }
+
+
+    window.location.href =
+      "login.html";
+
+  });
+
+
+loadDashboard();
+
+</script>
 
 </body>
 </html>
