@@ -1,449 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Place Order - Edesvino</title>
 
-<meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
 
-<title>Edesvino - Place Order</title>
+    header {
+      background: #111;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
 
-<style>
+    main {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+    }
 
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fa;
-  margin: 0;
-  padding: 20px;
-}
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-}
+    h1 {
+      margin-top: 0;
+    }
 
-.header {
-  background: #111827;
-  color: white;
-  padding: 25px;
-  border-radius: 12px;
-  text-align: center;
-}
+    .price {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
 
-.card {
-  background: white;
-  padding: 20px;
-  margin-top: 15px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-}
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
 
-.product {
-  padding-bottom: 15px;
-  border-bottom: 1px solid #ddd;
-}
+    input,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
 
-.price {
-  font-size: 24px;
-  font-weight: bold;
-  margin-top: 10px;
-}
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
 
-label {
-  display: block;
-  margin-top: 15px;
-  margin-bottom: 6px;
-  font-weight: bold;
-}
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      color: white;
+      font-size: 17px;
+      cursor: pointer;
+    }
 
-input,
-textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 14px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 16px;
-}
+    button:disabled {
+      opacity: 0.6;
+    }
 
-textarea {
-  min-height: 110px;
-}
+    .success {
+      text-align: center;
+      padding: 20px 0;
+    }
 
-button {
-  width: 100%;
-  padding: 15px;
-  margin-top: 20px;
-  border: none;
-  border-radius: 8px;
-  background: #111827;
-  color: white;
-  font-size: 16px;
-}
+    .success h2 {
+      margin-bottom: 10px;
+    }
 
-button:disabled {
-  opacity: 0.6;
-}
+    .order-number {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
 
-.message {
-  margin-top: 20px;
-  padding: 15px;
-  border-radius: 8px;
-  display: none;
-}
+    .back {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #111;
+      font-weight: bold;
+    }
 
-.success {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
-.error {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.back {
-  display: block;
-  text-align: center;
-  margin-top: 20px;
-  color: #111827;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-</style>
-
+    .error {
+      color: #b00020;
+      margin-top: 15px;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+<header>
+  <h1>Edesvino</h1>
+</header>
 
-  <div class="header">
+<main>
+  <div class="card" id="orderCard">
 
-    <h1>Edesvino</h1>
+    <div id="productArea">
+      <h1>Place Order</h1>
 
-    <p>Place Order</p>
-
-  </div>
-
-
-  <div class="card">
-
-    <div id="productBox">
-
-      Loading product...
-
-    </div>
-
-
-    <form id="orderForm" style="display:none;">
-
-      <label for="customerName">
-        Full Name
-      </label>
-
-      <input
-        type="text"
-        id="customerName"
-        required
-      >
-
-
-      <label for="customerPhone">
-        Phone Number
-      </label>
-
-      <input
-        type="tel"
-        id="customerPhone"
-        required
-      >
-
-
-      <label for="deliveryAddress">
-        Delivery Address
-      </label>
-
-      <textarea
-        id="deliveryAddress"
-        required
-      ></textarea>
-
-
-      <button
-        type="submit"
-        id="orderButton">
-
-        Place Order
-
-      </button>
-
-    </form>
-
-
-    <div
-      id="message"
-      class="message">
-    </div>
-
-
-    <a
-      class="back"
-      href="index.html">
-
-      ← Back to Marketplace
-
-    </a>
-
-  </div>
-
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-
-const SUPABASE_URL =
-"https://lxszilqypuglxyfyukdg.supabase.co";
-
-const SUPABASE_KEY =
-"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
-
-
-const supabaseClient =
-window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-
-const productBox =
-document.getElementById("productBox");
-
-const orderForm =
-document.getElementById("orderForm");
-
-const orderButton =
-document.getElementById("orderButton");
-
-const message =
-document.getElementById("message");
-
-
-let currentProduct = null;
-
-
-async function loadProduct() {
-
-  const params =
-  new URLSearchParams(
-    window.location.search
-  );
-
-  const productName =
-  params.get("product");
-
-
-  if (!productName) {
-
-    productBox.innerHTML =
-    "<p>Product not found.</p>";
-
-    return;
-
-  }
-
-
-  const result =
-  await supabaseClient
-    .from("products")
-    .select("*")
-    .eq("name", productName)
-    .limit(1);
-
-
-  if (result.error) {
-
-    productBox.innerHTML =
-    "<p>Unable to load product: " +
-    result.error.message +
-    "</p>";
-
-    return;
-
-  }
-
-
-  if (!result.data ||
-      result.data.length === 0) {
-
-    productBox.innerHTML =
-    "<p>Product not found.</p>";
-
-    return;
-
-  }
-
-
-  currentProduct =
-  result.data[0];
-
-
-  productBox.innerHTML = `
-
-    <div class="product">
-
-      <h2>
-        ${currentProduct.name}
-      </h2>
-
-      <p>
-        ${currentProduct.description || ""}
-      </p>
-
-      <div class="price">
-        ₦${Number(
-          currentProduct.price
-        ).toLocaleString()}
+      <div id="productDetails">
+        Loading product...
       </div>
 
-      <p>
-        <strong>Store:</strong>
-        ${currentProduct.store || ""}
-      </p>
+      <form id="orderForm">
 
+        <label for="customerName">Full Name</label>
+        <input
+          type="text"
+          id="customerName"
+          required
+        >
+
+        <label for="customerPhone">Phone Number</label>
+        <input
+          type="tel"
+          id="customerPhone"
+          required
+        >
+
+        <label for="deliveryAddress">Delivery Address</label>
+        <textarea
+          id="deliveryAddress"
+          required
+        ></textarea>
+
+        <button type="submit" id="placeOrderButton">
+          Place Order
+        </button>
+
+        <div id="errorMessage" class="error"></div>
+
+      </form>
+
+      <a class="back" href="index.html">← Back to Marketplace</a>
     </div>
 
-  `;
+  </div>
+</main>
 
+<script>
+  const SUPABASE_URL = "https://lxszilqypuglxyfyukdg.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-  orderForm.style.display =
-  "block";
+  const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-}
+  const params = new URLSearchParams(window.location.search);
+  const productName = params.get("product");
 
+  let currentProduct = null;
 
-orderForm.addEventListener(
-"submit",
-async function(event) {
+  async function loadProduct() {
+    if (!productName) {
+      document.getElementById("productDetails").innerHTML =
+        "<p>Product not found.</p>";
+      return;
+    }
 
-  event.preventDefault();
+    const { data, error } = await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("name", productName)
+      .limit(1)
+      .single();
 
+    if (error || !data) {
+      document.getElementById("productDetails").innerHTML =
+        "<p>Product could not be found.</p>";
+      return;
+    }
 
-  if (!currentProduct) {
+    currentProduct = data;
 
-    return;
-
+    document.getElementById("productDetails").innerHTML = `
+      <h2>${escapeHtml(data.name)}</h2>
+      <p>${escapeHtml(data.description || "")}</p>
+      <div class="price">₦${Number(data.price).toLocaleString()}</div>
+      <p><strong>Store:</strong> ${escapeHtml(data.store || "Edesvino Seller")}</p>
+    `;
   }
 
-
-  orderButton.disabled =
-  true;
-
-  orderButton.textContent =
-  "Placing Order...";
-
-
-  message.style.display =
-  "block";
-
-  message.className =
-  "message";
-
-  message.textContent =
-  "Placing your order...";
-
-
-  const customerName =
-  document.getElementById(
-    "customerName"
-  ).value.trim();
-
-
-  const customerPhone =
-  document.getElementById(
-    "customerPhone"
-  ).value.trim();
-
-
-  const deliveryAddress =
-  document.getElementById(
-    "deliveryAddress"
-  ).value.trim();
-
-
-  const orderData = {
-
-    product_name:
-    currentProduct.name,
-
-    price:
-    currentProduct.price,
-
-    customer_name:
-    customerName,
-
-    customer_phone:
-    customerPhone,
-
-    delivery_address:
-    deliveryAddress,
-
-    seller_id:
-    currentProduct.seller_id
-
-  };
-
-
-  const result =
-  await supabaseClient
-    .from("orders")
-    .insert([orderData]);
-
-
-  if (result.error) {
-
-    message.className =
-    "message error";
-
-    message.textContent =
-    "Order failed: " +
-    result.error.message;
-
-    orderButton.disabled =
-    false;
-
-    orderButton.textContent =
-    "Place Order";
-
-    return;
-
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
+  document.getElementById("orderForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
 
-  message.className =
-  "message success";
+    if (!currentProduct) {
+      return;
+    }
 
-  message.textContent =
-  "Order placed successfully!";
+    const button = document.getElementById("placeOrderButton");
+    const errorMessage = document.getElementById("errorMessage");
 
+    button.disabled = true;
+    button.textContent = "Placing Order...";
+    errorMessage.textContent = "";
 
-  orderForm.reset();
+    const customerName =
+      document.getElementById("customerName").value.trim();
 
+    const customerPhone =
+      document.getElementById("customerPhone").value.trim();
 
-  orderButton.disabled =
-  false;
+    const deliveryAddress =
+      document.getElementById("deliveryAddress").value.trim();
 
-  orderButton.textContent =
-  "Place Order";
+    const { data: orderData, error } = await supabaseClient
+      .from("orders")
+      .insert([
+        {
+          product_name: currentProduct.name,
+          price: currentProduct.price,
+          customer_name: customerName,
+          customer_phone: customerPhone,
+          delivery_address: deliveryAddress,
+          seller_id: currentProduct.seller_id
+        }
+      ])
+      .select("id")
+      .single();
 
-});
+    if (error) {
+      console.error(error);
+      errorMessage.textContent =
+        "Order could not be placed. Please try again.";
 
+      button.disabled = false;
+      button.textContent = "Place Order";
+      return;
+    }
 
-loadProduct();
+    const orderNumber = orderData?.id || "Pending";
 
+    document.getElementById("productArea").innerHTML = `
+      <div class="success">
+        <h1>Order Successful!</h1>
+
+        <p>Your order has been placed successfully.</p>
+
+        <div class="order-number">
+          Order #${orderNumber}
+        </div>
+
+        <p>
+          <strong>${escapeHtml(currentProduct.name)}</strong>
+        </p>
+
+        <p>
+          Amount: ₦${Number(currentProduct.price).toLocaleString()}
+        </p>
+
+        <p>
+          Store: ${escapeHtml(currentProduct.store || "Edesvino Seller")}
+        </p>
+
+        <a class="back" href="index.html">
+          ← Back to Marketplace
+        </a>
+      </div>
+    `;
+  });
+
+  loadProduct();
 </script>
 
 </body>
