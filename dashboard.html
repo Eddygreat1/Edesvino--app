@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edesvino Seller Dashboard</title>
+
+<title>Seller Dashboard - Edesvino</title>
 
 <style>
 body {
@@ -26,6 +28,10 @@ body {
   border-radius: 12px;
 }
 
+.header h1 {
+  margin: 0 0 10px;
+}
+
 .card {
   background: white;
   padding: 20px;
@@ -33,34 +39,36 @@ body {
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
-.seller-info {
-  line-height: 1.8;
+
+.card h2 {
+  margin-top: 0;
 }
 
-button,
-a {
+.button {
   display: block;
   width: 100%;
   padding: 14px;
   margin-top: 12px;
-  border: none;
-  border-radius: 8px;
   background: #111827;
   color: white;
   text-align: center;
   text-decoration: none;
-  font-size: 16px;
+  border-radius: 8px;
   box-sizing: border-box;
-  cursor: pointer;
+  font-size: 16px;
 }
 
-.back {
-  background: #e5e7eb;
-  color: #111827;
+.button.logout {
+  background: #b91c1c;
 }
 
-.logout {
-  background: #dc2626;
+.info {
+  line-height: 1.7;
+}
+
+.welcome {
+  font-size: 18px;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -69,123 +77,78 @@ a {
 
 <div class="container">
 
-<div class="header">
-<h1>Edesvino</h1>
-<p>Seller Dashboard</p>
-</div>
-
-<div class="card" id="sellerInfo">
-<h2>Seller Information</h2>
-<p>Loading...</p>
-</div>
-
-<div class="card">
-<h2>Seller Menu</h2>
-<a href="add-product.html">➕ Add Product</a>
+  <div class="header">
+    <h1>Edesvino</h1>
+    <p>Seller Dashboard</p>
+  </div>
 
 
+  <div class="card">
 
+    <div class="welcome">
+      Welcome, Endurance Edirin Jackson!
+    </div>
 
+    <div class="info">
 
+      <p>
+        <strong>Store:</strong>
+        Edesvino Digital Hub
+      </p>
 
+      <p>
+        <strong>Email:</strong>
+        eddyspecial1978@gmail.com
+      </p>
 
-
- <a href="my-product.html">📦 My Products</a>
-<button onclick="viewOrders()">🛒 Orders</button>
-
-<button onclick="viewSales()">💰 Sales & Earnings</button>
-
-<a href="index.html" class="back">
-← Back to Marketplace
-</a>
-
-<button onclick="logoutSeller()" class="logout">
-Logout
-</button>
-
-</div>
-
-</div>
-
-  <script>
-
-const sellerData = localStorage.getItem("edesvinoSeller");
-
-const sellerInfo = document.getElementById("sellerInfo");
-
-if (sellerData) {
-
-  const seller = JSON.parse(sellerData);
-
-  sellerInfo.innerHTML = `
-    <h2>Welcome, ${seller.name}!</h2>
-
-    <div class="seller-info">
-
-      <strong>Store:</strong>
-      ${seller.store}
-
-      <br>
-
-      <strong>Email:</strong>
-      ${seller.email}
-
-      <br>
-
-      <strong>Phone:</strong>
-      ${seller.phone}
+      <p>
+        <strong>Phone:</strong>
+        08068390109
+      </p>
 
     </div>
-  `;
 
-} else {
+  </div>
 
-  sellerInfo.innerHTML = `
-    <h2>No Seller Account Found</h2>
 
-    <p>Please register as a seller first.</p>
+  <div class="card">
 
-    <a href="register.html">
-      Register as Seller
+    <h2>Seller Tools</h2>
+
+    <a href="add-product.html" class="button">
+      Add Product
     </a>
-  `;
 
-}
+    <a href="my-product.html" class="button">
+      My Products
+    </a>
 
-function addProduct() {
-  alert("Add Product will be connected next.");
-}
+    <a href="orders.html" class="button">
+      Orders
+    </a>
 
+    <a href="sales.html" class="button">
+      Sales & Earnings
+    </a>
 
-  
-function myProducts() {
-  window.location.href = "my-product.html";
-}
-
-
-
-function viewOrders() {
-  window.location.href = "orders.html";
-}
-
-  
+  </div>
 
 
-function viewSales() {
-  window.location.href = "sales.html";
-}
- 
+  <div class="card">
 
+    <h2>Marketplace</h2>
 
-function logoutSeller() {
+    <a href="index.html" class="button">
+      ← Back to Marketplace
+    </a>
 
-  localStorage.removeItem("edesvinoSeller");
+    <a href="index.html" class="button logout">
+      Logout
+    </a>
 
-  window.location.href = "index.html";
+  </div>
 
-}
-
-</script>
+</div>
 
 </body>
 </html>
