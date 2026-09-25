@@ -1,324 +1,264 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edesvino — Buy. Sell. Grow.</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<title>Edesvino Marketplace</title>
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #222;
-      line-height: 1.6;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
 
-    header {
-      background: #111827;
-      color: white;
-      padding: 16px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
+.container {
+  max-width: 800px;
+  margin: auto;
+}
 
-    .nav {
-      max-width: 1100px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  text-align: center;
+  border-radius: 12px;
+}
 
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-    }
+.header h1 {
+  margin: 0;
+}
 
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin-left: 12px;
-      font-size: 14px;
-    }
+.nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
 
-    .hero {
-      background: white;
-      text-align: center;
-      padding: 70px 20px;
-    }
+.nav a {
+  flex: 1;
+  background: white;
+  color: #111827;
+  padding: 12px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
 
-    .hero h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
-    }
+.card {
+  background: white;
+  padding: 20px;
+  margin-top: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
 
-    .hero p {
-      color: #666;
-      margin-bottom: 25px;
-      font-size: 18px;
-    }
+.product {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 15px;
+}
 
-    .btn {
-      display: inline-block;
-      padding: 12px 20px;
-      border-radius: 7px;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 5px;
-      background: #111827;
-      color: white;
-    }
+.product h2 {
+  margin-top: 0;
+}
 
-    .btn.secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
+.price {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 10px 0;
+}
 
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 40px 20px;
-    }
+.store {
+  margin-top: 10px;
+  font-weight: bold;
+}
 
-    .section-title {
-      text-align: center;
-      margin-bottom: 25px;
-    }
+.buy {
+  display: block;
+  background: #111827;
+  color: white;
+  padding: 13px;
+  margin-top: 15px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+}
 
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
+.loading {
+  text-align: center;
+  padding: 20px;
+}
 
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-    }
+.error {
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  color: #991b1b;
+  padding: 15px;
+  border-radius: 8px;
+}
 
-    .product-image {
-      height: 150px;
-      background: #e5e7eb;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 45px;
-      margin-bottom: 15px;
-    }
-
-    .price {
-      font-size: 20px;
-      font-weight: bold;
-      margin: 10px 0;
-    }
-
-    .seller-box {
-      background: white;
-      padding: 30px 20px;
-      text-align: center;
-      margin-top: 40px;
-      border-radius: 12px;
-    }
-
-    footer {
-      background: #111827;
-      color: white;
-      text-align: center;
-      padding: 25px 15px;
-      margin-top: 40px;
-    }
-
-    @media (max-width: 600px) {
-      .nav {
-        flex-direction: column;
-      }
-
-      nav a {
-        margin: 0 5px;
-      }
-
-      .hero h1 {
-        font-size: 32px;
-      }
-    }
-  </style>
+.empty {
+  text-align: center;
+  padding: 20px;
+}
+</style>
 </head>
 
 <body>
 
-<header>
+<div class="container">
+
+  <div class="header">
+    <h1>Edesvino</h1>
+    <p>Buy. Sell. Grow.</p>
+  </div>
+
   <div class="nav">
-    <div class="logo">Edesvino</div>
-
-    <nav>
-      <a href="#home">Home</a>
-      <a href="#products">Shop</a>
-      <a href="#seller">Sell</a>
-    </nav>
+    <a href="index.html">Home</a>
+    <a href="#products">Shop</a>
+    <a href="register.html">Sell</a>
   </div>
-</header>
 
-<section class="hero" id="home">
-  <h1>Welcome to Edesvino</h1>
+  <div class="card">
+    <h2>Welcome to Edesvino</h2>
+    <p>Buy and sell products online.</p>
+  </div>
 
-  <p>Buy. Sell. Grow.</p>
+  <div class="card" id="products">
 
-  <p>
-    A simple online marketplace where buyers discover products
-    and sellers grow their businesses.
-  </p>
+    <h2>Products</h2>
 
-  <a href="#products" class="btn">Shop Products</a>
-  <a href="#seller" class="btn secondary">Become a Seller</a>
-</section>
-
-<section class="container" id="products">
-
-  <h2 class="section-title">Featured Products</h2>
-
-  <div class="products">
-
-    <div class="card">
-      <div class="product-image">🛍️</div>
-
-      <h3>Sample Product</h3>
-
-      <p>Products from Edesvino sellers will appear here.</p>
-
-      <div class="price">₦0.00</div>
-
-      <button class="btn" onclick="buyProduct()">
-        Buy Now
-      </button>
-    </div>
-
-    <div class="card">
-      <div class="product-image">📱</div>
-
-      <h3>Phone Accessories</h3>
-
-      <p>Quality accessories from Edesvino sellers.</p>
-
-      <div class="price">Coming Soon</div>
-
-      <button class="btn" onclick="comingSoon()">
-        View Product
-      </button>
-    </div>
-
-    <div class="card">
-      <div class="product-image">👕</div>
-
-      <h3>Fashion</h3>
-
-      <p>Discover products from independent sellers.</p>
-
-      <div class="price">Coming Soon</div>
-
-      <button class="btn" onclick="comingSoon()">
-        View Product
-      </button>
+    <div id="productList">
+      <div class="loading">
+        Loading products...
+      </div>
     </div>
 
   </div>
 
-</section>
+</div>
 
-<section class="container" id="seller">
-
-  <div class="seller-box">
-
-    <h2>Start Selling on Edesvino</h2>
-
-    <p>
-      Create your seller account and get your products in front
-      of customers.
-    </p>
-
-    <br>
-   <a href="register.html" class="btn">
-       Become a Seller
-   </a>
-
-  </div>
-
-</section>
-
-<footer>
-  <p>© 2026 Edesvino. All rights reserved.</p>
-  <p>Buy. Sell. Grow.</p>
-</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
-  function buyProduct() {
-    alert("The Edesvino order system will be connected next.");
-  }
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
 
-  function comingSoon() {
-    alert("More products are coming soon.");
-  }
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-  function sellerRegister() {
-    alert("Seller registration will be connected next.");
-  }
-
-const savedProducts = JSON.parse(
-  localStorage.getItem("edesvinoProducts") || "[]"
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
 );
 
-if (savedProducts.length > 0) {
 
-  const productArea = document.querySelector(".products");
+async function loadProducts() {
 
-  productArea.innerHTML = "";
+  const productList =
+    document.getElementById("productList");
 
-  savedProducts.forEach(function(product) {
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-    productArea.innerHTML += `
-      <div class="card">
 
-        <div class="product-image">🛍️</div>
+  if (error) {
 
-        <h3>${product.name}</h3>
+    console.error(error);
 
-        <p>${product.description}</p>
-
-        <div class="price">
-          ₦${Number(product.price).toLocaleString()}
-        </div>
-
-        <p>
-          <strong>Store:</strong> ${product.store}
-        </p>
-
-     <a class="btn" href="order.html?product=Phone%20charger">
-     Buy Now
-     </a>
-
+    productList.innerHTML = `
+      <div class="error">
+        Could not load products: ${escapeHtml(error.message)}
       </div>
     `;
+
+    return;
+  }
+
+
+  if (!data || data.length === 0) {
+
+    productList.innerHTML = `
+      <div class="empty">
+        No products available yet.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  productList.innerHTML = "";
+
+
+  data.forEach(function(product) {
+
+    const productDiv =
+      document.createElement("div");
+
+    productDiv.className = "product";
+
+    const productName =
+      escapeHtml(product.name || "");
+
+    const description =
+      escapeHtml(product.description || "");
+
+    const store =
+      escapeHtml(product.store || "");
+
+    const price =
+      Number(product.price || 0).toLocaleString();
+
+
+    productDiv.innerHTML = `
+      <h2>${productName}</h2>
+
+      <p>${description}</p>
+
+      <div class="price">
+        ₦${price}
+      </div>
+
+      <div class="store">
+        Store: ${store}
+      </div>
+
+      <a class="buy"
+         href="order.html?product=${encodeURIComponent(product.name || "")}">
+        Buy Now
+      </a>
+    `;
+
+
+    productList.appendChild(productDiv);
 
   });
 
 }
 
-  
-  
+
+function escapeHtml(text) {
+
+  const div = document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+
+
+loadProducts();
+
 </script>
 
 </body>
