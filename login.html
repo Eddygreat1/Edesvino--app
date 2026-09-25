@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Seller Login - Edesvino</title>
+<title>Edesvino Seller Login</title>
 
 <style>
 body {
@@ -44,56 +45,55 @@ label {
 
 input {
   width: 100%;
-  padding: 13px;
+  padding: 14px;
+  box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 8px;
-  box-sizing: border-box;
   font-size: 16px;
 }
 
-button,
-.link-button {
-  display: block;
+button {
   width: 100%;
-  padding: 14px;
+  padding: 15px;
   margin-top: 20px;
   border: none;
   border-radius: 8px;
   background: #111827;
   color: white;
-  text-align: center;
-  text-decoration: none;
   font-size: 16px;
-  box-sizing: border-box;
   cursor: pointer;
 }
 
-.success {
+button:disabled {
+  opacity: 0.6;
+}
+
+.message {
   display: none;
   margin-top: 20px;
   padding: 15px;
+  border-radius: 8px;
+}
+
+.success {
   background: #ecfdf5;
   border: 1px solid #10b981;
-  border-radius: 8px;
   color: #065f46;
 }
 
 .error {
-  display: none;
-  margin-top: 20px;
-  padding: 15px;
   background: #fef2f2;
   border: 1px solid #ef4444;
-  border-radius: 8px;
   color: #991b1b;
 }
 
-.register {
+.link {
+  display: block;
   text-align: center;
   margin-top: 20px;
 }
 
-.register a {
+a {
   color: #111827;
   font-weight: bold;
 }
@@ -113,9 +113,7 @@ button,
 
     <form id="loginForm">
 
-      <label for="email">
-        Email Address
-      </label>
+      <label for="email">Email Address</label>
 
       <input
         type="email"
@@ -124,9 +122,7 @@ button,
         required
       >
 
-      <label for="password">
-        Password
-      </label>
+      <label for="password">Password</label>
 
       <input
         type="password"
@@ -135,24 +131,22 @@ button,
         required
       >
 
-      <button type="submit">
+      <button id="loginButton" type="submit">
         Login
       </button>
 
     </form>
 
-    <div id="successMessage" class="success"></div>
+    <div id="message" class="message"></div>
 
-    <div id="errorMessage" class="error"></div>
-
-    <div class="register">
+    <div class="link">
       Don't have a seller account?
       <a href="register.html">Create one</a>
     </div>
 
-    <a href="index.html" class="link-button">
-      ← Back to Marketplace
-    </a>
+    <div class="link">
+      <a href="index.html">← Back to Marketplace</a>
+    </div>
 
   </div>
 
@@ -176,73 +170,121 @@ const supabaseClient =
   );
 
 
-document
-  .getElementById("loginForm")
-  .addEventListener("submit", async function(event) {
+const form =
+  document.getElementById("loginForm");
 
-    event.preventDefault();
+const button =
+  document.getElementById("loginButton");
 
-    const email =
-      document.getElementById("email")
-        .value.trim();
-
-    const password =
-      document.getElementById("password")
-        .value;
+const message =
+  document.getElementById("message");
 
 
-    const successMessage =
-      document.getElementById("successMessage");
+form.addEventListener("submit", async function(event) {
 
-    const errorMessage =
-      document.getElementById("errorMessage");
+  event.preventDefault();
+
+  message.style.display = "block";
+  message.className = "message";
+  message.textContent = "Logging in...";
+
+  button.disabled = true;
+  button.textContent = "Logging in...";
 
 
-    successMessage.style.display = "none";
-    errorMessage.style.display = "none";
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
 
 
-    const { data, error } =
+  try {
+
+    const result =
       await supabaseClient.auth.signInWithPassword({
-
         email: email,
-
         password: password
-
       });
 
 
-    if (error) {
+    if (result.error) {
 
-      console.error(error);
+      message.className =
+        "message error";
 
-      errorMessage.textContent =
-        error.message;
+      message.textContent =
+        "Login failed: " + result.error.message;
 
-      errorMessage.style.display =
-        "block";
+      button.disabled = false;
+      button.textContent = "Login";
 
       return;
     }
 
 
-    if (data.user) {
+    if (result.data && result.data.user) {
+
+      const user =
+        result.data.user;
 
       const sellerData = {
 
         fullName:
-          data.user.user_metadata?.full_name || "",
+          user.user_metadata?.full_name || "",
 
         storeName:
-          data.user.user_metadata?.store_name || "",
+          user.user_metadata?.store_name || "",
 
         email:
-          data.user.email || "",
+          user.email || "",
 
         phone:
-          data.user.user_metadata?.phone || ""
+          user.user_metadata?.phone || ""
 
       };
 
+
+      localStorage.setItem(
+        "edesvinoSeller",
+        JSON.stringify(sellerData)
+      );
+
+
+      message.className =
+        "message success";
+
+      message.textContent =
+        "Login successful! Opening seller dashboard...";
+
+
+      setTimeout(function() {
+
+        window.location.href =
+          "dashboard.html";
+
+      }, 1000);
+
+    }
+
+  } catch (error) {
+
+    message.className =
+      "message error";
+
+    message.textContent =
+      "Error: " + error.message;
+
+    button.disabled = false;
+    button.textContent = "Login";
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>
 
      
