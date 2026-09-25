@@ -1,122 +1,349 @@
-<!DOCTYPE html>
+
+   <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edesvino - Orders</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 20px;
-    }
+<title>Orders - Edesvino</title>
 
-    .container {
-      max-width: 700px;
-      margin: 20px auto;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
 
-    h1 {
-      text-align: center;
-    }
+.container {
+  max-width: 600px;
+  margin: auto;
+}
 
-    .order {
-      background: white;
-      padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  text-align: center;
+  border-radius: 12px;
+}
 
-    .empty {
-      background: white;
-      padding: 25px;
-      text-align: center;
-      border-radius: 10px;
-    }
+.card {
+  background: white;
+  padding: 20px;
+  margin-top: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
 
-    .back {
-      display: block;
-      text-align: center;
-      margin-top: 20px;
-      text-decoration: none;
-    }
-  </style>
+label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+button,
+.back {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 18px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.success {
+  display: none;
+  margin-top: 20px;
+  padding: 15px;
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  color: #065f46;
+  text-align: center;
+}
+
+.error {
+  display: none;
+  margin-top: 20px;
+  padding: 15px;
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  color: #991b1b;
+}
+
+.product-info {
+  background: #f3f4f6;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>Customer Orders</h1>
+  <div class="header">
+    <h1>Edesvino</h1>
+    <p>Place Your Order</p>
+  </div>
 
-    <div id="orders"></div>
+  <div class="card">
 
-    <a class="back" href="dashboard.html">
-      ← Back to Seller Dashboard
+    <div class="product-info">
+      <strong>Product:</strong>
+      <span id="productName">Loading...</span>
+      <br><br>
+      <strong>Price:</strong>
+      ₦<span id="productPrice">0</span>
+    </div>
+
+    <form id="orderForm">
+
+      <label for="customerName">
+        Full Name
+      </label>
+
+      <input
+        type="text"
+        id="customerName"
+        placeholder="Enter your full name"
+        required
+      >
+
+      <label for="customerPhone">
+        Phone Number
+      </label>
+
+      <input
+        type="tel"
+        id="customerPhone"
+        placeholder="Enter your phone number"
+        required
+      >
+
+      <label for="deliveryAddress">
+        Delivery Address
+      </label>
+
+      <textarea
+        id="deliveryAddress"
+        placeholder="Enter your delivery address"
+        required
+      ></textarea>
+
+      <button type="submit">
+        Place Order
+      </button>
+
+    </form>
+
+    <div class="success" id="successMessage">
+      Order placed successfully!
+    </div>
+
+    <div class="error" id="errorMessage"></div>
+
+    <a href="index.html" class="back">
+      ← Back to Marketplace
     </a>
 
   </div>
 
-  <script>
+</div>
 
-    const ordersContainer = document.getElementById("orders");
 
-    const savedOrder = localStorage.getItem("edesvinoOrder");
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    if (!savedOrder) {
+<script>
 
-      ordersContainer.innerHTML = `
-        <div class="empty">
-          <h2>No orders yet</h2>
-          <p>Customer orders will appear here.</p>
-        </div>
-      `;
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
 
-    } else {
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-      const order = JSON.parse(savedOrder);
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-      ordersContainer.innerHTML = `
 
-        <div class="order">
+const params =
+  new URLSearchParams(window.location.search);
 
-          <h2>${order.product}</h2>
+const productName =
+  params.get("product");
 
-          <p>
-            <strong>Price:</strong>
-            ₦${Number(order.price).toLocaleString()}
-          </p>
 
-          <p>
-            <strong>Customer:</strong>
-            ${order.name}
-          </p>
+const productNameElement =
+  document.getElementById("productName");
 
-          <p>
-            <strong>Phone:</strong>
-            ${order.phone}
-          </p>
+const productPriceElement =
+  document.getElementById("productPrice");
 
-          <p>
-            <strong>Delivery Address:</strong>
-            ${order.address}
-          </p>
 
-          <p>
-            <strong>Order Date:</strong>
-            ${order.date}
-          </p>
+async function loadProduct() {
 
-        </div>
+  if (!productName) {
 
-      `;
+    productNameElement.textContent =
+      "Product not specified";
+
+    productPriceElement.textContent =
+      "0";
+
+    return;
+
+  }
+
+
+  const { data, error } =
+    await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("name", productName)
+      .limit(1)
+      .maybeSingle();
+
+
+  if (error) {
+
+    console.error(error);
+
+    productNameElement.textContent =
+      productName;
+
+    return;
+
+  }
+
+
+  if (!data) {
+
+    productNameElement.textContent =
+      productName;
+
+    return;
+
+  }
+
+
+  productNameElement.textContent =
+    data.name;
+
+  productPriceElement.textContent =
+    Number(data.price).toLocaleString();
+
+}
+
+
+loadProduct();
+
+
+document
+  .getElementById("orderForm")
+  .addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+
+    const successMessage =
+      document.getElementById("successMessage");
+
+    const errorMessage =
+      document.getElementById("errorMessage");
+
+
+    successMessage.style.display = "none";
+    errorMessage.style.display = "none";
+
+
+    const customerName =
+      document.getElementById("customerName")
+        .value.trim();
+
+    const customerPhone =
+      document.getElementById("customerPhone")
+        .value.trim();
+
+    const deliveryAddress =
+      document.getElementById("deliveryAddress")
+        .value.trim();
+
+
+    const price =
+      Number(
+        productPriceElement.textContent
+          .replace(/,/g, "")
+      );
+
+
+    const { error } =
+      await supabaseClient
+        .from("orders")
+        .insert([{
+          product_name: productName || "Unknown product",
+          price: price,
+          customer_name: customerName,
+          customer_phone: customerPhone,
+          delivery_address: deliveryAddress
+        }]);
+
+
+    if (error) {
+
+      console.error(error);
+
+      errorMessage.textContent =
+        "Order could not be placed: " +
+        error.message;
+
+      errorMessage.style.display = "block";
+
+      return;
 
     }
 
-  </script>
+
+    document
+      .getElementById("orderForm")
+      .reset();
+
+
+    successMessage.style.display =
+      "block";
+
+  });
+
+</script>
 
 </body>
-</html>
+</html>       
