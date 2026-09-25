@@ -1,98 +1,331 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sales & Earnings - Edesvino</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 20px;
-    }
+<title>Sales & Earnings - Edesvino</title>
 
-    .container {
-      max-width: 700px;
-      margin: auto;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
 
-    h1 {
-      text-align: center;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+}
 
-    .card {
-      background: white;
-      padding: 20px;
-      margin: 15px 0;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  text-align: center;
+  border-radius: 12px;
+}
 
-    .amount {
-      font-size: 28px;
-      font-weight: bold;
-    }
+.card {
+  background: white;
+  padding: 22px;
+  margin-top: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
 
-    .back {
-      display: inline-block;
-      margin-top: 20px;
-      text-decoration: none;
-      padding: 12px 18px;
-      background: #222;
-      color: white;
-      border-radius: 6px;
-    }
-  </style>
+.card h2 {
+  margin-top: 0;
+}
+
+.amount {
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.orders-count {
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.order-item {
+  border-top: 1px solid #ddd;
+  padding: 15px 0;
+}
+
+.order-item:first-child {
+  border-top: none;
+}
+
+.order-item strong {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+}
+
+.error {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+}
+
+.empty {
+  text-align: center;
+  padding: 20px;
+  color: #555;
+}
+
+.back {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  background: #111827;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>💰 Sales & Earnings</h1>
+  <div class="header">
+    <h1>Edesvino</h1>
+    <p>Sales & Earnings</p>
+  </div>
+
 
   <div class="card">
+
     <h2>Total Sales</h2>
-    <div class="amount" id="totalSales">₦0</div>
+
+    <div class="amount">
+      ₦<span id="totalSales">0</span>
+    </div>
+
   </div>
 
+
   <div class="card">
+
     <h2>Total Orders</h2>
-    <div class="amount" id="totalOrders">0</div>
+
+    <div class="orders-count">
+      <span id="totalOrders">0</span>
+    </div>
+
   </div>
+
 
   <div class="card">
+
     <h2>Seller Earnings</h2>
-    <div class="amount" id="sellerEarnings">₦0</div>
+
+    <div class="amount">
+      ₦<span id="sellerEarnings">0</span>
+    </div>
+
+    <p>
+      Current earnings based on completed customer orders.
+    </p>
+
   </div>
 
-  <a class="back" href="dashboard.html">
+
+  <div class="card">
+
+    <h2>Recent Orders</h2>
+
+    <div id="recentOrders">
+      <div class="loading">
+        Loading sales...
+      </div>
+    </div>
+
+  </div>
+
+
+  <a href="dashboard.html" class="back">
     ← Back to Seller Dashboard
   </a>
 
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 
-  const savedOrder = localStorage.getItem("edesvinoOrder");
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
 
-  if (savedOrder) {
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-    const order = JSON.parse(savedOrder);
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-    const price = Number(order.price) || 0;
 
-    document.getElementById("totalSales").textContent =
-      "₦" + price.toLocaleString();
+async function loadSales() {
 
-    document.getElementById("totalOrders").textContent = "1";
+  const recentOrders =
+    document.getElementById("recentOrders");
 
-    document.getElementById("sellerEarnings").textContent =
-      "₦" + price.toLocaleString();
 
+  const { data, error } =
+    await supabaseClient
+      .from("orders")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    recentOrders.innerHTML =
+      '<div class="error">' +
+      'Unable to load sales: ' +
+      error.message +
+      '</div>';
+
+    return;
   }
+
+
+  if (!data || data.length === 0) {
+
+    document.getElementById("totalSales")
+      .textContent = "0";
+
+    document.getElementById("totalOrders")
+      .textContent = "0";
+
+    document.getElementById("sellerEarnings")
+      .textContent = "0";
+
+    recentOrders.innerHTML =
+      '<div class="empty">' +
+      'No sales yet.' +
+      '</div>';
+
+    return;
+  }
+
+
+  let totalSales = 0;
+
+
+  data.forEach(function(order) {
+
+    totalSales +=
+      Number(order.price) || 0;
+
+  });
+
+
+  document.getElementById("totalSales")
+    .textContent =
+      totalSales.toLocaleString();
+
+
+  document.getElementById("totalOrders")
+    .textContent =
+      data.length;
+
+
+  document.getElementById("sellerEarnings")
+    .textContent =
+      totalSales.toLocaleString();
+
+
+  recentOrders.innerHTML = "";
+
+
+  data.slice(0, 10).forEach(function(order) {
+
+    const item =
+      document.createElement("div");
+
+    item.className =
+      "order-item";
+
+
+    const date =
+      order.created_at
+        ? new Date(order.created_at)
+            .toLocaleString()
+        : "Date unavailable";
+
+
+    item.innerHTML = `
+
+      <strong>
+        ${escapeHtml(order.product_name)}
+      </strong>
+
+      <br>
+
+      Amount:
+      ₦${Number(
+        order.price
+      ).toLocaleString()}
+
+      <br>
+
+      Customer:
+      ${escapeHtml(
+        order.customer_name
+      )}
+
+      <br>
+
+      Date:
+      ${escapeHtml(date)}
+
+    `;
+
+
+    recentOrders.appendChild(item);
+
+  });
+
+}
+
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+loadSales();
 
 </script>
 
