@@ -1,134 +1,134 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seller Registration - Edesvino</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<title>Seller Registration - Edesvino</title>
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #222;
-      padding: 20px;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
 
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-    }
+.container {
+  max-width: 600px;
+  margin: auto;
+}
 
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-    }
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  text-align: center;
+  border-radius: 12px;
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 8px;
-    }
+.card {
+  background: white;
+  padding: 20px;
+  margin-top: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
 
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 25px;
-    }
+label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
 
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
+input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
 
-    input {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #ccc;
-      border-radius: 7px;
-      font-size: 16px;
-    }
+button,
+.back {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
 
-    button,
-    .back {
-      width: 100%;
-      display: block;
-      padding: 13px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 7px;
-      background: #111827;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-    }
+.success {
+  display: none;
+  margin-top: 20px;
+  padding: 15px;
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  color: #065f46;
+}
 
-    .back {
-      background: #e5e7eb;
-      color: #111827;
-      margin-top: 10px;
-    }
-
-    .success {
-      display: none;
-      text-align: center;
-      background: #ecfdf5;
-      border: 1px solid #10b981;
-      color: #065f46;
-      padding: 18px;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-
-    .success h2 {
-      margin-bottom: 8px;
-    }
-  </style>
+.error {
+  display: none;
+  margin-top: 20px;
+  padding: 15px;
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  color: #991b1b;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
+  <div class="header">
+    <h1>Edesvino</h1>
+    <p>Become a Seller</p>
+  </div>
+
   <div class="card">
 
-    <h1>Seller Registration</h1>
+    <form id="registerForm">
 
-    <p class="subtitle">
-      Join Edesvino and start selling your products.
-    </p>
+      <label for="fullName">
+        Full Name
+      </label>
 
-    <form id="sellerForm">
-
-      <label for="name">Full Name</label>
       <input
         type="text"
-        id="name"
+        id="fullName"
         placeholder="Enter your full name"
         required
       >
 
-      <label for="store">Store / Business Name</label>
+      <label for="storeName">
+        Store / Business Name
+      </label>
+
       <input
         type="text"
-        id="store"
+        id="storeName"
         placeholder="Enter your store name"
         required
       >
 
-      <label for="email">Email Address</label>
+      <label for="email">
+        Email Address
+      </label>
+
       <input
         type="email"
         id="email"
@@ -136,7 +136,10 @@
         required
       >
 
-      <label for="phone">Phone Number</label>
+      <label for="phone">
+        Phone Number
+      </label>
+
       <input
         type="tel"
         id="phone"
@@ -144,13 +147,16 @@
         required
       >
 
-      <label for="password">Password</label>
+      <label for="password">
+        Password
+      </label>
+
       <input
         type="password"
         id="password"
         placeholder="Create a password"
-        required
         minlength="6"
+        required
       >
 
       <button type="submit">
@@ -159,17 +165,9 @@
 
     </form>
 
-    <div class="success" id="successMessage">
+    <div id="successMessage" class="success"></div>
 
-      <h2>Registration Successful! 🎉</h2>
-
-      <p id="welcomeMessage"></p>
-
-      <a href="index.html" class="back">
-        Return to Edesvino
-      </a>
-
-    </div>
+    <div id="errorMessage" class="error"></div>
 
     <a href="index.html" class="back">
       ← Back to Marketplace
@@ -179,35 +177,119 @@
 
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 
-  const sellerForm = document.getElementById("sellerForm");
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
 
-  sellerForm.addEventListener("submit", function(event) {
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+document
+  .getElementById("registerForm")
+  .addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
-    const name = document.getElementById("name").value.trim();
-    const store = document.getElementById("store").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
+    const successMessage =
+      document.getElementById("successMessage");
 
-    const seller = {
-      name: name,
-      store: store,
-      email: email,
-      phone: phone
-    };
+    const errorMessage =
+      document.getElementById("errorMessage");
 
-    localStorage.setItem("edesvinoSeller", JSON.stringify(seller));
+    successMessage.style.display = "none";
+    errorMessage.style.display = "none";
 
-    document.getElementById("sellerForm").style.display = "none";
 
-    document.getElementById("successMessage").style.display = "block";
+    const fullName =
+      document.getElementById("fullName")
+        .value.trim();
 
-    document.getElementById("welcomeMessage").textContent =
-      "Welcome to Edesvino, " + name + ". Your store " + store + " has been registered.";
+    const storeName =
+      document.getElementById("storeName")
+        .value.trim();
+
+    const email =
+      document.getElementById("email")
+        .value.trim();
+
+    const phone =
+      document.getElementById("phone")
+        .value.trim();
+
+    const password =
+      document.getElementById("password")
+        .value;
+
+
+    const { data, error } =
+      await supabaseClient.auth.signUp({
+
+        email: email,
+
+        password: password,
+
+        options: {
+
+          data: {
+            full_name: fullName,
+            store_name: storeName,
+            phone: phone
+          }
+
+        }
+
+      });
+
+
+    if (error) {
+
+      console.error(error);
+
+      errorMessage.textContent =
+        error.message;
+
+      errorMessage.style.display =
+        "block";
+
+      return;
+    }
+
+
+    if (data.user) {
+
+      localStorage.setItem(
+        "edesvinoSeller",
+        JSON.stringify({
+          fullName: fullName,
+          storeName: storeName,
+          email: email,
+          phone: phone
+        })
+      );
+
+      successMessage.innerHTML =
+        "<strong>Seller account created successfully!</strong><br><br>" +
+        "Your Edesvino seller account has been created.";
+
+      successMessage.style.display =
+        "block";
+
+      document
+        .getElementById("registerForm")
+        .style.display = "none";
+
+    }
 
   });
 
