@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Track Order - Edesvino</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    header {
+      background: #111;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      color: white;
+      font-size: 16px;
+    }
+
+    .order {
+      margin-top: 25px;
+      padding: 20px;
+      background: #f8f8f8;
+      border-radius: 10px;
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .error {
+      margin-top: 15px;
+      color: #b00020;
+      font-weight: bold;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 20px;
+      color: #111;
+      font-weight: bold;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Edesvino</h1>
+  <p>Track Your Order</p>
+</header>
+
+<main>
+
+  <div class="box">
+
+    <h2>Track Order</h2>
+
+    <p>
+      Enter your order number to check your order status.
+    </p>
+
+    <label for="orderId">
+      Order Number
+    </label>
+
+    <input
+      type="number"
+      id="orderId"
+      placeholder="Example: 4"
+    >
+
+    <button onclick="trackOrder()">
+      Track Order
+    </button>
+
+    <div id="result"></div>
+
+    <a class="back" href="index.html">
+      ← Back to Marketplace
+    </a>
+
+  </div>
+
+</main>
+
+<script>
+
+  const SUPABASE_URL =
+    "https://lxszilqypuglxyfyukdg.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+  const supabaseClient =
+    supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+
+  async function trackOrder() {
+
+    const orderId =
+      document.getElementById("orderId").value.trim();
+
+    const result =
+      document.getElementById("result");
+
+    if (!orderId) {
+
+      result.innerHTML =
+        '<div class="error">Please enter your order number.</div>';
+
+      return;
+    }
+
+    result.innerHTML =
+      "<p>Checking order...</p>";
+
+
+    const { data: order, error } =
+      await supabaseClient
+        .from("orders")
+        .select("*")
+        .eq("id", orderId)
+        .maybeSingle();
+
+
+    if (error) {
+
+      console.error(error);
+
+      result.innerHTML =
+        '<div class="error">Unable to check this order. Please try again.</div>';
+
+      return;
+    }
+
+
+    if (!order) {
+
+      result.innerHTML =
+        '<div class="error">Order not found. Please check your order number.</div>';
+
+      return;
+    }
+
+
+    const status =
+      order.status || "Pending";
+
+
+    result.innerHTML = `
+
+      <div class="order">
+
+        <h2>Order #${order.id}</h2>
+
+        <p>
+          <strong>Product:</strong>
+          ${escapeHtml(order.product_name)}
+        </p>
+
+        <p>
+          <strong>Amount:</strong>
+          ₦${Number(order.price).toLocaleString()}
+        </p>
+
+        <p>
+          <strong>Customer:</strong>
+          ${escapeHtml(order.customer_name)}
+        </p>
+
+        <p>
+          <strong>Order Date:</strong>
+          ${new Date(order.created_at).toLocaleString()}
+        </p>
+
+        <div class="status">
+          Order Status: ${escapeHtml(status)}
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  function escapeHtml(value) {
+
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  }
+
+</script>
+
+</body>
+</html>
