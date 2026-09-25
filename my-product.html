@@ -1,9 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>My Products - Edesvino</title>
 
 <style>
@@ -27,7 +27,7 @@ body {
   border-radius: 12px;
 }
 
-.product {
+.card {
   background: white;
   padding: 20px;
   margin-top: 15px;
@@ -35,40 +35,57 @@ body {
   box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
+.product {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
 .product h2 {
   margin-top: 0;
+  margin-bottom: 8px;
 }
 
 .price {
   font-size: 20px;
   font-weight: bold;
+  margin-bottom: 8px;
 }
 
-.description {
-  color: #555;
-  line-height: 1.5;
+.store {
+  font-weight: bold;
+  margin-top: 10px;
 }
 
-  
-.back {
+.loading {
+  text-align: center;
+  padding: 20px;
+}
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  color: #991b1b;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+button,
+a {
   display: block;
   width: 100%;
   padding: 14px;
   margin-top: 15px;
+  border: none;
+  border-radius: 8px;
   background: #111827;
   color: white;
   text-align: center;
   text-decoration: none;
-  border-radius: 8px;
+  font-size: 16px;
   box-sizing: border-box;
-}
-
-.empty {
-  background: white;
-  padding: 20px;
-  margin-top: 15px;
-  border-radius: 12px;
-  text-align: center;
 }
 </style>
 </head>
@@ -77,92 +94,125 @@ body {
 
 <div class="container">
 
-<div class="header">
-<h1>Edesvino</h1>
-<p>My Products</p>
-</div>
+  <div class="header">
+    <h1>Edesvino</h1>
+    <p>My Products</p>
+  </div>
 
-<div id="productsContainer"></div>
+  <div class="card">
 
-<a href="dashboard.html" class="back">
-← Back to Seller Dashboard
-</a>
-
-</div>
-
-  <script>
-
-const container = document.getElementById("productsContainer");
-
-let products = JSON.parse(
-  localStorage.getItem("edesvinoProducts") || "[]"
-);
-
-const uniqueProducts = [];
-
-products.forEach(function(product) {
-
-  const duplicate = uniqueProducts.some(function(existing) {
-
-    return (
-      existing.name === product.name &&
-      existing.price === product.price &&
-      existing.description === product.description &&
-      existing.store === product.store
-    );
-
-  });
-
-  if (!duplicate) {
-    uniqueProducts.push(product);
-  }
-
-});
-
-localStorage.setItem(
-  "edesvinoProducts",
-  JSON.stringify(uniqueProducts)
-);
-
-if (uniqueProducts.length === 0) {
-
-  container.innerHTML = `
-    <div class="empty">
-      <h2>No Products Yet</h2>
-      <p>You have not added any products.</p>
+    <div id="products">
+      <div class="loading">
+        Loading products...
+      </div>
     </div>
-  `;
 
-} else {
+    <a href="dashboard.html">
+      ← Back to Seller Dashboard
+    </a>
 
-  uniqueProducts.forEach(function(product) {
+  </div>
 
-    const productCard = document.createElement("div");
+</div>
 
-    productCard.className = "product";
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    productCard.innerHTML = `
-      <h2>${product.name}</h2>
+<script>
 
-      <p class="price">
-        ₦${Number(product.price).toLocaleString()}
-      </p>
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
 
-      <p class="description">
-        ${product.description}
-      </p>
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-      <p>
-        <strong>Store:</strong>
-        ${product.store}
-      </p>
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+async function loadProducts() {
+
+  const productsContainer =
+    document.getElementById("products");
+
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+
+  if (error) {
+
+    console.error(error);
+
+    productsContainer.innerHTML = `
+      <div class="error">
+        Could not load products: ${error.message}
+      </div>
     `;
 
-    container.appendChild(productCard);
+    return;
+  }
+
+
+  if (!data || data.length === 0) {
+
+    productsContainer.innerHTML = `
+      <div class="loading">
+        No products have been added yet.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  productsContainer.innerHTML = "";
+
+
+  data.forEach(function(product) {
+
+    const productDiv =
+      document.createElement("div");
+
+    productDiv.className = "product";
+
+    productDiv.innerHTML = `
+      <h2>${escapeHtml(product.name)}</h2>
+
+      <div class="price">
+        ₦${Number(product.price).toLocaleString()}
+      </div>
+
+      <div>
+        ${escapeHtml(product.description || "")}
+      </div>
+
+      <div class="store">
+        Store: ${escapeHtml(product.store || "")}
+      </div>
+    `;
+
+    productsContainer.appendChild(productDiv);
 
   });
 
 }
+
+
+function escapeHtml(text) {
+
+  const div = document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+
+
+loadProducts();
 
 </script>
 
