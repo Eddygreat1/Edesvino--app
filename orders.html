@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Orders - Edesvino</title>
+<title>Edesvino - Customer Orders</title>
 
 <style>
 body {
@@ -23,59 +22,44 @@ body {
   background: #111827;
   color: white;
   padding: 25px;
-  text-align: center;
   border-radius: 12px;
+  text-align: center;
 }
 
-.order-card {
+.card {
   background: white;
-  padding: 20px;
   margin-top: 15px;
+  padding: 20px;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
-.order-card h2 {
-  margin-top: 0;
+.order {
+  border-bottom: 1px solid #ddd;
+  padding: 15px 0;
 }
 
-.info {
-  margin: 10px 0;
-  line-height: 1.6;
+.order:last-child {
+  border-bottom: none;
 }
 
 .amount {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
 }
 
-.empty {
-  background: white;
-  padding: 25px;
-  margin-top: 15px;
-  border-radius: 12px;
+.message {
   text-align: center;
-}
-
-.error {
-  background: #fef2f2;
-  color: #991b1b;
-  padding: 15px;
-  margin-top: 15px;
-  border-radius: 8px;
+  padding: 20px;
 }
 
 .back {
   display: block;
-  width: 100%;
-  padding: 14px;
-  margin-top: 20px;
-  background: #111827;
-  color: white;
   text-align: center;
+  margin-top: 20px;
+  color: #111827;
+  font-weight: bold;
   text-decoration: none;
-  border-radius: 8px;
-  box-sizing: border-box;
 }
 </style>
 </head>
@@ -89,100 +73,118 @@ body {
     <p>Customer Orders</p>
   </div>
 
-  <div id="ordersContainer">
-    <div class="empty">
-      Loading orders...
+  <div class="card">
+
+    <div id="message" class="message">
+      Loading your orders...
     </div>
+
+    <div id="orders"></div>
+
   </div>
 
-  <a href="dashboard.html" class="back">
+  <a class="back" href="dashboard.html">
     ← Back to Seller Dashboard
   </a>
 
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
 const SUPABASE_URL =
-  "https://lxszilqypuglxyfyukdg.supabase.co";
+"https://lxszilqypuglxyfyukdg.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
 const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 
 async function loadOrders() {
 
-  const container =
-    document.getElementById("ordersContainer");
+  const message =
+  document.getElementById("message");
+
+  const ordersDiv =
+  document.getElementById("orders");
 
 
-  const { data, error } =
-    await supabaseClient
-      .from("orders")
-      .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+  const {
+    data: userData,
+    error: userError
+  } =
+  await supabaseClient.auth.getUser();
+
+
+  if (userError || !userData.user) {
+
+    window.location.replace("login.html");
+
+    return;
+  }
+
+
+  const user =
+  userData.user;
+
+
+  const {
+    data: orders,
+    error
+  } =
+  await supabaseClient
+    .from("orders")
+    .select("*")
+    .eq("seller_id", user.id)
+    .order(
+      "created_at",
+      { ascending: false }
+    );
 
 
   if (error) {
 
-    console.error(error);
-
-    container.innerHTML =
-      '<div class="error">' +
-      'Unable to load orders: ' +
-      error.message +
-      '</div>';
+    message.textContent =
+    "Unable to load orders: " +
+    error.message;
 
     return;
   }
 
 
-  if (!data || data.length === 0) {
+  message.style.display = "none";
 
-    container.innerHTML =
-      '<div class="empty">' +
-      '<h2>No orders yet</h2>' +
-      '<p>Customer orders will appear here.</p>' +
-      '</div>';
+
+  if (!orders || orders.length === 0) {
+
+    message.style.display = "block";
+
+    message.textContent =
+    "You have no orders yet.";
 
     return;
   }
 
 
-  container.innerHTML = "";
+  orders.forEach(function(order) {
+
+    const item =
+    document.createElement("div");
+
+    item.className = "order";
 
 
-  data.forEach(function(order) {
+    item.innerHTML = `
 
-    const card =
-      document.createElement("div");
-
-    card.className = "order-card";
-
-
-    const date =
-      order.created_at
-        ? new Date(order.created_at)
-            .toLocaleString()
-        : "Date unavailable";
-
-
-    card.innerHTML = `
-
-      <h2>${escapeHtml(
-        order.product_name
-      )}</h2>
+      <h2>
+        ${order.product_name}
+      </h2>
 
       <div class="amount">
         ₦${Number(
@@ -190,52 +192,34 @@ async function loadOrders() {
         ).toLocaleString()}
       </div>
 
-      <div class="info">
-
+      <p>
         <strong>Customer:</strong>
-        ${escapeHtml(
-          order.customer_name
-        )}
+        ${order.customer_name}
+      </p>
 
-        <br>
-
+      <p>
         <strong>Phone:</strong>
-        ${escapeHtml(
-          order.customer_phone
-        )}
+        ${order.customer_phone}
+      </p>
 
-        <br>
-
+      <p>
         <strong>Delivery Address:</strong>
-        ${escapeHtml(
-          order.delivery_address
-        )}
+        ${order.delivery_address}
+      </p>
 
-        <br>
-
+      <p>
         <strong>Order Date:</strong>
-        ${escapeHtml(date)}
-
-      </div>
+        ${new Date(
+          order.created_at
+        ).toLocaleString()}
+      </p>
 
     `;
 
 
-    container.appendChild(card);
+    ordersDiv.appendChild(item);
 
   });
-
-}
-
-
-function escapeHtml(value) {
-
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 
 }
 
