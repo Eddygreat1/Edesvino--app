@@ -158,7 +158,6 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_KEY
 );
 
-
 async function loadProducts() {
 
   const productList =
@@ -168,7 +167,6 @@ async function loadProducts() {
     .from("products")
     .select("*")
     .order("created_at", { ascending: false });
-
 
   if (error) {
 
@@ -183,7 +181,6 @@ async function loadProducts() {
     return;
   }
 
-
   if (!data || data.length === 0) {
 
     productList.innerHTML = `
@@ -195,9 +192,7 @@ async function loadProducts() {
     return;
   }
 
-
   productList.innerHTML = "";
-
 
   data.forEach(function(product) {
 
@@ -218,6 +213,9 @@ async function loadProducts() {
     const price =
       Number(product.price || 0).toLocaleString();
 
+    const productLink =
+      "checkout.html?product=" +
+      encodeURIComponent(product.name || "");
 
     productDiv.innerHTML = `
       <h2>${productName}</h2>
@@ -232,20 +230,16 @@ async function loadProducts() {
         Store: ${store}
       </div>
 
-      <a class="buy"
-  href="checkout.html?product
-       =${encodeURIComponent(product.name || "")
-            Buy Now
+      <a class="buy" href="${productLink}">
+        Buy Now
       </a>
     `;
-
 
     productList.appendChild(productDiv);
 
   });
 
 }
-
 
 function escapeHtml(text) {
 
@@ -257,11 +251,9 @@ function escapeHtml(text) {
 
 }
 
-
 loadProducts();
 
 </script>
 
 </body>
 </html>
-
