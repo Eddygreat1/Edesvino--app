@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Edesvino Checkout</title>
 
 <style>
@@ -72,19 +73,19 @@ button {
   font-weight: bold;
 }
 
+button:disabled {
+  opacity: 0.6;
+}
+
 .message {
   margin-top: 15px;
   padding: 12px;
   border-radius: 8px;
 }
 
-.success {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
 .error {
   background: #fef2f2;
+  border: 1px solid #ef4444;
   color: #991b1b;
 }
 
@@ -113,15 +114,30 @@ Loading product...
 <form id="checkoutForm">
 
 <label>Customer Name</label>
-<input type="text" id="customerName" required>
+<input
+  type="text"
+  id="customerName"
+  required
+>
 
 <label>Phone Number</label>
-<input type="tel" id="customerPhone" required>
+<input
+  type="tel"
+  id="customerPhone"
+  required
+>
 
 <label>Delivery Address</label>
-<textarea id="deliveryAddress" rows="4" required></textarea>
+<textarea
+  id="deliveryAddress"
+  rows="4"
+  required
+></textarea>
 
-<button type="submit" id="payButton">
+<button
+  type="submit"
+  id="payButton"
+>
 Proceed to Payment
 </button>
 
@@ -129,7 +145,10 @@ Proceed to Payment
 
 <div id="message"></div>
 
-<a class="back" href="index.html">
+<a
+  class="back"
+  href="index.html"
+>
 ← Back to Marketplace
 </a>
 
@@ -157,7 +176,9 @@ SUPABASE_KEY
 );
 
 const params =
-new URLSearchParams(window.location.search);
+new URLSearchParams(
+window.location.search
+);
 
 const productName =
 params.get("product");
@@ -175,165 +196,211 @@ document.getElementById("message");
 
 async function loadProduct() {
 
-if (!productName) {
+  if (!productName) {
 
-productBox.innerHTML =
-"<div class='error'>No product selected.</div>";
+    productBox.innerHTML =
+    `<div class="message error">
+    No product selected.
+    </div>`;
 
-checkoutForm.style.display = "none";
+    checkoutForm.style.display = "none";
 
-return;
-}
+    return;
+  }
 
-const { data, error } =
-await supabaseClient
-.from("products")
-.select("*")
-.eq("name", productName)
-.limit(1)
-.maybeSingle();
+  const { data, error } =
+  await supabaseClient
+  .from("products")
+  .select("*")
+  .eq("name", productName)
+  .limit(1)
+  .maybeSingle();
 
-if (error || !data) {
+  if (error || !data) {
 
-productBox.innerHTML =
-"<div class='error'>Product could not be found.</div>";
+    productBox.innerHTML =
+    `<div class="message error">
+    Product could not be found.
+    </div>`;
 
-checkoutForm.style.display = "none";
+    checkoutForm.style.display = "none";
 
-return;
-}
+    return;
+  }
 
-selectedProduct = data;
+  selectedProduct = data;
 
-productBox.innerHTML = `
-<div class="product">
-<h2>${escapeHtml(data.name)}</h2>
-<p>${escapeHtml(data.description || "")}</p>
-<div class="price">
-₦${Number(data.price).toLocaleString()}
-</div>
-<p><strong>Store:</strong>
-${escapeHtml(data.store || "")}</p>
-</div>
-`;
+  productBox.innerHTML = `
 
+    <div class="product">
+
+      <h2>
+        ${escapeHtml(data.name)}
+      </h2>
+
+      <p>
+        ${escapeHtml(data.description || "")}
+      </p>
+
+      <div class="price">
+        ₦${Number(data.price).toLocaleString()}
+      </div>
+
+      <p>
+        <strong>Store:</strong>
+        ${escapeHtml(data.store || "")}
+      </p>
+
+    </div>
+
+  `;
 }
 
 checkoutForm.addEventListener(
 "submit",
 async function(event) {
 
-event.preventDefault();
+  event.preventDefault();
 
-if (!selectedProduct) {
-return;
-}
+  if (!selectedProduct) {
+    return;
+  }
 
-const customerName =
-document.getElementById("customerName").value.trim();
+  const customerName =
+  document
+  .getElementById("customerName")
+  .value
+  .trim();
 
-const customerPhone =
-document.getElementById("customerPhone").value.trim();
+  const customerPhone =
+  document
+  .getElementById("customerPhone")
+  .value
+  .trim();
 
-const deliveryAddress =
-document.getElementById("deliveryAddress").value.trim();
+  const deliveryAddress =
+  document
+  .getElementById("deliveryAddress")
+  .value
+  .trim();
 
-const payButton =
-document.getElementById("payButton");
+  const payButton =
+  document.getElementById("payButton");
 
-payButton.disabled = true;
-payButton.textContent =
-"Connecting to Paystack...";
+  payButton.disabled = true;
 
-message.innerHTML = "";
+  payButton.textContent =
+  "Connecting to Paystack...";
 
-try {
+  message.innerHTML = "";
 
-const callbackUrl =
-window.location.href.split("?")[0];
+  try {
 
-const response =
-await fetch(FUNCTION_URL, {
+    const callbackUrl =
+    window.location.href
+    .split("?")[0];
 
-method: "POST",
+    const response =
+    await fetch(
+      FUNCTION_URL,
+      {
+        method: "POST",
 
-headers: {
-"Content-Type": "application/json"
-},
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization":
+            "Bearer " + SUPABASE_KEY
+        },
 
-body: JSON.stringify({
+        body: JSON.stringify({
 
-email: customerPhone + "@customer.edesvino.com",
+          email:
+            customerPhone +
+            "@customer.edesvino.com",
 
-amount: Number(selectedProduct.price),
+          amount:
+            Number(selectedProduct.price),
 
-callback_url: callbackUrl,
+          callback_url:
+            callbackUrl,
 
-metadata: {
+          metadata: {
 
-product_name: selectedProduct.name,
+            product_name:
+              selectedProduct.name,
 
-seller_id: selectedProduct.seller_id,
+            seller_id:
+              selectedProduct.seller_id,
 
-customer_name: customerName,
+            customer_name:
+              customerName,
 
-customer_phone: customerPhone,
+            customer_phone:
+              customerPhone,
 
-delivery_address: deliveryAddress
+            delivery_address:
+              deliveryAddress
 
-}
+          }
 
-})
+        })
 
-});
+      }
+    );
 
-const result =
-await response.json();
+    const result =
+    await response.json();
 
-if (!response.ok ||
-!result.status ||
-!result.data ||
-!result.data.authorization_url) {
+    if (
+      !response.ok ||
+      !result.status ||
+      !result.data ||
+      !result.data.authorization_url
+    ) {
 
-throw new Error(
-result.message ||
-result.error ||
-"Unable to start payment."
-);
+      throw new Error(
+        result.message ||
+        result.error ||
+        "Unable to start payment."
+      );
 
-}
+    }
 
-window.location.href =
-result.data.authorization_url;
+    window.location.href =
+    result.data.authorization_url;
 
-} catch (error) {
+  }
 
-console.error(error);
+  catch (error) {
 
-message.innerHTML = `
-<div class="message error">
-${escapeHtml(error.message)}
-</div>
-`;
+    console.error(error);
 
-payButton.disabled = false;
+    message.innerHTML = `
 
-payButton.textContent =
-"Proceed to Payment";
+      <div class="message error">
+        ${escapeHtml(error.message)}
+      </div>
 
-}
+    `;
+
+    payButton.disabled = false;
+
+    payButton.textContent =
+    "Proceed to Payment";
+
+  }
 
 });
 
 function escapeHtml(text) {
 
-const div =
-document.createElement("div");
+  const div =
+  document.createElement("div");
 
-div.textContent = text;
+  div.textContent = text;
 
-return div.innerHTML;
-
+  return div.innerHTML;
 }
 
 loadProduct();
