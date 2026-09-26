@@ -1,3 +1,344 @@
-We can't use writing block for code. Need just code. Also need URL citations? We have user supplied URL, no citation. Could give code. But must ensure correct Supabase publishable key. It is in memory/context, okay. Paystack public key not provided. Edge function handles initialization, so no public key needed. Need callback URL maybe checkout.html? Paystack redirects with reference. Function returns authorization_url. We can redirect there. Need amount from products query. Query product name. Supabase REST via JS CDN? Can use @supabase/supabase-js via CDN. Since GitHub Pages. Code should insert order only after payment? Current orders table insertion anon allowed. Better payment initialization first, then order insertion? To prevent fake orders, after payment user returns and we could verify via function, but current Edge function only initialize. Need real payment robustly: initialize, redirect; callback returns with reference, then verify via another edge function. Current smart-task doesn't verify. Could instead on checkout click initialize and insert order immediately; not ideal. User asked complete code likely expected. Could include payment then order? Need backend verification absent. We can create a function that supports initialize and verify based on action, but deployed function currently only initialize. Could update it later. For now code can initialize and insert order before redirect. But that creates pending order even unpaid. Better insert after redirect but cannot trust callback without verification. Could call Paystack verify directly from frontend? secret key no. Need update edge function. But user wants code now, perhaps first create checkout page that starts payment and stores order after initialization. Yet real payment isn't verified. We can clearly say this first version records Pending before payment, and next step secure verification. But likely wants complete code. Need include product name URL encoding. Also "amount" is Naira and function multiplies by 100. Need metadata. Need callback URL "window.location.origin + "/Edesvino--app/payment-success.html""? If GitHub pages path. Better callback to "window.location.href" maybe same checkout page with reference query. Paystack returns to checkout.html?reference=... We can detect reference and show payment received? But not verified. Could create "payment-success.html" later. For now use callback_url "${window.location.origin}${window.location.pathname}?paid=1"? On GitHub pages, pathname "/Edesvino--app/checkout.html". Paystack can redirect with query. We can show "Payment completed, order is being processed." But not verified. Hmm.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edesvino Checkout</title>
 
-Need perhaps first create checkout code using Edge Function and on successful initialization insert order with status "Payment Pending". That's acceptable. Then later verify. But the user asked complete code, not necessarily final secure flow. Let's answer with code and exact paste instructions. Need no writing block. Maybe mention after save we will update Buy Now. Ensure Supabase key isn't secret. Let's formulate concise.
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  margin-top: 20px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.product {
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.price {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+input,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 14px;
+  margin-top: 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.message {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.success {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.back {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  text-decoration: none;
+  color: #111827;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h1>Edesvino Checkout</h1>
+
+<div id="productBox">
+Loading product...
+</div>
+
+<form id="checkoutForm">
+
+<label>Customer Name</label>
+<input type="text" id="customerName" required>
+
+<label>Phone Number</label>
+<input type="tel" id="customerPhone" required>
+
+<label>Delivery Address</label>
+<textarea id="deliveryAddress" rows="4" required></textarea>
+
+<button type="submit" id="payButton">
+Proceed to Payment
+</button>
+
+</form>
+
+<div id="message"></div>
+
+<a class="back" href="index.html">
+← Back to Marketplace
+</a>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const FUNCTION_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co/functions/v1/smart-task";
+
+const supabaseClient =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+const params =
+new URLSearchParams(window.location.search);
+
+const productName =
+params.get("product");
+
+let selectedProduct = null;
+
+const productBox =
+document.getElementById("productBox");
+
+const checkoutForm =
+document.getElementById("checkoutForm");
+
+const message =
+document.getElementById("message");
+
+async function loadProduct() {
+
+if (!productName) {
+
+productBox.innerHTML =
+"<div class='error'>No product selected.</div>";
+
+checkoutForm.style.display = "none";
+
+return;
+}
+
+const { data, error } =
+await supabaseClient
+.from("products")
+.select("*")
+.eq("name", productName)
+.limit(1)
+.maybeSingle();
+
+if (error || !data) {
+
+productBox.innerHTML =
+"<div class='error'>Product could not be found.</div>";
+
+checkoutForm.style.display = "none";
+
+return;
+}
+
+selectedProduct = data;
+
+productBox.innerHTML = `
+<div class="product">
+<h2>${escapeHtml(data.name)}</h2>
+<p>${escapeHtml(data.description || "")}</p>
+<div class="price">
+₦${Number(data.price).toLocaleString()}
+</div>
+<p><strong>Store:</strong>
+${escapeHtml(data.store || "")}</p>
+</div>
+`;
+
+}
+
+checkoutForm.addEventListener(
+"submit",
+async function(event) {
+
+event.preventDefault();
+
+if (!selectedProduct) {
+return;
+}
+
+const customerName =
+document.getElementById("customerName").value.trim();
+
+const customerPhone =
+document.getElementById("customerPhone").value.trim();
+
+const deliveryAddress =
+document.getElementById("deliveryAddress").value.trim();
+
+const payButton =
+document.getElementById("payButton");
+
+payButton.disabled = true;
+payButton.textContent =
+"Connecting to Paystack...";
+
+message.innerHTML = "";
+
+try {
+
+const callbackUrl =
+window.location.href.split("?")[0];
+
+const response =
+await fetch(FUNCTION_URL, {
+
+method: "POST",
+
+headers: {
+"Content-Type": "application/json"
+},
+
+body: JSON.stringify({
+
+email: customerPhone + "@customer.edesvino.com",
+
+amount: Number(selectedProduct.price),
+
+callback_url: callbackUrl,
+
+metadata: {
+
+product_name: selectedProduct.name,
+
+seller_id: selectedProduct.seller_id,
+
+customer_name: customerName,
+
+customer_phone: customerPhone,
+
+delivery_address: deliveryAddress
+
+}
+
+})
+
+});
+
+const result =
+await response.json();
+
+if (!response.ok ||
+!result.status ||
+!result.data ||
+!result.data.authorization_url) {
+
+throw new Error(
+result.message ||
+result.error ||
+"Unable to start payment."
+);
+
+}
+
+window.location.href =
+result.data.authorization_url;
+
+} catch (error) {
+
+console.error(error);
+
+message.innerHTML = `
+<div class="message error">
+${escapeHtml(error.message)}
+</div>
+`;
+
+payButton.disabled = false;
+
+payButton.textContent =
+"Proceed to Payment";
+
+}
+
+});
+
+function escapeHtml(text) {
+
+const div =
+document.createElement("div");
+
+div.textContent = text;
+
+return div.innerHTML;
+
+}
+
+loadProduct();
+
+</script>
+
+</body>
+</html>
