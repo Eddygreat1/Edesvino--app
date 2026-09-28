@@ -122,8 +122,7 @@ const supabaseClient =
   );
 
 
-async function trackOrder() {
-
+ async function trackOrder(orderId = null) {
   const orderNumber =
     document.getElementById("orderNumber").value.trim();
 
