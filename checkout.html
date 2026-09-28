@@ -120,6 +120,7 @@ Loading product...
 <form id="checkoutForm">
 
 <label>Customer Name</label>
+
 <input
   type="text"
   id="customerName"
@@ -127,6 +128,7 @@ Loading product...
 >
 
 <label>Phone Number</label>
+
 <input
   type="tel"
   id="customerPhone"
@@ -134,6 +136,7 @@ Loading product...
 >
 
 <label>Delivery Address</label>
+
 <textarea
   id="deliveryAddress"
   rows="4"
@@ -204,10 +207,39 @@ document.getElementById("checkoutForm");
 const message =
 document.getElementById("message");
 
+const payButton =
+document.getElementById("payButton");
 
-// =====================================
-// LOAD PRODUCT
-// =====================================
+
+/*
+  RESET CHECKOUT BUTTON
+  This fixes the problem where
+  the browser returns from Paystack
+  showing "Connecting to Paystack..."
+*/
+
+function resetCheckoutState() {
+
+  if (!paymentReference) {
+
+    payButton.disabled = false;
+
+    payButton.textContent =
+    "Proceed to Payment";
+
+    message.innerHTML = "";
+
+    checkoutForm.style.display =
+    "block";
+
+  }
+
+}
+
+
+/*
+  LOAD PRODUCT
+*/
 
 async function loadProduct() {
 
@@ -218,7 +250,8 @@ async function loadProduct() {
       No product selected.
     </div>`;
 
-    checkoutForm.style.display = "none";
+    checkoutForm.style.display =
+    "none";
 
     return;
   }
@@ -242,7 +275,8 @@ async function loadProduct() {
       Product could not be found.
     </div>`;
 
-    checkoutForm.style.display = "none";
+    checkoutForm.style.display =
+    "none";
 
     return;
   }
@@ -276,13 +310,14 @@ async function loadProduct() {
 }
 
 
-// =====================================
-// VERIFY PAYSTACK PAYMENT
-// =====================================
+/*
+  VERIFY PAYMENT
+*/
 
 async function verifyPayment(reference) {
 
-  checkoutForm.style.display = "none";
+  checkoutForm.style.display =
+  "none";
 
   productBox.innerHTML = `
     <div class="message">
@@ -300,20 +335,25 @@ async function verifyPayment(reference) {
         method: "POST",
 
         headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
+          "Content-Type":
+            "application/json",
+
+          "apikey":
+            SUPABASE_KEY,
+
           "Authorization":
             "Bearer " + SUPABASE_KEY
         },
 
         body: JSON.stringify({
 
-          action: "verify",
+          action:
+            "verify",
 
-          reference: reference
+          reference:
+            reference
 
         })
-
       }
     );
 
@@ -334,7 +374,8 @@ async function verifyPayment(reference) {
     }
 
     if (
-      result.data.status !== "success"
+      result.data.status !==
+      "success"
     ) {
 
       throw new Error(
@@ -349,22 +390,32 @@ async function verifyPayment(reference) {
     let metadata =
     paymentData.metadata || {};
 
-    if (typeof metadata === "string") {
+    if (
+      typeof metadata ===
+      "string"
+    ) {
 
       try {
+
         metadata =
         JSON.parse(metadata);
+
       } catch (error) {
+
         metadata = {};
+
       }
 
     }
 
     const orderKey =
-    "edesvino_order_" + reference;
+    "edesvino_order_" +
+    reference;
 
     const existingOrder =
-    sessionStorage.getItem(orderKey);
+    sessionStorage.getItem(
+      orderKey
+    );
 
     if (existingOrder) {
 
@@ -376,33 +427,35 @@ async function verifyPayment(reference) {
       return;
     }
 
-
-    // =================================
-    // SAVE VERIFIED ORDER
-    // =================================
-
     const { data: order, error } =
     await supabaseClient
     .from("orders")
     .insert([{
 
       product_name:
-        metadata.product_name || "Product",
+        metadata.product_name ||
+        "Product",
 
       price:
-        Number(paymentData.amount) / 100,
+        Number(
+          paymentData.amount
+        ) / 100,
 
       customer_name:
-        metadata.customer_name || "Customer",
+        metadata.customer_name ||
+        "Customer",
 
       customer_phone:
-        metadata.customer_phone || "",
+        metadata.customer_phone ||
+        "",
 
       delivery_address:
-        metadata.delivery_address || "",
+        metadata.delivery_address ||
+        "",
 
       seller_id:
-        metadata.seller_id || null,
+        metadata.seller_id ||
+        null,
 
       status:
         "Confirmed"
@@ -410,7 +463,6 @@ async function verifyPayment(reference) {
     }])
     .select()
     .single();
-
 
     if (error) {
 
@@ -422,12 +474,10 @@ async function verifyPayment(reference) {
 
     }
 
-
     sessionStorage.setItem(
       orderKey,
       String(order.id)
     );
-
 
     showSuccess(
       order.id,
@@ -458,9 +508,9 @@ async function verifyPayment(reference) {
 }
 
 
-// =====================================
-// SUCCESS MESSAGE
-// =====================================
+/*
+  PAYMENT SUCCESS
+*/
 
 function showSuccess(
   orderNumber,
@@ -471,22 +521,34 @@ function showSuccess(
 
     <div class="message success">
 
-      <h2>Payment Successful!</h2>
+      <h2>
+        Payment Successful!
+      </h2>
 
       <p>
         Your payment has been verified.
       </p>
 
       <p>
-        <strong>Order Number:</strong>
-        ${escapeHtml(String(orderNumber))}
+        <strong>
+          Order Number:
+        </strong>
+
+        ${escapeHtml(
+          String(orderNumber)
+        )}
+
       </p>
 
       <p>
-        <strong>Amount Paid:</strong>
+        <strong>
+          Amount Paid:
+        </strong>
+
         ₦${(
           Number(amount) / 100
         ).toLocaleString()}
+
       </p>
 
       <p>
@@ -506,9 +568,9 @@ function showSuccess(
 }
 
 
-// =====================================
-// START PAYMENT
-// =====================================
+/*
+  START PAYMENT
+*/
 
 checkoutForm.addEventListener(
 "submit",
@@ -522,26 +584,30 @@ async function(event) {
 
   const customerName =
   document
-  .getElementById("customerName")
+  .getElementById(
+    "customerName"
+  )
   .value
   .trim();
 
   const customerPhone =
   document
-  .getElementById("customerPhone")
+  .getElementById(
+    "customerPhone"
+  )
   .value
   .trim();
 
   const deliveryAddress =
   document
-  .getElementById("deliveryAddress")
+  .getElementById(
+    "deliveryAddress"
+  )
   .value
   .trim();
 
-  const payButton =
-  document.getElementById("payButton");
-
-  payButton.disabled = true;
+  payButton.disabled =
+  true;
 
   payButton.textContent =
   "Connecting to Paystack...";
@@ -561,25 +627,30 @@ async function(event) {
         method: "POST",
 
         headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
+          "Content-Type":
+            "application/json",
+
+          "apikey":
+            SUPABASE_KEY,
+
           "Authorization":
-            "Bearer " + SUPABASE_KEY
+            "Bearer " +
+            SUPABASE_KEY
         },
 
-        
-    body: JSON.stringify({
+        body: JSON.stringify({
 
-      action: "initialize",
+          action:
+            "initialize",
 
-       email:
-      customerPhone +
-      "@customer.edesvino.com",
-      
-
+          email:
+            customerPhone +
+            "@customer.edesvino.com",
 
           amount:
-            Number(selectedProduct.price),
+            Number(
+              selectedProduct.price
+            ),
 
           callback_url:
             callbackUrl,
@@ -638,12 +709,18 @@ async function(event) {
     message.innerHTML = `
 
       <div class="message error">
-        ${escapeHtml(error.message)}
+
+        ${escapeHtml(
+          error.message ||
+          "Unable to start payment."
+        )}
+
       </div>
 
     `;
 
-    payButton.disabled = false;
+    payButton.disabled =
+    false;
 
     payButton.textContent =
     "Proceed to Payment";
@@ -653,14 +730,33 @@ async function(event) {
 });
 
 
-// =====================================
-// SECURITY HELPER
-// =====================================
+/*
+  HANDLE RETURN FROM PAYSTACK
+*/
+
+window.addEventListener(
+"pageshow",
+function() {
+
+  if (!paymentReference) {
+
+    resetCheckoutState();
+
+  }
+
+});
+
+
+/*
+  ESCAPE HTML
+*/
 
 function escapeHtml(text) {
 
   const div =
-  document.createElement("div");
+  document.createElement(
+    "div"
+  );
 
   div.textContent =
   text;
@@ -669,9 +765,9 @@ function escapeHtml(text) {
 }
 
 
-// =====================================
-// PAGE START
-// =====================================
+/*
+  START PAGE
+*/
 
 if (paymentReference) {
 
@@ -682,6 +778,8 @@ if (paymentReference) {
 } else {
 
   loadProduct();
+
+  resetCheckoutState();
 
 }
 
