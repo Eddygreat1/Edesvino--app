@@ -89,6 +89,12 @@ button:disabled {
   color: #991b1b;
 }
 
+.success {
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  color: #065f46;
+}
+
 .back {
   display: block;
   text-align: center;
@@ -171,17 +177,21 @@ const FUNCTION_URL =
 
 const supabaseClient =
 window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
+  SUPABASE_URL,
+  SUPABASE_KEY
 );
 
 const params =
 new URLSearchParams(
-window.location.search
+  window.location.search
 );
 
 const productName =
 params.get("product");
+
+const paymentReference =
+params.get("reference") ||
+params.get("trxref");
 
 let selectedProduct = null;
 
@@ -194,17 +204,26 @@ document.getElementById("checkoutForm");
 const message =
 document.getElementById("message");
 
+
+// =====================================
+// LOAD PRODUCT
+// =====================================
+
 async function loadProduct() {
 
-  if (!productName) {
+  if (!productName && !paymentReference) {
 
     productBox.innerHTML =
     `<div class="message error">
-    No product selected.
+      No product selected.
     </div>`;
 
     checkoutForm.style.display = "none";
 
+    return;
+  }
+
+  if (!productName) {
     return;
   }
 
@@ -220,7 +239,7 @@ async function loadProduct() {
 
     productBox.innerHTML =
     `<div class="message error">
-    Product could not be found.
+      Product could not be found.
     </div>`;
 
     checkoutForm.style.display = "none";
@@ -255,6 +274,241 @@ async function loadProduct() {
 
   `;
 }
+
+
+// =====================================
+// VERIFY PAYSTACK PAYMENT
+// =====================================
+
+async function verifyPayment(reference) {
+
+  checkoutForm.style.display = "none";
+
+  productBox.innerHTML = `
+    <div class="message">
+      Verifying your Paystack payment...
+      Please wait.
+    </div>
+  `;
+
+  try {
+
+    const response =
+    await fetch(
+      FUNCTION_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization":
+            "Bearer " + SUPABASE_KEY
+        },
+
+        body: JSON.stringify({
+
+          action: "verify",
+
+          reference: reference
+
+        })
+
+      }
+    );
+
+    const result =
+    await response.json();
+
+    if (
+      !response.ok ||
+      !result.status ||
+      !result.data
+    ) {
+
+      throw new Error(
+        result.message ||
+        "Payment verification failed."
+      );
+
+    }
+
+    if (
+      result.data.status !== "success"
+    ) {
+
+      throw new Error(
+        "Payment was not successful."
+      );
+
+    }
+
+    const paymentData =
+    result.data;
+
+    let metadata =
+    paymentData.metadata || {};
+
+    if (typeof metadata === "string") {
+
+      try {
+        metadata =
+        JSON.parse(metadata);
+      } catch (error) {
+        metadata = {};
+      }
+
+    }
+
+    const orderKey =
+    "edesvino_order_" + reference;
+
+    const existingOrder =
+    sessionStorage.getItem(orderKey);
+
+    if (existingOrder) {
+
+      showSuccess(
+        existingOrder,
+        paymentData.amount
+      );
+
+      return;
+    }
+
+
+    // =================================
+    // SAVE VERIFIED ORDER
+    // =================================
+
+    const { data: order, error } =
+    await supabaseClient
+    .from("orders")
+    .insert([{
+
+      product_name:
+        metadata.product_name || "Product",
+
+      price:
+        Number(paymentData.amount) / 100,
+
+      customer_name:
+        metadata.customer_name || "Customer",
+
+      customer_phone:
+        metadata.customer_phone || "",
+
+      delivery_address:
+        metadata.delivery_address || "",
+
+      seller_id:
+        metadata.seller_id || null,
+
+      status:
+        "Confirmed"
+
+    }])
+    .select()
+    .single();
+
+
+    if (error) {
+
+      console.error(error);
+
+      throw new Error(
+        "Payment was successful, but the order could not be saved."
+      );
+
+    }
+
+
+    sessionStorage.setItem(
+      orderKey,
+      String(order.id)
+    );
+
+
+    showSuccess(
+      order.id,
+      paymentData.amount
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    productBox.innerHTML = `
+
+      <div class="message error">
+
+        ${escapeHtml(
+          error.message ||
+          "Unable to verify payment."
+        )}
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+// =====================================
+// SUCCESS MESSAGE
+// =====================================
+
+function showSuccess(
+  orderNumber,
+  amount
+) {
+
+  productBox.innerHTML = `
+
+    <div class="message success">
+
+      <h2>Payment Successful!</h2>
+
+      <p>
+        Your payment has been verified.
+      </p>
+
+      <p>
+        <strong>Order Number:</strong>
+        ${escapeHtml(String(orderNumber))}
+      </p>
+
+      <p>
+        <strong>Amount Paid:</strong>
+        ₦${(
+          Number(amount) / 100
+        ).toLocaleString()}
+      </p>
+
+      <p>
+        Your order has been sent to the seller.
+      </p>
+
+      <p>
+        <a href="track-order.html">
+          Track Your Order
+        </a>
+      </p>
+
+    </div>
+
+  `;
+
+}
+
+
+// =====================================
+// START PAYMENT
+// =====================================
 
 checkoutForm.addEventListener(
 "submit",
@@ -393,17 +647,38 @@ async function(event) {
 
 });
 
+
+// =====================================
+// SECURITY HELPER
+// =====================================
+
 function escapeHtml(text) {
 
   const div =
   document.createElement("div");
 
-  div.textContent = text;
+  div.textContent =
+  text;
 
   return div.innerHTML;
 }
 
-loadProduct();
+
+// =====================================
+// PAGE START
+// =====================================
+
+if (paymentReference) {
+
+  verifyPayment(
+    paymentReference
+  );
+
+} else {
+
+  loadProduct();
+
+}
 
 </script>
 
