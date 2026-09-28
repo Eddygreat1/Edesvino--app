@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Track Order - Edesvino</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -122,12 +123,17 @@ const supabaseClient =
   );
 
 
- async function trackOrder(orderId = null) {
-  const orderNumber =
-    document.getElementById("orderNumber").value.trim();
+async function trackOrder(orderId = null) {
+
+  const orderNumberInput =
+    document.getElementById("orderNumber");
 
   const result =
     document.getElementById("result");
+
+  const orderNumber =
+    orderId ||
+    orderNumberInput.value.trim();
 
 
   if (!orderNumber) {
@@ -138,6 +144,8 @@ const supabaseClient =
     return;
   }
 
+
+  orderNumberInput.value = orderNumber;
 
   result.innerHTML =
     "<p>Checking your order...</p>";
@@ -229,6 +237,26 @@ const supabaseClient =
       "<p>Something went wrong. Please try again.</p>";
 
   }
+
+}
+
+
+/* Automatically track an order when
+   the page is opened with ?order=ORDER_ID */
+
+const urlParams =
+  new URLSearchParams(window.location.search);
+
+const orderFromUrl =
+  urlParams.get("order");
+
+
+if (orderFromUrl) {
+
+  document.getElementById("orderNumber").value =
+    orderFromUrl;
+
+  trackOrder(orderFromUrl);
 
 }
 
