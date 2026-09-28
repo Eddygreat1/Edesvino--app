@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Track Order - Edesvino</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,23 +26,21 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 10px;
     }
 
     .subtitle {
       text-align: center;
       color: #555;
-      margin-bottom: 25px;
     }
 
     input {
       width: 100%;
       box-sizing: border-box;
       padding: 14px;
+      margin: 15px 0;
       border: 1px solid #ccc;
       border-radius: 7px;
       font-size: 16px;
-      margin-bottom: 12px;
     }
 
     button {
@@ -76,166 +73,167 @@
       display: block;
       text-align: center;
       margin-top: 25px;
-      text-decoration: none;
       color: #111;
+      text-decoration: none;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>Edesvino</h1>
+  <h1>Edesvino</h1>
 
-    <p class="subtitle">
-      Track Your Order
-    </p>
+  <p class="subtitle">
+    Track Your Order
+  </p>
 
-    <input
-      type="number"
-      id="orderNumber"
-      placeholder="Enter your order number"
-    >
+  <input
+    type="number"
+    id="orderNumber"
+    placeholder="Enter your order number"
+  >
 
-    <button onclick="trackOrder()">
-      Track Order
-    </button>
+  <button onclick="trackOrder()">
+    Track Order
+  </button>
 
-    <div id="result"></div>
+  <div id="result"></div>
 
-    <a class="back" href="index.html">
-      ← Back to Edesvino
-    </a>
+  <a class="back" href="index.html">
+    ← Back to Edesvino
+  </a>
 
-  </div>
+</div>
 
-  <script>
+<script>
 
-    const SUPABASE_URL =
-      "https://lxszilqypuglxyfyukdg.supabase.co";
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
 
-    const SUPABASE_KEY =
-      "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-    const supabaseClient =
-      supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
-
-
-    async function trackOrder() {
-
-      const orderNumber =
-        document.getElementById("orderNumber").value.trim();
-
-      const result =
-        document.getElementById("result");
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-      if (!orderNumber) {
+async function trackOrder() {
 
-        result.innerHTML =
-          "<p>Please enter your order number.</p>";
+  const orderNumber =
+    document.getElementById("orderNumber").value.trim();
 
-        return;
-      }
+  const result =
+    document.getElementById("result");
 
+
+  if (!orderNumber) {
+
+    result.innerHTML =
+      "<p>Please enter your order number.</p>";
+
+    return;
+  }
+
+
+  result.innerHTML =
+    "<p>Checking your order...</p>";
+
+
+  try {
+
+    const { data, error } =
+      await supabaseClient
+        .from("orders")
+        .select(
+          "id, product_name, price, customer_name, created_at, status"
+        )
+        .eq("id", orderNumber)
+        .maybeSingle();
+
+
+    if (error) {
+
+      console.error(error);
 
       result.innerHTML =
-        "<p>Checking your order...</p>";
+        "<p>Unable to check the order.</p>";
 
-
-      try {
-
-        const { data, error } =
-          await supabaseClient
-            .from("orders")
-            .select(
-              "id, product_name, price, customer_name, created_at, status"
-            )
-            .eq("id", orderNumber)
-            .maybeSingle();
-
-
-        if (error) {
-
-          console.error(error);
-
-          result.innerHTML =
-            "<p>Unable to check the order. Please try again.</p>";
-
-          return;
-        }
-
-
-        if (!data) {
-
-          result.innerHTML =
-            "<p>Order not found.</p>" +
-            "<p>Please check your order number.</p>";
-
-          return;
-        }
-
-
-        const orderDate =
-          new Date(data.created_at).toLocaleString();
-
-
-        const amount =
-          Number(data.price || 0).toLocaleString();
-
-
-        result.innerHTML = `
-
-          <div class="order-box">
-
-            <h2>Order #${data.id}</h2>
-
-            <p>
-              <strong>Product:</strong><br>
-              ${data.product_name || "N/A"}
-            </p>
-
-            <p>
-              <strong>Amount:</strong><br>
-              ₦${amount}
-            </p>
-
-            <p>
-              <strong>Customer:</strong><br>
-              ${data.customer_name || "N/A"}
-            </p>
-
-            <p>
-              <strong>Order Date:</strong><br>
-              ${orderDate}
-            </p>
-
-            <p>
-              <strong>Order Status:</strong><br>
-              <span class="status">
-                ${data.status || "Pending"}
-              </span>
-            </p>
-
-          </div>
-
-        `;
-
-      } catch (error) {
-
-        console.error(error);
-
-        result.innerHTML =
-          "<p>Something went wrong. Please try again.</p>";
-      }
-
+      return;
     }
 
-  </script>
+
+    if (!data) {
+
+      result.innerHTML =
+        "<p>Order not found.</p>" +
+        "<p>Please check your order number.</p>";
+
+      return;
+    }
+
+
+    const orderDate =
+      new Date(data.created_at).toLocaleString();
+
+
+    const amount =
+      Number(data.price || 0).toLocaleString();
+
+
+    result.innerHTML = `
+
+      <div class="order-box">
+
+        <h2>Order #${data.id}</h2>
+
+        <p>
+          <strong>Product:</strong><br>
+          ${data.product_name || "N/A"}
+        </p>
+
+        <p>
+          <strong>Amount:</strong><br>
+          ₦${amount}
+        </p>
+
+        <p>
+          <strong>Customer:</strong><br>
+          ${data.customer_name || "N/A"}
+        </p>
+
+        <p>
+          <strong>Order Date:</strong><br>
+          ${orderDate}
+        </p>
+
+        <p>
+          <strong>Order Status:</strong><br>
+          <span class="status">
+            ${data.status || "Pending"}
+          </span>
+        </p>
+
+      </div>
+
+    `;
+
+  } catch (error) {
+
+    console.error(error);
+
+    result.innerHTML =
+      "<p>Something went wrong. Please try again.</p>";
+
+  }
+
+}
+
+</script>
 
 </body>
 </html>
