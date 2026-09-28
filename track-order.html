@@ -11,109 +11,91 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f4f4f4;
       margin: 0;
-      background: #f5f5f5;
-      color: #222;
-    }
-
-    header {
-      background: #111;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-
-    main {
-      max-width: 600px;
-      margin: 30px auto;
       padding: 20px;
     }
 
-    .box {
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
       background: white;
       padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #555;
+      margin-bottom: 25px;
     }
 
     input {
       width: 100%;
       box-sizing: border-box;
       padding: 14px;
-      margin-top: 8px;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: 7px;
       font-size: 16px;
+      margin-bottom: 12px;
     }
 
     button {
       width: 100%;
       padding: 14px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 8px;
       background: #111;
       color: white;
+      border: none;
+      border-radius: 7px;
       font-size: 16px;
+      cursor: pointer;
     }
 
-    .order {
+    #result {
       margin-top: 25px;
-      padding: 20px;
+    }
+
+    .order-box {
       background: #f8f8f8;
-      border-radius: 10px;
+      padding: 18px;
+      border-radius: 8px;
+      line-height: 1.6;
     }
 
     .status {
-      margin-top: 15px;
-      padding: 15px;
-      background: white;
-      border-radius: 8px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .error {
-      margin-top: 15px;
-      color: #b00020;
       font-weight: bold;
     }
 
     .back {
-      display: inline-block;
-      margin-top: 20px;
-      color: #111;
-      font-weight: bold;
+      display: block;
+      text-align: center;
+      margin-top: 25px;
       text-decoration: none;
+      color: #111;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <h1>Edesvino</h1>
-  <p>Track Your Order</p>
-</header>
+  <div class="container">
 
-<main>
+    <h1>Edesvino</h1>
 
-  <div class="box">
-
-    <h2>Track Order</h2>
-
-    <p>
-      Enter your order number to check your order status.
+    <p class="subtitle">
+      Track Your Order
     </p>
-
-    <label for="orderId">
-      Order Number
-    </label>
 
     <input
       type="number"
-      id="orderId"
-      placeholder="Example: 4"
+      id="orderNumber"
+      placeholder="Enter your order number"
     >
 
     <button onclick="trackOrder()">
@@ -123,129 +105,137 @@
     <div id="result"></div>
 
     <a class="back" href="index.html">
-      ← Back to Marketplace
+      ← Back to Edesvino
     </a>
 
   </div>
 
-</main>
+  <script>
 
-<script>
+    const SUPABASE_URL =
+      "https://lxszilqypuglxyfyukdg.supabase.co";
 
-  const SUPABASE_URL =
-    "https://lxszilqypuglxyfyukdg.supabase.co";
+    const SUPABASE_KEY =
+      "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-  const SUPABASE_KEY =
-    "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
-
-  const supabaseClient =
-    supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
 
 
-  async function trackOrder() {
+    async function trackOrder() {
 
-    const orderId =
-      document.getElementById("orderId").value.trim();
+      const orderNumber =
+        document.getElementById("orderNumber").value.trim();
 
-    const result =
-      document.getElementById("result");
+      const result =
+        document.getElementById("result");
 
-    if (!orderId) {
+
+      if (!orderNumber) {
+
+        result.innerHTML =
+          "<p>Please enter your order number.</p>";
+
+        return;
+      }
+
 
       result.innerHTML =
-        '<div class="error">Please enter your order number.</div>';
+        "<p>Checking your order...</p>";
 
-      return;
+
+      try {
+
+        const { data, error } =
+          await supabaseClient
+            .from("orders")
+            .select(
+              "id, product_name, price, customer_name, created_at, status"
+            )
+            .eq("id", orderNumber)
+            .maybeSingle();
+
+
+        if (error) {
+
+          console.error(error);
+
+          result.innerHTML =
+            "<p>Unable to check the order. Please try again.</p>";
+
+          return;
+        }
+
+
+        if (!data) {
+
+          result.innerHTML =
+            "<p>Order not found.</p>" +
+            "<p>Please check your order number.</p>";
+
+          return;
+        }
+
+
+        const orderDate =
+          new Date(data.created_at).toLocaleString();
+
+
+        const amount =
+          Number(data.price || 0).toLocaleString();
+
+
+        result.innerHTML = `
+
+          <div class="order-box">
+
+            <h2>Order #${data.id}</h2>
+
+            <p>
+              <strong>Product:</strong><br>
+              ${data.product_name || "N/A"}
+            </p>
+
+            <p>
+              <strong>Amount:</strong><br>
+              ₦${amount}
+            </p>
+
+            <p>
+              <strong>Customer:</strong><br>
+              ${data.customer_name || "N/A"}
+            </p>
+
+            <p>
+              <strong>Order Date:</strong><br>
+              ${orderDate}
+            </p>
+
+            <p>
+              <strong>Order Status:</strong><br>
+              <span class="status">
+                ${data.status || "Pending"}
+              </span>
+            </p>
+
+          </div>
+
+        `;
+
+      } catch (error) {
+
+        console.error(error);
+
+        result.innerHTML =
+          "<p>Something went wrong. Please try again.</p>";
+      }
+
     }
 
-    result.innerHTML =
-      "<p>Checking order...</p>";
-
-
-    const { data: order, error } =
-      await supabaseClient
-        .from("orders")
-        .select("*")
-        .eq("id", orderId)
-        .maybeSingle();
-
-
-    if (error) {
-
-      console.error(error);
-
-      result.innerHTML =
-        '<div class="error">Unable to check this order. Please try again.</div>';
-
-      return;
-    }
-
-
-    if (!order) {
-
-      result.innerHTML =
-        '<div class="error">Order not found. Please check your order number.</div>';
-
-      return;
-    }
-
-
-    const status =
-      order.status || "Pending";
-
-
-    result.innerHTML = `
-
-      <div class="order">
-
-        <h2>Order #${order.id}</h2>
-
-        <p>
-          <strong>Product:</strong>
-          ${escapeHtml(order.product_name)}
-        </p>
-
-        <p>
-          <strong>Amount:</strong>
-          ₦${Number(order.price).toLocaleString()}
-        </p>
-
-        <p>
-          <strong>Customer:</strong>
-          ${escapeHtml(order.customer_name)}
-        </p>
-
-        <p>
-          <strong>Order Date:</strong>
-          ${new Date(order.created_at).toLocaleString()}
-        </p>
-
-        <div class="status">
-          Order Status: ${escapeHtml(status)}
-        </div>
-
-      </div>
-
-    `;
-
-  }
-
-
-  function escapeHtml(value) {
-
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-
-  }
-
-</script>
+  </script>
 
 </body>
 </html>
