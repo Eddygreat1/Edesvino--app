@@ -21,7 +21,7 @@ body {
 header {
   background: #111827;
   color: white;
-  padding: 20px;
+  padding: 22px;
   text-align: center;
 }
 
@@ -40,29 +40,26 @@ header {
 }
 
 h1,
-h2,
-h3 {
+h2 {
   margin-top: 0;
 }
 
 .info {
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
 .menu {
   display: grid;
   gap: 12px;
-  margin-top: 20px;
 }
 
-.menu button,
-.menu a {
+.menu a,
+.menu button {
   display: block;
   width: 100%;
   padding: 15px;
   border: none;
   border-radius: 8px;
-  background: #111827;
   color: white;
   text-decoration: none;
   text-align: center;
@@ -70,39 +67,35 @@ h3 {
   cursor: pointer;
 }
 
-.menu a.add {
+.add {
   background: #16a34a;
 }
 
-.menu a.shop {
+.products {
   background: #2563eb;
 }
 
+.orders {
+  background: #7c3aed;
+}
+
+.sales {
+  background: #0891b2;
+}
+
+.marketplace {
+  background: #111827;
+}
+
 .logout {
-  background: #dc2626 !important;
-}
-
-.stat {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.stat:last-child {
-  border-bottom: none;
+  background: #dc2626;
 }
 
 .message {
+  margin-top: 20px;
   padding: 15px;
-  border-radius: 8px;
-  margin-top: 15px;
   background: #f3f4f6;
-}
-
-.warning {
-  background: #fff7ed;
-  color: #9a3412;
+  border-radius: 8px;
 }
 
 footer {
@@ -120,115 +113,115 @@ footer a {
 <body>
 
 <header>
-  <h1>Edesvino Marketplace</h1>
-  <p>Seller Dashboard</p>
+
+<h1>Edesvino Marketplace</h1>
+
+<p>Seller Dashboard</p>
+
 </header>
+
 
 <div class="container">
 
-  <div class="card">
 
-    <h2>Welcome, Seller</h2>
+<div class="card">
 
-    <div id="sellerInfo" class="info">
-      Loading seller information...
-    </div>
+<h2>Welcome, Seller</h2>
 
-  </div>
+<div id="sellerInfo">
+Loading seller information...
+</div>
 
-
-  <div class="card">
-
-    <h2>Seller Menu</h2>
-
-    <div class="menu">
-
-      <a
-        class="add"
-        href="add-product.html"
-      >
-        + Add Product
-      </a>
-
-      <a
-        href="products.html"
-      >
-        My Products
-      </a>
-
-      <a
-        href="orders.html"
-      >
-        Orders
-      </a>
-
-      <a
-        href="sales.html"
-      >
-        Sales
-      </a>
-
-      <a
-        href="earnings.html"
-      >
-        Earnings
-      </a>
-
-      <a
-        class="shop"
-        href="index.html"
-      >
-        View Marketplace
-      </a>
-
-      <button
-        class="logout"
-        onclick="logout()"
-      >
-        Logout
-      </button>
-
-    </div>
-
-  </div>
+</div>
 
 
-  <div class="card">
+<div class="card">
 
-    <h2>Account Status</h2>
+<h2>Seller Menu</h2>
 
-    <div class="stat">
-      <span>Seller Account</span>
-      <strong id="accountStatus">
-        Active
-      </strong>
-    </div>
-
-    <div class="stat">
-      <span>Store</span>
-      <strong id="storeStatus">
-        —
-      </strong>
-    </div>
-
-  </div>
+<div class="menu">
 
 
-  <div
-    id="message"
-    class="message"
-  >
-    Your seller dashboard is ready.
-  </div>
+<a
+class="add"
+href="add-product.html"
+>
++ Add Product
+</a>
+
+
+<a
+class="products"
+href="my-product.html"
+>
+My Products
+</a>
+
+
+<a
+class="orders"
+href="orders.html"
+>
+Customer Orders
+</a>
+
+
+<a
+class="sales"
+href="sales.html"
+>
+Sales & Earnings
+</a>
+
+
+<a
+class="marketplace"
+href="index.html"
+>
+View Marketplace
+</a>
+
+
+<button
+class="logout"
+onclick="logout()"
+>
+Logout
+</button>
+
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Store Information</h2>
+
+<div id="storeInfo">
+Loading...
+</div>
+
+</div>
+
+
+<div
+id="message"
+class="message"
+>
+Seller dashboard is ready.
+</div>
+
 
 </div>
 
 
 <footer>
 
-  <a href="index.html">
-    ← Back to Marketplace
-  </a>
+<a href="index.html">
+← Back to Marketplace
+</a>
 
 </footer>
 
@@ -237,146 +230,152 @@ footer a {
 
 const sellerData =
 localStorage.getItem(
-  "edesvinoSeller"
+"edesvinoSeller"
 );
-
 
 const sellerInfo =
 document.getElementById(
-  "sellerInfo"
+"sellerInfo"
 );
 
-
-const storeStatus =
+const storeInfo =
 document.getElementById(
-  "storeStatus"
+"storeInfo"
 );
 
 
 if (!sellerData) {
 
-  sellerInfo.innerHTML = `
+sellerInfo.innerHTML = `
 
-    <div class="warning">
+<p>
+No seller information was found
+on this device.
+</p>
 
-      No seller information was found
-      on this device.
+<p>
+<a href="register.html">
+Register as a Seller
+</a>
+</p>
 
-      <br><br>
+`;
 
-      Please register as a seller first.
-
-      <br><br>
-
-      <a href="register.html">
-        Register Seller
-      </a>
-
-    </div>
-
-  `;
+storeInfo.innerHTML =
+"<p>No store information available.</p>";
 
 } else {
 
-  try {
+try {
 
-    const seller =
-    JSON.parse(sellerData);
+const seller =
+JSON.parse(sellerData);
 
-    const name =
-    seller.name ||
-    seller.fullName ||
-    seller.sellerName ||
-    "Seller";
 
-    const store =
-    seller.store ||
-    seller.storeName ||
-    seller.businessName ||
-    "Edesvino Store";
+const name =
+seller.name ||
+seller.fullName ||
+seller.sellerName ||
+"Seller";
 
-    const email =
-    seller.email ||
-    "Not provided";
 
-    const phone =
-    seller.phone ||
-    "Not provided";
+const store =
+seller.store ||
+seller.storeName ||
+seller.businessName ||
+"Edesvino Store";
 
-    sellerInfo.innerHTML = `
 
-      <strong>Name:</strong>
-      ${escapeHtml(name)}
+const email =
+seller.email ||
+"Not provided";
 
-      <br>
 
-      <strong>Store:</strong>
-      ${escapeHtml(store)}
+const phone =
+seller.phone ||
+"Not provided";
 
-      <br>
 
-      <strong>Email:</strong>
-      ${escapeHtml(email)}
+sellerInfo.innerHTML = `
 
-      <br>
+<p>
+<strong>Name:</strong>
+${escapeHtml(name)}
+</p>
 
-      <strong>Phone:</strong>
-      ${escapeHtml(phone)}
+<p>
+<strong>Email:</strong>
+${escapeHtml(email)}
+</p>
 
-    `;
+<p>
+<strong>Phone:</strong>
+${escapeHtml(phone)}
+</p>
 
-    storeStatus.textContent =
-    store;
+`;
 
-  }
 
-  catch (error) {
+storeInfo.innerHTML = `
 
-    sellerInfo.innerHTML = `
+<p>
+<strong>Store Name:</strong>
+${escapeHtml(store)}
+</p>
 
-      <div class="warning">
+<p>
+<strong>Status:</strong>
+Active
+</p>
 
-        Seller information could not
-        be loaded correctly.
+`;
 
-      </div>
+}
 
-    `;
+catch (error) {
 
-  }
+sellerInfo.innerHTML =
+"<p>Unable to load seller information.</p>";
+
+storeInfo.innerHTML =
+"<p>Unable to load store information.</p>";
+
+}
 
 }
 
 
 /*
-  LOGOUT
+LOGOUT
 */
 
 function logout() {
 
-  localStorage.removeItem(
-    "edesvinoSeller"
-  );
+localStorage.removeItem(
+"edesvinoSeller"
+);
 
-  window.location.href =
-    "index.html";
+window.location.href =
+"index.html";
 
 }
 
 
 /*
-  SECURITY HELPER
+SECURITY HELPER
 */
 
 function escapeHtml(text) {
 
-  const div =
-    document.createElement("div");
+const div =
+document.createElement(
+"div"
+);
 
-  div.textContent =
-    text;
+div.textContent =
+text;
 
-  return div.innerHTML;
+return div.innerHTML;
 
 }
 
