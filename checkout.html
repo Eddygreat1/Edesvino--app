@@ -567,11 +567,16 @@ async function(event) {
             "Bearer " + SUPABASE_KEY
         },
 
-        body: JSON.stringify({
+        
+    body: JSON.stringify({
 
-          email:
-            customerPhone +
-            "@customer.edesvino.com",
+      action: "initialize",
+
+       email:
+      customerPhone +
+      "@customer.edesvino.com",
+      
+
 
           amount:
             Number(selectedProduct.price),
