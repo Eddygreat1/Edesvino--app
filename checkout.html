@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Checkout - Edesvino</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,7 +15,7 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f5f5f5;
       color: #222;
     }
 
@@ -27,11 +26,12 @@
     }
 
     .header-content {
-      max-width: 700px;
+      max-width: 900px;
       margin: auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 15px;
     }
 
     .logo {
@@ -39,7 +39,7 @@
       font-weight: bold;
     }
 
-    header a {
+    .back {
       color: white;
       text-decoration: none;
       font-size: 14px;
@@ -47,14 +47,14 @@
 
     .container {
       max-width: 600px;
-      margin: 30px auto;
-      padding: 0 15px;
+      margin: 35px auto;
+      padding: 0 20px;
     }
 
-    .box {
+    .card {
       background: white;
       padding: 25px;
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
@@ -63,118 +63,106 @@
       margin-top: 0;
     }
 
-    .subtitle {
-      text-align: center;
+    h2 {
+      margin-bottom: 8px;
+    }
+
+    .description {
       color: #666;
-      margin-bottom: 25px;
+      margin-bottom: 15px;
     }
 
-    .product-box {
-      background: #f7f7f7;
-      padding: 18px;
-      border-radius: 10px;
-      margin-bottom: 25px;
-    }
-
-    .product-box h2 {
-      margin: 0 0 10px;
-    }
-
-    .product-description {
-      color: #666;
-      margin-bottom: 12px;
-    }
-
-    .product-price {
-      font-size: 24px;
+    .price {
+      font-size: 25px;
       font-weight: bold;
+      margin: 15px 0 8px;
     }
 
-    .product-store {
+    .store {
       color: #555;
-      margin-top: 8px;
-      font-size: 14px;
+      margin-bottom: 25px;
     }
 
     label {
       display: block;
       font-weight: bold;
-      margin-top: 16px;
+      margin-top: 15px;
       margin-bottom: 7px;
     }
 
     input,
     textarea {
       width: 100%;
-      padding: 14px;
+      padding: 13px;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: 7px;
       font-size: 16px;
       font-family: Arial, sans-serif;
     }
 
     textarea {
-      min-height: 110px;
+      min-height: 100px;
       resize: vertical;
     }
 
-    .pay-button {
+    button {
       width: 100%;
-      margin-top: 25px;
-      padding: 15px;
+      padding: 14px;
+      margin-top: 20px;
       border: none;
-      border-radius: 8px;
+      border-radius: 7px;
       background: #111;
       color: white;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    .pay-button:disabled {
+    button:disabled {
       opacity: 0.6;
-      cursor: not-allowed;
     }
 
-    .back {
-      display: block;
-      text-align: center;
+    .message {
       margin-top: 20px;
-      color: #111;
-      text-decoration: none;
-    }
-
-    #message {
-      margin-top: 20px;
-    }
-
-    .success {
-      background: #eaf8ee;
-      padding: 20px;
-      border-radius: 10px;
+      padding: 15px;
+      border-radius: 8px;
       text-align: center;
-    }
-
-    .success h2 {
-      margin-top: 0;
-    }
-
-    .track {
-      display: block;
-      margin-top: 15px;
-      padding: 13px;
-      background: #111;
-      color: white;
-      text-decoration: none;
-      border-radius: 7px;
-      font-weight: bold;
     }
 
     .error {
       background: #fff0f0;
       color: #a00000;
-      padding: 15px;
-      border-radius: 8px;
+    }
+
+    .success {
+      background: #eefaf0;
+      color: #176b25;
+    }
+
+    .order-number {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    .track {
+      display: block;
+      text-align: center;
+      background: #111;
+      color: white;
+      text-decoration: none;
+      padding: 14px;
+      border-radius: 7px;
+      margin-top: 18px;
+      font-weight: bold;
+    }
+
+    .continue {
+      display: block;
+      text-align: center;
+      color: #111;
+      margin-top: 18px;
+      text-decoration: none;
     }
 
     .loading {
@@ -184,12 +172,8 @@
     }
 
     @media (max-width: 600px) {
-      .box {
-        padding: 20px;
-      }
-
-      .logo {
-        font-size: 21px;
+      .header-content {
+        flex-direction: column;
       }
     }
   </style>
@@ -200,96 +184,57 @@
 <header>
   <div class="header-content">
     <div class="logo">Edesvino</div>
-
-    <a href="index.html">
-      ← Back to Shop
-    </a>
+    <a class="back" href="index.html">← Back to Shop</a>
   </div>
 </header>
 
-
 <div class="container">
 
-  <div class="box">
+  <div class="card">
 
     <h1>Checkout</h1>
 
-    <p class="subtitle">
+    <p style="text-align:center;color:#666;">
       Complete your order securely
     </p>
 
-
     <div id="productArea">
-
-      <div class="loading">
-        Loading product...
-      </div>
-
+      <div class="loading">Loading product...</div>
     </div>
 
+    <div id="checkoutForm">
 
-    <form id="checkoutForm">
-
-      <label for="customerName">
-        Full Name
-      </label>
-
+      <label for="customerName">Full Name</label>
       <input
         type="text"
         id="customerName"
         placeholder="Enter your full name"
-        required
       >
 
-
-      <label for="customerPhone">
-        Phone Number
-      </label>
-
+      <label for="customerPhone">Phone Number</label>
       <input
         type="tel"
         id="customerPhone"
         placeholder="Enter your phone number"
-        required
       >
 
-
-      <label for="deliveryAddress">
-        Delivery Address
-      </label>
-
+      <label for="deliveryAddress">Delivery Address</label>
       <textarea
         id="deliveryAddress"
-        placeholder="Enter your complete delivery address"
-        required
+        placeholder="Enter your delivery address"
       ></textarea>
 
-
-      <button
-        type="submit"
-        class="pay-button"
-        id="payButton"
-      >
+      <button id="payButton" onclick="startPayment()">
         Continue to Payment
       </button>
 
-    </form>
+      <div id="message"></div>
 
-
-    <div id="message"></div>
-
-
-    <a
-      class="back"
-      href="index.html"
-    >
-      ← Continue Shopping
-    </a>
+    </div>
 
   </div>
 
 </div>
-
 
 <script>
 
@@ -299,53 +244,27 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-const FUNCTION_URL =
-  SUPABASE_URL +
-  "/functions/v1/smart-task";
-
+const EDGE_FUNCTION_URL =
+  SUPABASE_URL + "/functions/v1/smart-task";
 
 const supabaseClient =
-  supabase.createClient(
+  window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
   );
 
+let currentProduct = null;
 
-const params =
-  new URLSearchParams(
-    window.location.search
-  );
 
+/* --------------------------------
+   GET PRODUCT FROM URL
+-------------------------------- */
+
+const urlParams =
+  new URLSearchParams(window.location.search);
 
 const productName =
-  params.get("product");
-
-
-let selectedProduct = null;
-
-
-const productArea =
-  document.getElementById(
-    "productArea"
-  );
-
-
-const message =
-  document.getElementById(
-    "message"
-  );
-
-
-const payButton =
-  document.getElementById(
-    "payButton"
-  );
-
-
-const checkoutForm =
-  document.getElementById(
-    "checkoutForm"
-  );
+  urlParams.get("product");
 
 
 /* --------------------------------
@@ -354,20 +273,19 @@ const checkoutForm =
 
 async function loadProduct() {
 
+  const productArea =
+    document.getElementById("productArea");
+
   if (!productName) {
 
-    productArea.innerHTML = `
-      <div class="error">
-        No product was selected.
-      </div>
-    `;
+    productArea.innerHTML =
+      '<div class="message error">No product was selected.</div>';
 
-    checkoutForm.style.display =
+    document.getElementById("checkoutForm").style.display =
       "none";
 
     return;
   }
-
 
   try {
 
@@ -379,714 +297,601 @@ async function loadProduct() {
         .limit(1)
         .maybeSingle();
 
-
     if (error) {
 
       console.error(error);
 
-      productArea.innerHTML = `
-        <div class="error">
-          Unable to load this product.
-        </div>
-      `;
-
-      checkoutForm.style.display =
-        "none";
+      productArea.innerHTML =
+        '<div class="message error">Unable to load this product.</div>';
 
       return;
     }
-
 
     if (!data) {
 
-      productArea.innerHTML = `
-        <div class="error">
-          Product not found.
-        </div>
-      `;
-
-      checkoutForm.style.display =
-        "none";
+      productArea.innerHTML =
+        '<div class="message error">Product not found.</div>';
 
       return;
     }
 
-
-    selectedProduct = data;
-
+    currentProduct = data;
 
     const price =
-      Number(
-        data.price || 0
-      ).toLocaleString();
-
+      Number(data.price || 0).toLocaleString();
 
     productArea.innerHTML = `
+      <h2>${escapeHtml(data.name)}</h2>
 
-      <div class="product-box">
+      <p class="description">
+        ${escapeHtml(data.description || "No description available.")}
+      </p>
 
-        <h2>
-          ${escapeHtml(
-            data.name || "Product"
-          )}
-        </h2>
-
-        <div class="product-description">
-          ${escapeHtml(
-            data.description ||
-            "No description available."
-          )}
-        </div>
-
-        <div class="product-price">
-          ₦${price}
-        </div>
-
-        <div class="product-store">
-          Store:
-          ${escapeHtml(
-            data.store ||
-            "Edesvino Seller"
-          )}
-        </div>
-
+      <div class="price">
+        ₦${price}
       </div>
 
+      <div class="store">
+        Store: ${escapeHtml(data.store || "Edesvino Seller")}
+      </div>
     `;
 
   } catch (error) {
 
     console.error(error);
 
-    productArea.innerHTML = `
-      <div class="error">
-        Something went wrong while
-        loading the product.
-      </div>
-    `;
-
+    productArea.innerHTML =
+      '<div class="message error">Something went wrong while loading the product.</div>';
   }
-
 }
 
 
 /* --------------------------------
-   PAYMENT
+   START PAYMENT
 -------------------------------- */
 
-checkoutForm.addEventListener(
-  "submit",
-  async function(event) {
+async function startPayment() {
 
-    event.preventDefault();
+  if (!currentProduct) {
 
+    showMessage(
+      "Product information is not ready yet. Please wait a moment and try again.",
+      "error"
+    );
 
-    if (!selectedProduct) {
-
-      message.innerHTML = `
-        <div class="error">
-          Product information is not ready.
-          Please refresh the page.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    const customerName =
-      document
-        .getElementById(
-          "customerName"
-        )
-        .value
-        .trim();
-
-
-    const customerPhone =
-      document
-        .getElementById(
-          "customerPhone"
-        )
-        .value
-        .trim();
-
-
-    const deliveryAddress =
-      document
-        .getElementById(
-          "deliveryAddress"
-        )
-        .value
-        .trim();
-
-
-    if (
-      !customerName ||
-      !customerPhone ||
-      !deliveryAddress
-    ) {
-
-      message.innerHTML = `
-        <div class="error">
-          Please complete all customer
-          information.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    const amount =
-      Number(
-        selectedProduct.price || 0
-      );
-
-
-    if (
-      !amount ||
-      amount <= 0
-    ) {
-
-      message.innerHTML = `
-        <div class="error">
-          Invalid product price.
-        </div>
-      `;
-
-      return;
-    }
-
-
-    payButton.disabled = true;
-
-    payButton.textContent =
-      "Preparing Payment...";
-
-
-    message.innerHTML = `
-      <div class="loading">
-        Connecting to secure payment...
-      </div>
-    `;
-
-
-    try {
-
-      const customerEmail =
-        customerPhone.replace(
-          /[^0-9]/g,
-          ""
-        ) +
-        "@customer.edesvino.com";
-
-
-      const callbackUrl =
-        window.location.origin +
-        window.location.pathname +
-        "?product=" +
-        encodeURIComponent(
-          selectedProduct.name
-        );
-
-
-      const response =
-        await fetch(
-          FUNCTION_URL,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-
-              "apikey":
-                SUPABASE_KEY,
-
-              "Authorization":
-                "Bearer " +
-                SUPABASE_KEY
-            },
-
-            body:
-              JSON.stringify({
-
-                action:
-                  "initialize",
-
-                email:
-                  customerEmail,
-
-                amount:
-                  amount,
-
-                callback_url:
-                  callbackUrl,
-
-                metadata: {
-
-                  product_name:
-                    selectedProduct.name,
-
-                  seller_id:
-                    selectedProduct.seller_id,
-
-                  customer_name:
-                    customerName,
-
-                  customer_phone:
-                    customerPhone,
-
-                  delivery_address:
-                    deliveryAddress
-
-                }
-
-              })
-
-          }
-        );
-
-
-      const result =
-        await response.json();
-
-
-      if (
-        !response.ok ||
-        !result.status ||
-        !result.data ||
-        !result.data.authorization_url
-      ) {
-
-        console.error(
-          "Payment initialization error:",
-          result
-        );
-
-        throw new Error(
-          result.message ||
-          "Unable to initialize payment."
-        );
-
-      }
-
-
-      /*
-        Save customer information
-        temporarily so it is available
-        after Paystack returns.
-      */
-
-      sessionStorage.setItem(
-        "edesvinoCheckout",
-        JSON.stringify({
-
-          product_name:
-            selectedProduct.name,
-
-          price:
-            amount,
-
-          seller_id:
-            selectedProduct.seller_id,
-
-          customer_name:
-            customerName,
-
-          customer_phone:
-            customerPhone,
-
-          delivery_address:
-            deliveryAddress
-
-        })
-      );
-
-
-      /*
-        Redirect customer to Paystack.
-      */
-
-      window.location.href =
-        result.data.authorization_url;
-
-    } catch (error) {
-
-      console.error(error);
-
-      payButton.disabled = false;
-
-      payButton.textContent =
-        "Continue to Payment";
-
-
-      message.innerHTML = `
-        <div class="error">
-          ${
-            escapeHtml(
-              error.message ||
-              "Unable to start payment."
-            )
-          }
-        </div>
-      `;
-
-    }
-
-  }
-);
-
-
-/* --------------------------------
-   VERIFY PAYMENT AFTER RETURN
--------------------------------- */
-
-async function handlePaymentReturn() {
-
-  const reference =
-    params.get("reference") ||
-    params.get("trxref");
-
-
-  if (!reference) {
     return;
   }
 
+  const customerName =
+    document.getElementById("customerName").value.trim();
+
+  const customerPhone =
+    document.getElementById("customerPhone").value.trim();
+
+  const deliveryAddress =
+    document.getElementById("deliveryAddress").value.trim();
+
+  if (!customerName) {
+
+    showMessage(
+      "Please enter your full name.",
+      "error"
+    );
+
+    return;
+  }
+
+  if (!customerPhone) {
+
+    showMessage(
+      "Please enter your phone number.",
+      "error"
+    );
+
+    return;
+  }
+
+  if (!deliveryAddress) {
+
+    showMessage(
+      "Please enter your delivery address.",
+      "error"
+    );
+
+    return;
+  }
+
+  const payButton =
+    document.getElementById("payButton");
+
+  payButton.disabled = true;
+  payButton.textContent = "Preparing Payment...";
+
+  try {
+
+    const cleanPhone =
+      customerPhone.replace(/\D/g, "");
+
+    const customerEmail =
+      cleanPhone + "@customer.edesvino.com";
+
+    const checkoutInfo = {
+
+      product_name: currentProduct.name,
+
+      seller_id: currentProduct.seller_id,
+
+      customer_name: customerName,
+
+      customer_phone: customerPhone,
+
+      delivery_address: deliveryAddress,
+
+      price: Number(currentProduct.price)
+
+    };
+
+    sessionStorage.setItem(
+      "edesvinoCheckout",
+      JSON.stringify(checkoutInfo)
+    );
+
+
+    /* ------------------------------
+       PAYSTACK CALLBACK URL
+    ------------------------------ */
+
+    const callbackUrl =
+      window.location.origin +
+      window.location.pathname;
+
+
+    /* ------------------------------
+       INITIALIZE PAYSTACK
+    ------------------------------ */
+
+    const response =
+      await fetch(EDGE_FUNCTION_URL, {
+
+        method: "POST",
+
+        headers: {
+
+          "Content-Type": "application/json",
+
+          "apikey": SUPABASE_KEY,
+
+          "Authorization":
+            "Bearer " + SUPABASE_KEY
+
+        },
+
+        body: JSON.stringify({
+
+          action: "initialize",
+
+          email: customerEmail,
+
+          amount: Number(currentProduct.price),
+
+          callback_url: callbackUrl,
+
+          metadata: {
+
+            product_name: currentProduct.name,
+
+            seller_id: currentProduct.seller_id,
+
+            customer_name: customerName,
+
+            customer_phone: customerPhone,
+
+            delivery_address: deliveryAddress
+
+          }
+
+        })
+
+      });
+
+
+    const result =
+      await response.json();
+
+
+    if (!response.ok || !result.status) {
+
+      console.error(result);
+
+      throw new Error(
+        result.message ||
+        "Unable to initialize payment."
+      );
+    }
+
+
+    if (!result.data ||
+        !result.data.authorization_url) {
+
+      throw new Error(
+        "Paystack did not return a payment link."
+      );
+    }
+
+
+    window.location.href =
+      result.data.authorization_url;
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showMessage(
+      error.message ||
+      "Unable to start payment. Please try again.",
+      "error"
+    );
+
+    payButton.disabled = false;
+
+    payButton.textContent =
+      "Continue to Payment";
+  }
+}
+
+
+/* --------------------------------
+   VERIFY PAYMENT
+-------------------------------- */
+
+async function verifyPayment(reference) {
+
+  const productArea =
+    document.getElementById("productArea");
+
+  const checkoutForm =
+    document.getElementById("checkoutForm");
+
+  productArea.innerHTML =
+    '<div class="loading">Verifying your payment...</div>';
+
+  checkoutForm.style.display =
+    "none";
+
+
+  try {
+
+    const response =
+      await fetch(EDGE_FUNCTION_URL, {
+
+        method: "POST",
+
+        headers: {
+
+          "Content-Type": "application/json",
+
+          "apikey": SUPABASE_KEY,
+
+          "Authorization":
+            "Bearer " + SUPABASE_KEY
+
+        },
+
+        body: JSON.stringify({
+
+          action: "verify",
+
+          reference: reference
+
+        })
+
+      });
+
+
+    const result =
+      await response.json();
+
+
+    if (!response.ok ||
+        !result.status) {
+
+      throw new Error(
+        result.message ||
+        "Payment verification failed."
+      );
+    }
+
+
+    if (!result.data ||
+        result.data.status !== "success") {
+
+      throw new Error(
+        "Payment was not successful."
+      );
+    }
+
+
+    await createOrder(result.data);
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    productArea.innerHTML = `
+      <div class="message error">
+        <strong>Payment verification failed.</strong>
+        <br><br>
+        ${escapeHtml(error.message)}
+        <br><br>
+        Please contact Edesvino support if you were charged.
+      </div>
+
+      <a class="continue" href="index.html">
+        ← Continue Shopping
+      </a>
+    `;
+
+    checkoutForm.style.display =
+      "none";
+  }
+}
+
+
+/* --------------------------------
+   CREATE ORDER
+-------------------------------- */
+
+async function createOrder(paymentData) {
 
   const savedCheckout =
     sessionStorage.getItem(
       "edesvinoCheckout"
     );
 
-
   if (!savedCheckout) {
 
-    message.innerHTML = `
-      <div class="error">
-        Payment information could not
-        be recovered. Please contact
-        Edesvino support.
-      </div>
-    `;
-
-    return;
+    throw new Error(
+      "Checkout information could not be recovered."
+    );
   }
 
-
-  let checkoutData;
-
-
-  try {
-
-    checkoutData =
-      JSON.parse(
-        savedCheckout
-      );
-
-  } catch (error) {
-
-    console.error(error);
-
-    message.innerHTML = `
-      <div class="error">
-        Unable to recover your order.
-      </div>
-    `;
-
-    return;
-  }
+  const checkout =
+    JSON.parse(savedCheckout);
 
 
-  /*
-    Prevent the same browser session
-    from creating the same order twice.
-  */
+  /* --------------------------------
+     PREVENT DUPLICATE ORDER
+  -------------------------------- */
 
-  const paymentKey =
+  const paymentReference =
+    paymentData.reference;
+
+  const idempotencyKey =
     "edesvinoPayment_" +
-    reference;
+    paymentReference;
 
 
-  const existingOrder =
+  const existingPayment =
     sessionStorage.getItem(
-      paymentKey
+      idempotencyKey
     );
 
+  if (existingPayment) {
 
-  if (existingOrder) {
+    const existingOrderId =
+      existingPayment;
 
     showSuccess(
-      existingOrder,
-      checkoutData.price
+      existingOrderId,
+      Number(paymentData.amount || 0) / 100
     );
 
     return;
   }
 
 
-  checkoutForm.style.display =
-    "none";
+  /* --------------------------------
+     INSERT ORDER
+  -------------------------------- */
+
+  const { data, error } =
+    await supabaseClient
+      .from("orders")
+      .insert({
+
+        product_name:
+          checkout.product_name,
+
+        price:
+          checkout.price,
+
+        customer_name:
+          checkout.customer_name,
+
+        customer_phone:
+          checkout.customer_phone,
+
+        delivery_address:
+          checkout.delivery_address,
+
+        seller_id:
+          checkout.seller_id,
+
+        status:
+          "Pending"
+
+      })
+      .select("id")
+      .single();
 
 
-  productArea.innerHTML =
-    "";
-
-
-  message.innerHTML = `
-    <div class="loading">
-      Verifying your payment...
-    </div>
-  `;
-
-
-  try {
-
-    const verifyResponse =
-      await fetch(
-        FUNCTION_URL,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            "apikey":
-              SUPABASE_KEY,
-
-            "Authorization":
-              "Bearer " +
-              SUPABASE_KEY
-          },
-
-          body:
-            JSON.stringify({
-
-              action:
-                "verify",
-
-              reference:
-                reference
-
-            })
-
-          }
-        );
-
-
-    const verifyResult =
-      await verifyResponse.json();
-
-
-    if (
-      !verifyResponse.ok ||
-      !verifyResult.status
-    ) {
-
-      throw new Error(
-        verifyResult.message ||
-        "Payment verification failed."
-      );
-
-    }
-
-
-    const paymentStatus =
-      verifyResult.data &&
-      verifyResult.data.status;
-
-
-    if (
-      paymentStatus !==
-      "success"
-    ) {
-
-      throw new Error(
-        "Payment was not successful."
-      );
-
-    }
-
-
-    /*
-      Create the order only after
-      successful Paystack verification.
-    */
-
-    const { data, error } =
-      await supabaseClient
-        .from("orders")
-        .insert([{
-
-          product_name:
-            checkoutData.product_name,
-
-          price:
-            checkoutData.price,
-
-          customer_name:
-            checkoutData.customer_name,
-
-          customer_phone:
-            checkoutData.customer_phone,
-
-          delivery_address:
-            checkoutData.delivery_address,
-
-          seller_id:
-            checkoutData.seller_id,
-
-          status:
-            "Pending"
-
-        }])
-        .select("id")
-        .single();
-
-
-    if (error) {
-
-      console.error(error);
-
-      throw new Error(
-        "Payment succeeded, but the order could not be created."
-      );
-
-    }
-
-
-    const orderId =
-      data.id;
-
-
-    sessionStorage.setItem(
-      paymentKey,
-      String(orderId)
-    );
-
-
-    sessionStorage.removeItem(
-      "edesvinoCheckout"
-    );
-
-
-    showSuccess(
-      orderId,
-      checkoutData.price
-    );
-
-
-  } catch (error) {
+  if (error) {
 
     console.error(error);
 
-    message.innerHTML = `
-      <div class="error">
-
-        <strong>
-          Payment verification problem
-        </strong>
-
-        <p>
-          ${
-            escapeHtml(
-              error.message ||
-              "Please contact Edesvino support."
-            )
-          }
-        </p>
-
-      </div>
-    `;
-
+    throw new Error(
+      "Payment was successful, but the order could not be created. Please contact Edesvino support."
+    );
   }
 
+
+  const orderId =
+    data.id;
+
+
+  /* --------------------------------
+     SAVE PAYMENT REFERENCE
+  -------------------------------- */
+
+  sessionStorage.setItem(
+    idempotencyKey,
+    String(orderId)
+  );
+
+
+  /* --------------------------------
+     SHOW SUCCESS
+  -------------------------------- */
+
+  showSuccess(
+    orderId,
+    Number(paymentData.amount || 0) / 100
+  );
+
+
+  sessionStorage.removeItem(
+    "edesvinoCheckout"
+  );
 }
 
 
 /* --------------------------------
-   SUCCESS MESSAGE
+   SUCCESS SCREEN
 -------------------------------- */
 
-function showSuccess(
-  orderId,
-  amount
-) {
+function showSuccess(orderId, amount) {
 
-  checkoutForm.style.display =
-    "none";
+  const productArea =
+    document.getElementById("productArea");
 
-
-  productArea.innerHTML =
-    "";
+  const checkoutForm =
+    document.getElementById("checkoutForm");
 
 
-  message.innerHTML = `
+  /*
+     IMPORTANT:
+     The tracking URL is created
+     directly from the NEW order ID.
+  */
 
-    <div class="success">
+  const trackingUrl =
+    "track-order.html?order=" +
+    encodeURIComponent(orderId);
 
-      <h2>
-        Order Successful! 🎉
-      </h2>
+
+  productArea.innerHTML = `
+
+    <div class="message success">
+
+      <h2>Order Successful! 🎉</h2>
 
       <p>
-        Your payment was successfully
-        verified.
+        Your payment was successfully verified.
       </p>
 
-      <p>
-        <strong>
-          Order #${orderId}
-        </strong>
-      </p>
+      <div class="order-number">
+        Order #${escapeHtml(orderId)}
+      </div>
 
       <p>
         Amount:
         <strong>
-          ₦${Number(
-            amount || 0
-          ).toLocaleString()}
+          ₦${Number(amount || 0).toLocaleString()}
         </strong>
       </p>
 
-      <a
-        class="track"
-        href="track-order.html?order=${encodeURIComponent(
-          orderId
-        )}"
-      >
-        Track Your Order
-      </a>
-
     </div>
 
+    <a
+      class="track"
+      href="${trackingUrl}"
+    >
+      Track Your Order
+    </a>
+
+    <a
+      class="continue"
+      href="index.html"
+    >
+      ← Continue Shopping
+    </a>
+
   `;
+
+  checkoutForm.style.display =
+    "none";
+
+  /*
+     Remove payment parameters
+     from browser history so refreshing
+     the success page does not try to
+     verify the same payment again.
+  */
+
+  const cleanUrl =
+    window.location.origin +
+    window.location.pathname +
+    "?success=" +
+    encodeURIComponent(orderId);
+
+  window.history.replaceState(
+    {},
+    document.title,
+    cleanUrl
+  );
+}
+
+
+/* --------------------------------
+   CHECK FOR PAYSTACK RETURN
+-------------------------------- */
+
+const reference =
+  urlParams.get("reference") ||
+  urlParams.get("trxref");
+
+
+if (reference) {
+
+  verifyPayment(reference);
+
+} else {
+
+  loadProduct();
 
 }
 
 
 /* --------------------------------
-   RESET PAGE AFTER CANCELLATION
+   RESET BUTTON WHEN PAGE RETURNS
 -------------------------------- */
 
 window.addEventListener(
   "pageshow",
   function() {
 
-    const hasPaymentReference =
-      params.get("reference") ||
-      params.get("trxref");
+    const payButton =
+      document.getElementById("payButton");
 
-
-    if (!hasPaymentReference) {
+    if (payButton &&
+        payButton.disabled) {
 
       payButton.disabled = false;
 
       payButton.textContent =
         "Continue to Payment";
-
     }
 
   }
@@ -1094,43 +899,35 @@ window.addEventListener(
 
 
 /* --------------------------------
-   HTML SAFETY
+   MESSAGE
+-------------------------------- */
+
+function showMessage(message, type) {
+
+  const messageBox =
+    document.getElementById("message");
+
+  messageBox.innerHTML = `
+    <div class="message ${type}">
+      ${escapeHtml(message)}
+    </div>
+  `;
+}
+
+
+/* --------------------------------
+   SECURITY
 -------------------------------- */
 
 function escapeHtml(value) {
 
   return String(value || "")
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
-
-
-/* --------------------------------
-   START
--------------------------------- */
-
-loadProduct();
-
-handlePaymentReturn();
 
 </script>
 
