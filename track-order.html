@@ -9,11 +9,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
       margin: 0;
       padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      color: #222;
     }
 
     .container {
@@ -27,6 +32,7 @@
 
     h1 {
       text-align: center;
+      margin-top: 0;
     }
 
     .subtitle {
@@ -36,7 +42,6 @@
 
     input {
       width: 100%;
-      box-sizing: border-box;
       padding: 14px;
       margin: 15px 0;
       border: 1px solid #ccc;
@@ -52,7 +57,12 @@
       border: none;
       border-radius: 7px;
       font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
     }
 
     #result {
@@ -68,6 +78,13 @@
 
     .status {
       font-weight: bold;
+    }
+
+    .error {
+      background: #fff0f0;
+      padding: 15px;
+      border-radius: 8px;
+      color: #a00000;
     }
 
     .back {
@@ -96,17 +113,24 @@
     placeholder="Enter your order number"
   >
 
-  <button onclick="trackOrder()">
+  <button
+    id="trackButton"
+    onclick="trackOrder()"
+  >
     Track Order
   </button>
 
   <div id="result"></div>
 
-  <a class="back" href="index.html">
+  <a
+    class="back"
+    href="index.html"
+  >
     ← Back to Edesvino
   </a>
 
 </div>
+
 
 <script>
 
@@ -116,36 +140,60 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
+
 const supabaseClient =
-  supabase.createClient(
+  window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
   );
 
 
+const orderInput =
+  document.getElementById(
+    "orderNumber"
+  );
+
+
+const result =
+  document.getElementById(
+    "result"
+  );
+
+
+const trackButton =
+  document.getElementById(
+    "trackButton"
+  );
+
+
 async function trackOrder(orderId = null) {
-
-  const orderNumberInput =
-    document.getElementById("orderNumber");
-
-  const result =
-    document.getElementById("result");
 
   const orderNumber =
     orderId ||
-    orderNumberInput.value.trim();
+    orderInput.value.trim();
 
 
   if (!orderNumber) {
 
     result.innerHTML =
-      "<p>Please enter your order number.</p>";
+      '<div class="error">' +
+      'Please enter your order number.' +
+      '</div>';
 
     return;
   }
 
 
-  orderNumberInput.value = orderNumber;
+  orderInput.value =
+    orderNumber;
+
+
+  trackButton.disabled =
+    true;
+
+  trackButton.textContent =
+    "Checking...";
+
 
   result.innerHTML =
     "<p>Checking your order...</p>";
@@ -153,54 +201,90 @@ async function trackOrder(orderId = null) {
 
   try {
 
-    const { data, error } =
-      await supabaseClient
-        .from("orders")
-        .select(
-          "id, product_name, price, customer_name, created_at, status"
-        )
-        .eq("id", orderNumber)
-        .maybeSingle();
+    const response =
+      await fetch(
+        SUPABASE_URL +
+        "/rest/v1/orders?id=eq." +
+        encodeURIComponent(orderNumber) +
+        "&select=id,product_name,price,customer_name,created_at,status",
+        {
+          method: "GET",
+
+          headers: {
+            "apikey":
+              SUPABASE_KEY,
+
+            "Authorization":
+              "Bearer " +
+              SUPABASE_KEY
+          }
+        }
+      );
 
 
-    if (error) {
+    const data =
+      await response.json();
 
-      console.error(error);
+
+    if (!response.ok) {
+
+      console.error(data);
 
       result.innerHTML =
-        "<p>Unable to check the order.</p>";
+        '<div class="error">' +
+        'Unable to check the order. ' +
+        'Please try again.' +
+        '</div>';
 
       return;
     }
 
 
-    if (!data) {
+    if (
+      !Array.isArray(data) ||
+      data.length === 0
+    ) {
 
       result.innerHTML =
-        "<p>Order not found.</p>" +
-        "<p>Please check your order number.</p>";
+        '<div class="error">' +
+        '<strong>Order not found.</strong>' +
+        '<br>Please check your order number.' +
+        '</div>';
 
       return;
     }
+
+
+    const order =
+      data[0];
 
 
     const orderDate =
-      new Date(data.created_at).toLocaleString();
+      new Date(
+        order.created_at
+      ).toLocaleString();
 
 
     const amount =
-      Number(data.price || 0).toLocaleString();
+      Number(
+        order.price || 0
+      ).toLocaleString();
 
 
     result.innerHTML = `
 
       <div class="order-box">
 
-        <h2>Order #${data.id}</h2>
+        <h2>
+          Order #${order.id}
+        </h2>
 
         <p>
           <strong>Product:</strong><br>
-          ${data.product_name || "N/A"}
+          ${escapeHtml(
+            order.product_name ||
+            "N/A"
+          )}
         </p>
 
         <p>
@@ -210,7 +294,10 @@ async function trackOrder(orderId = null) {
 
         <p>
           <strong>Customer:</strong><br>
-          ${data.customer_name || "N/A"}
+          ${escapeHtml(
+            order.customer_name ||
+            "N/A"
+          )}
         </p>
 
         <p>
@@ -220,32 +307,52 @@ async function trackOrder(orderId = null) {
 
         <p>
           <strong>Order Status:</strong><br>
+
           <span class="status">
-            ${data.status || "Pending"}
+            ${escapeHtml(
+              order.status ||
+              "Pending"
+            )}
           </span>
+
         </p>
 
       </div>
 
     `;
 
+
   } catch (error) {
 
     console.error(error);
 
     result.innerHTML =
-      "<p>Something went wrong. Please try again.</p>";
+      '<div class="error">' +
+      'Something went wrong while checking the order.' +
+      '</div>';
+
+  } finally {
+
+    trackButton.disabled =
+      false;
+
+    trackButton.textContent =
+      "Track Order";
 
   }
 
 }
 
 
-/* Automatically track an order when
-   the page is opened with ?order=ORDER_ID */
+/* --------------------------------
+   AUTOMATIC ORDER TRACKING
+-------------------------------- */
 
 const urlParams =
-  new URLSearchParams(window.location.search);
+  new URLSearchParams(
+    window.location.search
+  );
+
 
 const orderFromUrl =
   urlParams.get("order");
@@ -253,10 +360,43 @@ const orderFromUrl =
 
 if (orderFromUrl) {
 
-  document.getElementById("orderNumber").value =
+  orderInput.value =
     orderFromUrl;
 
-  trackOrder(orderFromUrl);
+  trackOrder(
+    orderFromUrl
+  );
+
+}
+
+
+/* --------------------------------
+   HTML SAFETY
+-------------------------------- */
+
+function escapeHtml(value) {
+
+  return String(value || "")
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
 }
 
