@@ -96,15 +96,41 @@
 
     #products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(220px, 1fr)
+      );
       gap: 20px;
     }
 
     .product {
       background: white;
-      padding: 20px;
       border-radius: 12px;
+      overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      background: #eee;
+    }
+
+    .no-image {
+      width: 100%;
+      height: 220px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .product-content {
+      padding: 20px;
     }
 
     .product h3 {
@@ -167,6 +193,7 @@
     }
 
     @media (max-width: 600px) {
+
       .header-content {
         flex-direction: column;
       }
@@ -178,6 +205,12 @@
       .hero h1 {
         font-size: 28px;
       }
+
+      .product-image,
+      .no-image {
+        height: 200px;
+      }
+
     }
   </style>
 </head>
@@ -193,10 +226,23 @@
     </div>
 
     <nav>
-      <a href="index.html">Home</a>
-      <a href="#products-section">Shop</a>
-      <a href="register.html">Sell</a>
-      <a href="track-order.html">Track Order</a>
+
+      <a href="index.html">
+        Home
+      </a>
+
+      <a href="#products-section">
+        Shop
+      </a>
+
+      <a href="register.html">
+        Sell
+      </a>
+
+      <a href="track-order.html">
+        Track Order
+      </a>
+
     </nav>
 
   </div>
@@ -206,11 +252,12 @@
 
 <section class="hero">
 
-  <h1>Buy. Sell. Grow.</h1>
+  <h1>
+    Buy. Sell. Grow.
+  </h1>
 
   <p>
-    Discover products from Edesvino sellers
-    and shop online with ease.
+    Discover products from Edesvino sellers and shop online with ease.
   </p>
 
   <div class="hero-buttons">
@@ -239,7 +286,9 @@
   id="products-section"
 >
 
-  <h2>Featured Products</h2>
+  <h2>
+    Featured Products
+  </h2>
 
   <div id="products">
 
@@ -273,6 +322,7 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
+
 const supabaseClient =
   supabase.createClient(
     SUPABASE_URL,
@@ -285,15 +335,21 @@ async function loadProducts() {
   const productsContainer =
     document.getElementById("products");
 
+
   try {
 
-    const { data, error } =
+    const {
+      data,
+      error
+    } =
       await supabaseClient
         .from("products")
         .select("*")
         .order(
           "created_at",
-          { ascending: false }
+          {
+            ascending: false
+          }
         );
 
 
@@ -301,24 +357,30 @@ async function loadProducts() {
 
       console.error(error);
 
-      productsContainer.innerHTML = `
+      productsContainer.innerHTML =
+        `
         <div class="error">
           Unable to load products.
+          <br>
           Please try again later.
         </div>
-      `;
+        `;
 
       return;
     }
 
 
-    if (!data || data.length === 0) {
+    if (
+      !data ||
+      data.length === 0
+    ) {
 
-      productsContainer.innerHTML = `
+      productsContainer.innerHTML =
+        `
         <div class="empty">
           No products available yet.
         </div>
-      `;
+        `;
 
       return;
     }
@@ -330,19 +392,24 @@ async function loadProducts() {
     data.forEach(product => {
 
       const productName =
-        product.name || "Unnamed Product";
+        product.name ||
+        "Unnamed Product";
+
 
       const description =
         product.description ||
         "No description available.";
 
+
       const store =
         product.store ||
         "Edesvino Seller";
 
+
       const price =
-        Number(product.price || 0)
-          .toLocaleString();
+        Number(
+          product.price || 0
+        ).toLocaleString();
 
 
       const productLink =
@@ -353,38 +420,73 @@ async function loadProducts() {
 
 
       const productDiv =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
+
 
       productDiv.className =
         "product";
 
 
-      productDiv.innerHTML = `
+      let imageHTML = "";
 
-        <h3>
-          ${productName}
-        </h3>
 
-        <p class="description">
-          ${description}
-        </p>
+      if (product.image_url) {
 
-        <div class="price">
-          ₦${price}
+        imageHTML =
+          `
+          <img
+            class="product-image"
+            src="${product.image_url}"
+            alt="${productName}"
+            loading="lazy"
+          >
+          `;
+
+      } else {
+
+        imageHTML =
+          `
+          <div class="no-image">
+            No image available
+          </div>
+          `;
+
+      }
+
+
+      productDiv.innerHTML =
+        `
+        ${imageHTML}
+
+        <div class="product-content">
+
+          <h3>
+            ${productName}
+          </h3>
+
+          <p class="description">
+            ${description}
+          </p>
+
+          <div class="price">
+            ₦${price}
+          </div>
+
+          <div class="store">
+            Store: ${store}
+          </div>
+
+          <a
+            class="buy"
+            href="${productLink}"
+          >
+            Buy Now
+          </a>
+
         </div>
-
-        <div class="store">
-          Store: ${store}
-        </div>
-
-        <a
-          class="buy"
-          href="${productLink}"
-        >
-          Buy Now
-        </a>
-
-      `;
+        `;
 
 
       productsContainer.appendChild(
@@ -393,16 +495,19 @@ async function loadProducts() {
 
     });
 
+
   } catch (error) {
 
     console.error(error);
 
-    productsContainer.innerHTML = `
+    productsContainer.innerHTML =
+      `
       <div class="error">
         Something went wrong.
+        <br>
         Please try again.
       </div>
-    `;
+      `;
 
   }
 
