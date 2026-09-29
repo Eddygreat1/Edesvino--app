@@ -1,149 +1,269 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Edesvino Marketplace</title>
+  <title>Edesvino Marketplace</title>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fa;
-  margin: 0;
-  padding: 20px;
-}
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-.container {
-  max-width: 800px;
-  margin: auto;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-.header {
-  background: #111827;
-  color: white;
-  padding: 25px;
-  text-align: center;
-  border-radius: 12px;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
 
-.header h1 {
-  margin: 0;
-}
+    header {
+      background: #111;
+      color: white;
+      padding: 18px 20px;
+    }
 
-.nav {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-}
+    .header-content {
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
 
-.nav a {
-  flex: 1;
-  background: white;
-  color: #111827;
-  padding: 12px;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: bold;
-}
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
 
-.card {
-  background: white;
-  padding: 20px;
-  margin-top: 15px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-}
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 15px;
+      font-size: 14px;
+    }
 
-.product {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 15px;
-  margin-top: 15px;
-}
+    .hero {
+      background: white;
+      text-align: center;
+      padding: 45px 20px;
+    }
 
-.product h2 {
-  margin-top: 0;
-}
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+    }
 
-.price {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 10px 0;
-}
+    .hero p {
+      color: #666;
+      font-size: 17px;
+      margin-bottom: 25px;
+    }
 
-.store {
-  margin-top: 10px;
-  font-weight: bold;
-}
+    .hero-buttons a {
+      display: inline-block;
+      padding: 13px 20px;
+      margin: 5px;
+      border-radius: 7px;
+      text-decoration: none;
+      font-weight: bold;
+    }
 
-.buy {
-  display: block;
-  background: #111827;
-  color: white;
-  padding: 13px;
-  margin-top: 15px;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 8px;
-}
+    .shop-button {
+      background: #111;
+      color: white;
+    }
 
-.loading {
-  text-align: center;
-  padding: 20px;
-}
+    .sell-button {
+      background: #e8e8e8;
+      color: #111;
+    }
 
-.error {
-  background: #fef2f2;
-  border: 1px solid #ef4444;
-  color: #991b1b;
-  padding: 15px;
-  border-radius: 8px;
-}
+    .products-section {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
 
-.empty {
-  text-align: center;
-  padding: 20px;
-}
-</style>
+    .products-section h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    #products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .product {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .product h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .description {
+      color: #666;
+      min-height: 40px;
+    }
+
+    .price {
+      font-size: 21px;
+      font-weight: bold;
+      margin: 15px 0 8px;
+    }
+
+    .store {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .buy {
+      display: block;
+      text-align: center;
+      background: #111;
+      color: white;
+      padding: 12px;
+      border-radius: 7px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .buy:hover {
+      opacity: 0.85;
+    }
+
+    .loading,
+    .empty,
+    .error {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+      grid-column: 1 / -1;
+    }
+
+    footer {
+      margin-top: 40px;
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 25px 20px;
+    }
+
+    footer p {
+      margin: 5px 0;
+    }
+
+    @media (max-width: 600px) {
+      .header-content {
+        flex-direction: column;
+      }
+
+      nav a {
+        margin: 0 7px;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+<header>
 
-  <div class="header">
-    <h1>Edesvino</h1>
-    <p>Buy. Sell. Grow.</p>
+  <div class="header-content">
+
+    <div class="logo">
+      Edesvino
+    </div>
+
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="#products-section">Shop</a>
+      <a href="register.html">Sell</a>
+      <a href="track-order.html">Track Order</a>
+    </nav>
+
   </div>
 
-  <div class="nav">
-    <a href="index.html">Home</a>
-    <a href="#products">Shop</a>
-    <a href="register.html">Sell</a>
+</header>
+
+
+<section class="hero">
+
+  <h1>Buy. Sell. Grow.</h1>
+
+  <p>
+    Discover products from Edesvino sellers
+    and shop online with ease.
+  </p>
+
+  <div class="hero-buttons">
+
+    <a
+      class="shop-button"
+      href="#products-section"
+    >
+      Shop Products
+    </a>
+
+    <a
+      class="sell-button"
+      href="register.html"
+    >
+      Become a Seller
+    </a>
+
   </div>
 
-  <div class="card">
-    <h2>Welcome to Edesvino</h2>
-    <p>Buy and sell products online.</p>
-  </div>
+</section>
 
-  <div class="card" id="products">
 
-    <h2>Products</h2>
+<section
+  class="products-section"
+  id="products-section"
+>
 
-    <div id="productList">
-      <div class="loading">
-        Loading products...
-      </div>
+  <h2>Featured Products</h2>
+
+  <div id="products">
+
+    <div class="loading">
+      Loading products...
     </div>
 
   </div>
 
-</div>
+</section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<footer>
+
+  <p>
+    <strong>Edesvino Marketplace</strong>
+  </p>
+
+  <p>
+    Buy. Sell. Grow.
+  </p>
+
+</footer>
+
 
 <script>
 
@@ -153,103 +273,141 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
 
 async function loadProducts() {
 
-  const productList =
-    document.getElementById("productList");
+  const productsContainer =
+    document.getElementById("products");
 
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
 
-  if (error) {
+    const { data, error } =
+      await supabaseClient
+        .from("products")
+        .select("*")
+        .order(
+          "created_at",
+          { ascending: false }
+        );
+
+
+    if (error) {
+
+      console.error(error);
+
+      productsContainer.innerHTML = `
+        <div class="error">
+          Unable to load products.
+          Please try again later.
+        </div>
+      `;
+
+      return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+      productsContainer.innerHTML = `
+        <div class="empty">
+          No products available yet.
+        </div>
+      `;
+
+      return;
+    }
+
+
+    productsContainer.innerHTML = "";
+
+
+    data.forEach(product => {
+
+      const productName =
+        product.name || "Unnamed Product";
+
+      const description =
+        product.description ||
+        "No description available.";
+
+      const store =
+        product.store ||
+        "Edesvino Seller";
+
+      const price =
+        Number(product.price || 0)
+          .toLocaleString();
+
+
+      const productLink =
+        "checkout.html?product=" +
+        encodeURIComponent(
+          productName
+        );
+
+
+      const productDiv =
+        document.createElement("div");
+
+      productDiv.className =
+        "product";
+
+
+      productDiv.innerHTML = `
+
+        <h3>
+          ${productName}
+        </h3>
+
+        <p class="description">
+          ${description}
+        </p>
+
+        <div class="price">
+          ₦${price}
+        </div>
+
+        <div class="store">
+          Store: ${store}
+        </div>
+
+        <a
+          class="buy"
+          href="${productLink}"
+        >
+          Buy Now
+        </a>
+
+      `;
+
+
+      productsContainer.appendChild(
+        productDiv
+      );
+
+    });
+
+  } catch (error) {
 
     console.error(error);
 
-    productList.innerHTML = `
+    productsContainer.innerHTML = `
       <div class="error">
-        Could not load products: ${escapeHtml(error.message)}
+        Something went wrong.
+        Please try again.
       </div>
     `;
 
-    return;
   }
-
-  if (!data || data.length === 0) {
-
-    productList.innerHTML = `
-      <div class="empty">
-        No products available yet.
-      </div>
-    `;
-
-    return;
-  }
-
-  productList.innerHTML = "";
-
-  data.forEach(function(product) {
-
-    const productDiv =
-      document.createElement("div");
-
-    productDiv.className = "product";
-
-    const productName =
-      escapeHtml(product.name || "");
-
-    const description =
-      escapeHtml(product.description || "");
-
-    const store =
-      escapeHtml(product.store || "");
-
-    const price =
-      Number(product.price || 0).toLocaleString();
-
-    const productLink =
-      "checkout.html?product=" +
-      encodeURIComponent(product.name || "");
-
-    productDiv.innerHTML = `
-      <h2>${productName}</h2>
-
-      <p>${description}</p>
-
-      <div class="price">
-        ₦${price}
-      </div>
-
-      <div class="store">
-        Store: ${store}
-      </div>
-
-      <a class="buy" href="${productLink}">
-        Buy Now
-      </a>
-    `;
-
-    productList.appendChild(productDiv);
-
-  });
 
 }
 
-function escapeHtml(text) {
-
-  const div = document.createElement("div");
-
-  div.textContent = text;
-
-  return div.innerHTML;
-
-}
 
 loadProducts();
 
