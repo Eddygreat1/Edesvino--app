@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Edesvino - Customer Dashboard</title>
+
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 700px;
+  margin: 30px auto;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+}
+
+.welcome {
+  text-align: center;
+  margin: 25px 0;
+}
+
+.menu {
+  display: grid;
+  gap: 12px;
+}
+
+.menu a,
+.menu button {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.menu a {
+  background: #111827;
+  color: white;
+}
+
+.logout {
+  background: #dc2626 !important;
+  color: white;
+}
+
+.message {
+  text-align: center;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+
+    <h1>Edesvino</h1>
+
+    <p class="subtitle">
+      Customer Dashboard
+    </p>
+
+    <div class="welcome">
+
+      <h2 id="customerName">
+        Loading...
+      </h2>
+
+      <p id="customerEmail"></p>
+
+    </div>
+
+    <div class="menu">
+
+      <a href="index.html">
+        Continue Shopping
+      </a>
+
+      <a href="customer-orders.html">
+        My Orders
+      </a>
+
+      <a href="track-order.html">
+        Track Order
+      </a>
+
+      <button
+        class="logout"
+        id="logoutButton">
+
+        Logout
+
+      </button>
+
+    </div>
+
+    <div
+      id="message"
+      class="message">
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+async function loadCustomer() {
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient.auth.getUser();
+
+
+  if (error || !data.user) {
+
+    window.location.href =
+      "customer-login.html";
+
+    return;
+
+  }
+
+
+  const user =
+    data.user;
+
+
+  const fullName =
+    user.user_metadata?.full_name
+    || "Customer";
+
+
+  document
+    .getElementById("customerName")
+    .textContent =
+      "Welcome, " + fullName;
+
+
+  document
+    .getElementById("customerEmail")
+    .textContent =
+      user.email || "";
+
+}
+
+
+document
+  .getElementById("logoutButton")
+  .addEventListener(
+    "click",
+    async function() {
+
+      const button =
+        document
+        .getElementById("logoutButton");
+
+      button.disabled = true;
+
+      button.textContent =
+        "Logging out...";
+
+
+      await supabaseClient.auth.signOut();
+
+
+      window.location.href =
+        "customer-login.html";
+
+    }
+  );
+
+
+loadCustomer();
+
+</script>
+
+</body>
+</html>
