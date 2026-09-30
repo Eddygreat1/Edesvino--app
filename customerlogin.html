@@ -94,15 +94,11 @@
 
       <h1>Edesvino</h1>
 
-      <p class="subtitle">
-        Customer Login
-      </p>
+      <p class="subtitle">Customer Login</p>
 
       <form id="loginForm">
 
-        <label for="email">
-          Email Address
-        </label>
+        <label for="email">Email Address</label>
 
         <input
           type="email"
@@ -111,9 +107,7 @@
           required
         >
 
-        <label for="password">
-          Password
-        </label>
+        <label for="password">Password</label>
 
         <input
           type="password"
@@ -122,19 +116,13 @@
           required
         >
 
-        <button
-          type="submit"
-          id="loginButton"
-        >
+        <button type="submit" id="loginButton">
           Login
         </button>
 
       </form>
 
-      <div
-        id="message"
-        class="message">
-      </div>
+      <div id="message" class="message"></div>
 
       <div class="links">
 
@@ -173,69 +161,46 @@
 
     document
       .getElementById("loginForm")
-      .addEventListener(
-        "submit",
-        async function(event) {
+      .addEventListener("submit", async function(event) {
 
-          event.preventDefault();
+        event.preventDefault();
 
-          const email =
-            document
-              .getElementById("email")
-              .value
-              .trim();
+        const email =
+          document.getElementById("email").value.trim();
 
-          const password =
-            document
-              .getElementById("password")
-              .value;
+        const password =
+          document.getElementById("password").value;
 
-          const button =
-            document
-              .getElementById("loginButton");
+        const button =
+          document.getElementById("loginButton");
 
-          const message =
-            document
-              .getElementById("message");
+        const message =
+          document.getElementById("message");
 
-          button.disabled = true;
-          button.textContent = "Logging in...";
-          message.textContent = "";
+        button.disabled = true;
+        button.textContent = "Logging in...";
+        message.textContent = "";
 
-          const {
-            data,
-            error
-          } =
-            await supabaseClient.auth.signInWithPassword({
-              email: email,
-              password: password
-            });
+        const { data, error } =
+          await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
 
-          if (error) {
-
-            console.error(error);
-
-            message.textContent =
-              error.message;
-
-            button.disabled = false;
-            button.textContent = "Login";
-
-            return;
-          }
-
-          message.textContent =
-            "Login successful!";
-
-          setTimeout(function() {
-
-            window.location.href =
-              "Customer - dashboard.html";
-
-          }, 1000);
-
+        if (error) {
+          message.textContent = error.message;
+          button.disabled = false;
+          button.textContent = "Login";
+          return;
         }
-      );
+
+        message.textContent = "Login successful!";
+
+        setTimeout(function() {
+          window.location.href = "Customer - dashboard.html";
+        }, 1000);
+
+      });
   </script>
 
 </body>
