@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Edesvino - My Orders</title>
+
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 700px;
+  margin: 30px auto;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.order {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 15px;
+}
+
+.order h2 {
+  margin-top: 0;
+}
+
+.order p {
+  margin: 8px 0;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.loading,
+.empty,
+.error {
+  text-align: center;
+  padding: 20px;
+}
+
+.links {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.links a {
+  display: inline-block;
+  margin: 5px;
+  padding: 10px 15px;
+  background: #111827;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+
+    <h1>Edesvino</h1>
+
+    <p class="subtitle">
+      My Orders
+    </p>
+
+    <div id="ordersContainer">
+
+      <div class="loading">
+        Loading your orders...
+      </div>
+
+    </div>
+
+    <div class="links">
+
+      <a href="customer-dashboard.html">
+        Customer Dashboard
+      </a>
+
+      <a href="index.html">
+        Continue Shopping
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+async function loadOrders() {
+
+  const container =
+    document.getElementById(
+      "ordersContainer"
+    );
+
+
+  const {
+    data: userData,
+    error: userError
+  } =
+  await supabaseClient.auth.getUser();
+
+
+  if (
+    userError ||
+    !userData.user
+  ) {
+
+    window.location.href =
+      "customer-login.html";
+
+    return;
+
+  }
+
+
+  const customerId =
+    userData.user.id;
+
+
+  const {
+    data: orders,
+    error
+  } =
+  await supabaseClient
+    .from("orders")
+    .select("*")
+    .eq(
+      "customer_id",
+      customerId
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
+
+  if (error) {
+
+    console.error(error);
+
+    container.innerHTML = `
+      <div class="error">
+        Unable to load your orders.
+        <br><br>
+        ${error.message}
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  if (
+    !orders ||
+    orders.length === 0
+  ) {
+
+    container.innerHTML = `
+      <div class="empty">
+        You don't have any orders yet.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML = "";
+
+
+  orders.forEach(function(order) {
+
+    const orderDate =
+      order.created_at
+      ? new Date(
+          order.created_at
+        ).toLocaleString()
+      : "Not available";
+
+
+    const orderBox =
+      document.createElement(
+        "div"
+      );
+
+    orderBox.className =
+      "order";
+
+
+    orderBox.innerHTML = `
+
+      <h2>
+        ${order.product_name || "Product"}
+      </h2>
+
+      <p>
+        <strong>Price:</strong>
+        ₦${Number(
+          order.price || 0
+        ).toLocaleString()}
+      </p>
+
+      <p>
+        <strong>Customer:</strong>
+        ${order.customer_name || ""}
+      </p>
+
+      <p>
+        <strong>Phone:</strong>
+        ${order.customer_phone || ""}
+      </p>
+
+      <p>
+        <strong>Delivery Address:</strong>
+        ${order.delivery_address || ""}
+      </p>
+
+      <p>
+        <strong>Status:</strong>
+        <span class="status">
+          ${order.status || "Pending"}
+        </span>
+      </p>
+
+      <p>
+        <strong>Order Date:</strong>
+        ${orderDate}
+      </p>
+
+    `;
+
+
+    container.appendChild(
+      orderBox
+    );
+
+  });
+
+}
+
+
+loadOrders();
+
+</script>
+
+</body>
+  </html>
