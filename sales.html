@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,6 +81,10 @@ body {
   text-decoration: none;
 }
 
+.status {
+  font-weight: bold;
+}
+
 </style>
 
 </head>
@@ -155,8 +160,8 @@ body {
       </div>
 
       <p>
-        Current earnings based on completed
-        customer orders.
+        Sales and earnings are based only on
+        delivered customer orders.
       </p>
 
     </div>
@@ -256,15 +261,29 @@ async function loadSales() {
   }
 
 
-  let totalSales = 0;
+  let completedSales = 0;
+
+  let completedOrders = 0;
 
 
   if (orders) {
 
     orders.forEach(function(order) {
 
-      totalSales +=
-      Number(order.price) || 0;
+      const status =
+      String(order.status || "")
+      .toLowerCase()
+      .trim();
+
+
+      if (status === "delivered") {
+
+        completedSales +=
+        Number(order.price) || 0;
+
+        completedOrders++;
+
+      }
 
     });
 
@@ -275,7 +294,7 @@ async function loadSales() {
     "totalSales"
   ).textContent =
   "₦" +
-  totalSales.toLocaleString();
+  completedSales.toLocaleString();
 
 
   document.getElementById(
@@ -288,7 +307,7 @@ async function loadSales() {
     "sellerEarnings"
   ).textContent =
   "₦" +
-  totalSales.toLocaleString();
+  completedSales.toLocaleString();
 
 
   const recentOrders =
@@ -313,29 +332,40 @@ async function loadSales() {
       "order";
 
 
+      const status =
+      String(order.status || "Pending");
+
+
       item.innerHTML = `
 
         <strong>
-          ${order.product_name}
+          ${order.product_name || "Product"}
         </strong>
 
         <p>
           Amount:
           ₦${Number(
-            order.price
+            order.price || 0
           ).toLocaleString()}
         </p>
 
         <p>
           Customer:
-          ${order.customer_name}
+          ${order.customer_name || "Customer"}
         </p>
 
         <p>
           Date:
-          ${new Date(
-            order.created_at
-          ).toLocaleString()}
+          ${order.created_at
+            ? new Date(
+                order.created_at
+              ).toLocaleString()
+            : "Unknown"}
+        </p>
+
+        <p class="status">
+          Status:
+          ${status}
         </p>
 
       `;
@@ -363,3 +393,5 @@ loadSales();
 
 </body>
 </html>
+
+
