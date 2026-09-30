@@ -1,4 +1,4 @@
-
+Here it is. 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,14 +101,12 @@ body {
 
   </div>
 
-
   <div id="loading"
        class="message">
 
     Loading sales...
 
   </div>
-
 
   <div id="salesContent"
        style="display:none;">
@@ -129,7 +127,6 @@ body {
 
       </div>
 
-
       <div class="stat">
 
         <h2>Total Orders</h2>
@@ -143,7 +140,6 @@ body {
         </div>
 
       </div>
-
 
       <div class="stat">
 
@@ -166,7 +162,6 @@ body {
 
     </div>
 
-
     <div class="card">
 
       <h2>Recent Orders</h2>
@@ -176,7 +171,6 @@ body {
     </div>
 
   </div>
-
 
   <a
     class="back"
@@ -188,7 +182,6 @@ body {
 
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -199,13 +192,11 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-
 const supabaseClient =
 window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
-
 
 async function loadSales() {
 
@@ -215,13 +206,11 @@ async function loadSales() {
   const content =
   document.getElementById("salesContent");
 
-
   const {
     data: userData,
     error: userError
   } =
   await supabaseClient.auth.getUser();
-
 
   if (userError || !userData.user) {
 
@@ -231,10 +220,8 @@ async function loadSales() {
 
   }
 
-
   const user =
   userData.user;
-
 
   const {
     data: orders,
@@ -249,7 +236,6 @@ async function loadSales() {
       { ascending: false }
     );
 
-
   if (error) {
 
     loading.textContent =
@@ -260,11 +246,7 @@ async function loadSales() {
 
   }
 
-
   let completedSales = 0;
-
-  let completedOrders = 0;
-
 
   if (orders) {
 
@@ -275,13 +257,10 @@ async function loadSales() {
       .toLowerCase()
       .trim();
 
-
       if (status === "delivered") {
 
         completedSales +=
         Number(order.price) || 0;
-
-        completedOrders++;
 
       }
 
@@ -289,19 +268,16 @@ async function loadSales() {
 
   }
 
-
   document.getElementById(
     "totalSales"
   ).textContent =
   "₦" +
   completedSales.toLocaleString();
 
-
   document.getElementById(
     "totalOrders"
   ).textContent =
   orders ? orders.length : 0;
-
 
   document.getElementById(
     "sellerEarnings"
@@ -309,12 +285,10 @@ async function loadSales() {
   "₦" +
   completedSales.toLocaleString();
 
-
   const recentOrders =
   document.getElementById(
     "recentOrders"
   );
-
 
   if (!orders || orders.length === 0) {
 
@@ -331,10 +305,8 @@ async function loadSales() {
       item.className =
       "order";
 
-
       const status =
       String(order.status || "Pending");
-
 
       item.innerHTML = `
 
@@ -370,13 +342,11 @@ async function loadSales() {
 
       `;
 
-
       recentOrders.appendChild(item);
 
     });
 
   }
-
 
   loading.style.display =
   "none";
@@ -386,12 +356,14 @@ async function loadSales() {
 
 }
 
-
 loadSales();
 
 </script>
 
 </body>
 </html>
-
-
+For your current 8 orders: since they are all Pending, the page should show:
+Total Sales: ₦0
+Total Orders: 8
+Seller Earnings: ₦0
+Then when you change one Power bank order to Delivered, sales should become ₦20,000.
