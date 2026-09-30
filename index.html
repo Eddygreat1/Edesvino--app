@@ -210,7 +210,6 @@
       .no-image {
         height: 200px;
       }
-
     }
   </style>
 </head>
@@ -218,7 +217,6 @@
 <body>
 
 <header>
-
   <div class="header-content">
 
     <div class="logo">
@@ -226,35 +224,19 @@
     </div>
 
     <nav>
-
-      <a href="index.html">
-        Home
-      </a>
-
-      <a href="#products-section">
-        Shop
-      </a>
-
-      <a href="register.html">
-        Sell
-      </a>
-
-      <a href="track-order.html">
-        Track Order
-      </a>
-
+      <a href="index.html">Home</a>
+      <a href="#products-section">Shop</a>
+      <a href="register.html">Sell</a>
+      <a href="track-order.html">Track Order</a>
     </nav>
 
   </div>
-
 </header>
 
 
 <section class="hero">
 
-  <h1>
-    Buy. Sell. Grow.
-  </h1>
+  <h1>Buy. Sell. Grow.</h1>
 
   <p>
     Discover products from Edesvino sellers and shop online with ease.
@@ -286,9 +268,7 @@
   id="products-section"
 >
 
-  <h2>
-    Featured Products
-  </h2>
+  <h2>Featured Products</h2>
 
   <div id="products">
 
@@ -335,22 +315,22 @@ async function loadProducts() {
   const productsContainer =
     document.getElementById("products");
 
-
   try {
 
     const {
       data,
       error
-    } =
-      await supabaseClient
-        .from("products")
-        .select("*")
-        .order(
-          "created_at",
-          {
-            ascending: false
-          }
-        );
+    } = await supabaseClient
+      .from("products")
+      .select(
+        "id,name,price,description,store,image_url,created_at"
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
 
     if (error) {
@@ -370,10 +350,7 @@ async function loadProducts() {
     }
 
 
-    if (
-      !data ||
-      data.length === 0
-    ) {
+    if (!data || data.length === 0) {
 
       productsContainer.innerHTML =
         `
@@ -414,25 +391,23 @@ async function loadProducts() {
 
       const productLink =
         "checkout.html?product=" +
-        encodeURIComponent(
-          productName
-        );
+        encodeURIComponent(productName);
 
 
       const productDiv =
-        document.createElement(
-          "div"
-        );
-
+        document.createElement("div");
 
       productDiv.className =
         "product";
 
 
-      let imageHTML = "";
+      let imageHTML;
 
 
-      if (product.image_url) {
+      if (
+        product.image_url &&
+        product.image_url.trim() !== ""
+      ) {
 
         imageHTML =
           `
@@ -440,8 +415,15 @@ async function loadProducts() {
             class="product-image"
             src="${product.image_url}"
             alt="${productName}"
-            loading="lazy"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
           >
+
+          <div
+            class="no-image"
+            style="display:none;"
+          >
+            Image unavailable
+          </div>
           `;
 
       } else {
@@ -495,7 +477,6 @@ async function loadProducts() {
 
     });
 
-
   } catch (error) {
 
     console.error(error);
@@ -510,7 +491,6 @@ async function loadProducts() {
       `;
 
   }
-
 }
 
 
