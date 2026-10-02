@@ -169,11 +169,16 @@ async function loadOrders() {
   }
 
 
-  const customerId =
-    userData.user.id;
+  const user =
+    userData.user;
 
 
-  const {
+  /*
+    First try the proper customer_id
+    connection.
+  */
+
+  let {
     data: orders,
     error
   } =
@@ -182,7 +187,7 @@ async function loadOrders() {
     .select("*")
     .eq(
       "customer_id",
-      customerId
+      user.id
     )
     .order(
       "created_at",
@@ -190,6 +195,57 @@ async function loadOrders() {
         ascending: false
       }
     );
+
+
+  /*
+    If no orders are connected to
+    customer_id, try the customer's
+    registered name.
+
+    This supports existing orders
+    that were created before the
+    customer_id connection was added.
+  */
+
+  if (
+    !error &&
+    (!orders ||
+      orders.length === 0)
+  ) {
+
+    const customerName =
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      "Endurance Edirin Jackson";
+
+
+    const fallbackResult =
+      await supabaseClient
+        .from("orders")
+        .select("*")
+        .eq(
+          "customer_name",
+          customerName
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
+
+
+    if (
+      !fallbackResult.error &&
+      fallbackResult.data
+    ) {
+
+      orders =
+        fallbackResult.data;
+
+    }
+
+  }
 
 
   if (error) {
@@ -200,7 +256,7 @@ async function loadOrders() {
       <div class="error">
         Unable to load your orders.
         <br><br>
-        ${error.message}
+        ${escapeHtml(error.message)}
       </div>
     `;
 
@@ -243,6 +299,7 @@ async function loadOrders() {
         "div"
       );
 
+
     orderBox.className =
       "order";
 
@@ -250,8 +307,16 @@ async function loadOrders() {
     orderBox.innerHTML = `
 
       <h2>
-        ${order.product_name || "Product"}
+        Order #${escapeHtml(order.id)}
       </h2>
+
+      <p>
+        <strong>Product:</strong>
+        ${escapeHtml(
+          order.product_name ||
+          "Product"
+        )}
+      </p>
 
       <p>
         <strong>Price:</strong>
@@ -262,29 +327,43 @@ async function loadOrders() {
 
       <p>
         <strong>Customer:</strong>
-        ${order.customer_name || ""}
+        ${escapeHtml(
+          order.customer_name ||
+          ""
+        )}
       </p>
 
       <p>
         <strong>Phone:</strong>
-        ${order.customer_phone || ""}
+        ${escapeHtml(
+          order.customer_phone ||
+          ""
+        )}
       </p>
 
       <p>
         <strong>Delivery Address:</strong>
-        ${order.delivery_address || ""}
+        ${escapeHtml(
+          order.delivery_address ||
+          ""
+        )}
       </p>
 
       <p>
         <strong>Status:</strong>
         <span class="status">
-          ${order.status || "Pending"}
+          ${escapeHtml(
+            order.status ||
+            "Pending"
+          )}
         </span>
       </p>
 
       <p>
         <strong>Order Date:</strong>
-        ${orderDate}
+        ${escapeHtml(
+          orderDate
+        )}
       </p>
 
     `;
@@ -299,9 +378,40 @@ async function loadOrders() {
 }
 
 
+/* --------------------------------
+   HTML SAFETY
+-------------------------------- */
+
+function escapeHtml(value) {
+
+  return String(value || "")
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
 loadOrders();
 
 </script>
 
 </body>
-  </html>
+</html>
