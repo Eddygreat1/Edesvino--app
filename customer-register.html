@@ -3,35 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customer Login - Edesvino</title>
+  <title>Customer Register - Edesvino</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f5f5f5;
       margin: 0;
       padding: 20px;
     }
 
     .container {
-      max-width: 400px;
-      margin: 50px auto;
+      max-width: 420px;
+      margin: 40px auto;
       background: white;
       padding: 25px;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    h1, h2 {
+    h1 {
       text-align: center;
+      color: #222;
     }
 
     input {
       width: 100%;
       padding: 12px;
-      margin: 8px 0 15px;
+      margin: 8px 0;
       box-sizing: border-box;
       border: 1px solid #ccc;
       border-radius: 6px;
@@ -40,16 +41,21 @@
     button {
       width: 100%;
       padding: 12px;
-      background: #16803c;
+      margin-top: 12px;
+      background: #111;
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 16px;
       cursor: pointer;
     }
 
-    button:disabled {
-      opacity: 0.6;
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
     }
 
     .links {
@@ -58,13 +64,7 @@
     }
 
     a {
-      color: #16803c;
       text-decoration: none;
-    }
-
-    #message {
-      text-align: center;
-      margin-top: 15px;
     }
   </style>
 </head>
@@ -74,83 +74,78 @@
   <div class="container">
 
     <h1>Edesvino</h1>
-    <h2>Customer Login</h2>
+    <h2>Customer Registration</h2>
 
-    <form id="loginForm">
+    <form id="registerForm">
 
-      <label>Email Address</label>
+      <input
+        type="text"
+        id="fullName"
+        placeholder="Full Name"
+        required
+      >
+
       <input
         type="email"
         id="email"
-        placeholder="Enter your email"
+        placeholder="Email Address"
         required
       >
 
-      <label>Password</label>
       <input
         type="password"
         id="password"
-        placeholder="Enter your password"
+        placeholder="Password"
+        minlength="6"
         required
       >
 
-      <button type="submit" id="loginButton">
-        Login
-      </button>
+      <input
+        type="password"
+        id="confirmPassword"
+        placeholder="Confirm Password"
+        minlength="6"
+        required
+      >
+
+      <button type="submit">Create Customer Account</button>
 
     </form>
 
-    <p id="message"></p>
+    <div id="message" class="message"></div>
 
     <div class="links">
+      <p>
+        Already have an account?
+        <a href="customer-login.html">Login</a>
+      </p>
 
-      Don't have a customer account?
-
-    
-        <a href="customer-register.html">
-          Register
-        </a>
-      
-
-      <br><br>
-
-      <a href="index.html">
-        ← Back to Marketplace
-      </a>
-
+      <p>
+        <a href="index.html">← Back to Marketplace</a>
+      </p>
     </div>
 
   </div>
 
-
   <script>
+    const SUPABASE_URL = "https://lxszilqypuglxyfyukdg.supabase.co";
 
-    const SUPABASE_URL =
-      "https://lxszilqypuglxyfyukdg.supabase.co";
-
-    const SUPABASE_KEY =
+    const SUPABASE_ANON_KEY =
       "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-    const supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
 
+    const form = document.getElementById("registerForm");
+    const message = document.getElementById("message");
 
-    const loginForm =
-      document.getElementById("loginForm");
-
-    const loginButton =
-      document.getElementById("loginButton");
-
-    const message =
-      document.getElementById("message");
-
-
-    loginForm.addEventListener("submit", async function(event) {
-
+    form.addEventListener("submit", async function(event) {
       event.preventDefault();
+
+      const fullName =
+        document.getElementById("fullName").value.trim();
 
       const email =
         document.getElementById("email").value.trim();
@@ -158,63 +153,43 @@
       const password =
         document.getElementById("password").value;
 
+      const confirmPassword =
+        document.getElementById("confirmPassword").value;
 
-      loginButton.disabled = true;
-
-      loginButton.textContent = "Logging in...";
-
-      message.textContent = "";
-
-
-      try {
-
-        const { data, error } =
-          await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
-
-
-        if (error) {
-          throw error;
-        }
-
-
-        if (!data.session) {
-          throw new Error("Login session was not created.");
-        }
-
-
-        message.style.color = "green";
-
-        message.textContent =
-          "Login successful!";
-
-
-        setTimeout(function() {
-
-          window.location.href =
-            "customer-dashboard.html";
-
-        }, 500);
-
-
-      } catch (error) {
-
+      if (password !== confirmPassword) {
+        message.textContent = "Passwords do not match.";
         message.style.color = "red";
-
-        message.textContent =
-          error.message ||
-          "Login failed. Please try again.";
-
-        loginButton.disabled = false;
-
-        loginButton.textContent = "Login";
-
+        return;
       }
 
-    });
+      message.textContent = "Creating your account...";
+      message.style.color = "black";
 
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            display_name: fullName
+          }
+        }
+      });
+
+      if (error) {
+        message.textContent = error.message;
+        message.style.color = "red";
+        return;
+      }
+
+      message.textContent =
+        "Customer account created successfully!";
+
+      message.style.color = "green";
+
+      setTimeout(() => {
+        window.location.href = "customer-login.html";
+      }, 1500);
+    });
   </script>
 
 </body>
