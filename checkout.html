@@ -234,10 +234,12 @@
 
 </div>
 
+
 <script>
 
+
 /* =====================================================
-   SUPABASE SETTINGS
+   SUPABASE
 ===================================================== */
 
 const SUPABASE_URL =
@@ -303,7 +305,7 @@ let currentProduct = null;
 
 
 /* =====================================================
-   SHOW MESSAGE
+   MESSAGE
 ===================================================== */
 
 function showMessage(
@@ -466,6 +468,7 @@ async function createOrder(
       .from("orders")
       .insert([
         {
+
           product_name:
             checkoutData.product_name,
 
@@ -491,6 +494,7 @@ async function createOrder(
 
           status:
             "Pending"
+
         }
       ])
       .select()
@@ -653,16 +657,19 @@ checkoutForm.addEventListener(
 
 
       /* =================================================
-         INITIALIZE PAYSTACK PAYMENT
+         SMART-TASK REQUEST
       ================================================= */
 
       const response =
         await fetch(
           EDGE_FUNCTION_URL,
           {
-            method: "POST",
+
+            method:
+              "POST",
 
             headers: {
+
               "Content-Type":
                 "application/json",
 
@@ -672,6 +679,7 @@ checkoutForm.addEventListener(
               "Authorization":
                 "Bearer " +
                 SUPABASE_KEY
+
             },
 
             body:
@@ -714,6 +722,7 @@ checkoutForm.addEventListener(
                 }
 
               })
+
           }
         );
 
@@ -743,11 +752,13 @@ checkoutForm.addEventListener(
 
       console.error(error);
 
+
       showMessage(
         error.message ||
         "Payment initialization failed.",
         "error"
       );
+
 
       payButton.disabled =
         false;
@@ -758,7 +769,7 @@ checkoutForm.addEventListener(
 
 
 /* =====================================================
-   VERIFY PAYSTACK PAYMENT
+   VERIFY PAYMENT
 ===================================================== */
 
 async function verifyPayment() {
@@ -791,13 +802,21 @@ async function verifyPayment() {
 
   try {
 
+
+    /* ================================================
+       QUICK-FUNCTION VERIFICATION REQUEST
+    ================================================ */
+
     const response =
       await fetch(
         VERIFY_FUNCTION_URL,
         {
-          method: "POST",
+
+          method:
+            "POST",
 
           headers: {
+
             "Content-Type":
               "application/json",
 
@@ -807,13 +826,17 @@ async function verifyPayment() {
             "Authorization":
               "Bearer " +
               SUPABASE_KEY
+
           },
 
           body:
             JSON.stringify({
+
               reference:
                 reference
+
             })
+
         }
       );
 
@@ -875,6 +898,7 @@ async function verifyPayment() {
 
 
     showMessage(
+
       "Payment was successfully verified by Paystack. " +
       "Your order has been created. " +
       "Order #" +
@@ -883,7 +907,9 @@ async function verifyPayment() {
       Number(
         paymentResult.amount / 100
       ).toLocaleString(),
+
       "success"
+
     );
 
 
@@ -902,11 +928,13 @@ async function verifyPayment() {
 
     console.error(error);
 
+
     showMessage(
       error.message ||
       "Payment verification failed.",
       "error"
     );
+
 
     payButton.disabled =
       false;
@@ -915,12 +943,13 @@ async function verifyPayment() {
 
 
 /* =====================================================
-   START PAGE
+   START
 ===================================================== */
 
 loadProduct();
 
 verifyPayment();
+
 
 </script>
 
