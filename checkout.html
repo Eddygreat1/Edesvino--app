@@ -252,4 +252,677 @@ const SUPABASE_KEY =
 ===================================================== */
 
 const EDGE_FUNCTION_URL =
-  SUPABASE_URL + "/functions
+  SUPABASE_URL + "/functions/v1/smart-task";
+
+const VERIFY_FUNCTION_URL =
+  SUPABASE_URL + "/functions/v1/quick-function";
+
+
+/* =====================================================
+   SUPABASE CLIENT
+===================================================== */
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/* =====================================================
+   PAGE ELEMENTS
+===================================================== */
+
+const productBox =
+  document.getElementById(
+    "productBox"
+  );
+
+const checkoutForm =
+  document.getElementById(
+    "checkoutForm"
+  );
+
+const payButton =
+  document.getElementById(
+    "payButton"
+  );
+
+const message =
+  document.getElementById(
+    "message"
+  );
+
+const trackLink =
+  document.getElementById(
+    "trackLink"
+  );
+
+
+let currentProduct = null;
+
+
+/* =====================================================
+   SHOW MESSAGE
+===================================================== */
+
+function showMessage(
+  text,
+  type
+) {
+
+  message.textContent =
+    text;
+
+  message.className =
+    "message " + type;
+
+  message.style.display =
+    "block";
+}
+
+
+/* =====================================================
+   LOAD PRODUCT
+===================================================== */
+
+async function loadProduct() {
+
+  try {
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const productName =
+      params.get("product");
+
+
+    if (!productName) {
+
+      productBox.innerHTML =
+        "No product selected.";
+
+      return;
+    }
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("products")
+        .select("*")
+        .eq(
+          "name",
+          productName
+        )
+        .limit(1)
+        .maybeSingle();
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    if (!data) {
+
+      productBox.innerHTML =
+        "Product not found.";
+
+      return;
+    }
+
+
+    currentProduct =
+      data;
+
+
+    productBox.innerHTML = `
+
+      <div class="product-name">
+        ${data.name || "Product"}
+      </div>
+
+      <div>
+        ${data.description || ""}
+      </div>
+
+      <div class="price">
+        ₦${Number(
+          data.price || 0
+        ).toLocaleString()}
+      </div>
+
+      <div class="store">
+        Store:
+        ${
+          data.store_name ||
+          data.seller_name ||
+          "Edesvino"
+        }
+      </div>
+
+    `;
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    productBox.innerHTML =
+      "Unable to load product.";
+  }
+}
+
+
+/* =====================================================
+   CREATE ORDER
+===================================================== */
+
+async function createOrder(
+  paymentResult
+) {
+
+  const checkoutData =
+    JSON.parse(
+      sessionStorage.getItem(
+        "edesvinoCheckout"
+      ) || "{}"
+    );
+
+
+  const paymentReference =
+    paymentResult.reference;
+
+
+  const idempotencyKey =
+    "edesvinoPayment_" +
+    paymentReference;
+
+
+  const existingOrder =
+    sessionStorage.getItem(
+      idempotencyKey
+    );
+
+
+  if (existingOrder) {
+
+    return {
+      id: existingOrder
+    };
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("orders")
+      .insert([
+        {
+          product_name:
+            checkoutData.product_name,
+
+          price:
+            checkoutData.price,
+
+          customer_name:
+            checkoutData.customer_name,
+
+          customer_phone:
+            checkoutData.customer_phone,
+
+          delivery_address:
+            checkoutData.delivery_address,
+
+          seller_id:
+            checkoutData.seller_id ||
+            null,
+
+          customer_id:
+            checkoutData.customer_id ||
+            null,
+
+          status:
+            "Pending"
+        }
+      ])
+      .select()
+      .single();
+
+
+  if (error) {
+
+    console.error(error);
+
+    throw error;
+  }
+
+
+  sessionStorage.setItem(
+    idempotencyKey,
+    String(data.id)
+  );
+
+
+  return data;
+}
+
+
+/* =====================================================
+   CONTINUE TO PAYMENT
+===================================================== */
+
+checkoutForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+
+    if (!currentProduct) {
+
+      showMessage(
+        "Product information is not available.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    payButton.disabled =
+      true;
+
+
+    showMessage(
+      "Preparing your payment...",
+      "loading"
+    );
+
+
+    try {
+
+      const {
+        data: {
+          user
+        },
+        error: userError
+      } =
+        await supabaseClient
+          .auth
+          .getUser();
+
+
+      if (
+        userError ||
+        !user
+      ) {
+
+        throw new Error(
+          "Please login before placing an order."
+        );
+      }
+
+
+      const customerName =
+        document
+          .getElementById(
+            "customerName"
+          )
+          .value
+          .trim();
+
+
+      const customerPhone =
+        document
+          .getElementById(
+            "customerPhone"
+          )
+          .value
+          .trim();
+
+
+      const deliveryAddress =
+        document
+          .getElementById(
+            "deliveryAddress"
+          )
+          .value
+          .trim();
+
+
+      if (
+        !customerName ||
+        !customerPhone ||
+        !deliveryAddress
+      ) {
+
+        throw new Error(
+          "Please complete all customer details."
+        );
+      }
+
+
+      const checkoutData = {
+
+        product_name:
+          currentProduct.name,
+
+        price:
+          Number(
+            currentProduct.price
+          ),
+
+        seller_id:
+          currentProduct.seller_id ||
+          null,
+
+        customer_id:
+          user.id,
+
+        customer_name:
+          customerName,
+
+        customer_phone:
+          customerPhone,
+
+        delivery_address:
+          deliveryAddress
+
+      };
+
+
+      sessionStorage.setItem(
+        "edesvinoCheckout",
+        JSON.stringify(
+          checkoutData
+        )
+      );
+
+
+      const callbackUrl =
+        window.location.origin +
+        window.location.pathname;
+
+
+      /* =================================================
+         INITIALIZE PAYSTACK PAYMENT
+      ================================================= */
+
+      const response =
+        await fetch(
+          EDGE_FUNCTION_URL,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              "apikey":
+                SUPABASE_KEY,
+
+              "Authorization":
+                "Bearer " +
+                SUPABASE_KEY
+            },
+
+            body:
+              JSON.stringify({
+
+                action:
+                  "initialize",
+
+                email:
+                  user.email,
+
+                amount:
+                  Math.round(
+                    Number(
+                      currentProduct.price
+                    ) * 100
+                  ),
+
+                callback_url:
+                  callbackUrl,
+
+                metadata: {
+
+                  product_name:
+                    currentProduct.name,
+
+                  seller_id:
+                    currentProduct.seller_id ||
+                    null,
+
+                  customer_id:
+                    user.id,
+
+                  customer_name:
+                    customerName,
+
+                  customer_phone:
+                    customerPhone
+
+                }
+
+              })
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (
+        !response.ok ||
+        !result ||
+        !result.authorization_url
+      ) {
+
+        throw new Error(
+          result?.message ||
+          "Unable to initialize Paystack payment."
+        );
+      }
+
+
+      window.location.href =
+        result.authorization_url;
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        error.message ||
+        "Payment initialization failed.",
+        "error"
+      );
+
+      payButton.disabled =
+        false;
+    }
+
+  }
+);
+
+
+/* =====================================================
+   VERIFY PAYSTACK PAYMENT
+===================================================== */
+
+async function verifyPayment() {
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const reference =
+    params.get(
+      "reference"
+    ) ||
+    params.get(
+      "trxref"
+    );
+
+
+  if (!reference) {
+    return;
+  }
+
+
+  showMessage(
+    "Verifying your payment with Paystack...",
+    "loading"
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        VERIFY_FUNCTION_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            "apikey":
+              SUPABASE_KEY,
+
+            "Authorization":
+              "Bearer " +
+              SUPABASE_KEY
+          },
+
+          body:
+            JSON.stringify({
+              reference:
+                reference
+            })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    console.log(
+      "Paystack verification:",
+      result
+    );
+
+
+    if (
+      !response.ok ||
+      !result.success
+    ) {
+
+      throw new Error(
+        result.message ||
+        "Payment verification failed."
+      );
+    }
+
+
+    if (!result.paid) {
+
+      throw new Error(
+        "Payment was not successful."
+      );
+    }
+
+
+    const paymentResult = {
+
+      reference:
+        result.reference ||
+        reference,
+
+      amount:
+        result.amount ||
+        0,
+
+      status:
+        result.status
+
+    };
+
+
+    const order =
+      await createOrder(
+        paymentResult
+      );
+
+
+    checkoutForm.style.display =
+      "none";
+
+
+    showMessage(
+      "Payment was successfully verified by Paystack. " +
+      "Your order has been created. " +
+      "Order #" +
+      order.id +
+      " — ₦" +
+      Number(
+        paymentResult.amount / 100
+      ).toLocaleString(),
+      "success"
+    );
+
+
+    trackLink.style.display =
+      "block";
+
+
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showMessage(
+      error.message ||
+      "Payment verification failed.",
+      "error"
+    );
+
+    payButton.disabled =
+      false;
+  }
+}
+
+
+/* =====================================================
+   START PAGE
+===================================================== */
+
+loadProduct();
+
+verifyPayment();
+
+</script>
+
+</body>
+</html>
