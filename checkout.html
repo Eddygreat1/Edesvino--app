@@ -15,79 +15,67 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background: #f5f7fa;
       color: #222;
     }
 
     header {
-      background: #111;
+      background: #111827;
       color: white;
-      padding: 18px 20px;
+      padding: 18px;
+      text-align: center;
     }
 
-    .header-content {
-      max-width: 900px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .back {
-      color: white;
-      text-decoration: none;
-      font-size: 14px;
+    header h1 {
+      margin: 0;
+      font-size: 26px;
     }
 
     .container {
       max-width: 600px;
-      margin: 35px auto;
-      padding: 0 20px;
+      margin: 25px auto;
+      padding: 20px;
     }
 
     .card {
       background: white;
-      padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-
-    h1 {
-      text-align: center;
-      margin-top: 0;
+      padding: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
     }
 
     h2 {
-      margin-bottom: 8px;
+      margin-top: 0;
     }
 
-    .description {
-      color: #666;
-      margin-bottom: 15px;
+    .product {
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .product-name {
+      font-size: 20px;
+      font-weight: bold;
     }
 
     .price {
-      font-size: 25px;
+      font-size: 22px;
       font-weight: bold;
-      margin: 15px 0 8px;
+      margin-top: 8px;
     }
 
     .store {
+      margin-top: 8px;
       color: #555;
-      margin-bottom: 25px;
     }
 
     label {
       display: block;
-      font-weight: bold;
       margin-top: 15px;
-      margin-bottom: 7px;
+      margin-bottom: 6px;
+      font-weight: bold;
     }
 
     input,
@@ -95,86 +83,71 @@
       width: 100%;
       padding: 13px;
       border: 1px solid #ccc;
-      border-radius: 7px;
+      border-radius: 8px;
       font-size: 16px;
-      font-family: Arial, sans-serif;
     }
 
     textarea {
-      min-height: 100px;
+      min-height: 90px;
       resize: vertical;
     }
 
     button {
       width: 100%;
-      padding: 14px;
       margin-top: 20px;
+      padding: 15px;
       border: none;
-      border-radius: 7px;
-      background: #111;
+      border-radius: 8px;
+      background: #16a34a;
       color: white;
-      font-size: 16px;
+      font-size: 17px;
       font-weight: bold;
       cursor: pointer;
     }
 
     button:disabled {
-      opacity: 0.6;
+      background: #999;
     }
 
     .message {
       margin-top: 20px;
       padding: 15px;
       border-radius: 8px;
-      text-align: center;
-    }
-
-    .error {
-      background: #fff0f0;
-      color: #a00000;
+      display: none;
     }
 
     .success {
-      background: #eefaf0;
-      color: #176b25;
+      background: #dcfce7;
+      color: #166534;
     }
 
-    .order-number {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 15px 0;
-    }
-
-    .track {
-      display: block;
-      text-align: center;
-      background: #111;
-      color: white;
-      text-decoration: none;
-      padding: 14px;
-      border-radius: 7px;
-      margin-top: 18px;
-      font-weight: bold;
-    }
-
-    .continue {
-      display: block;
-      text-align: center;
-      color: #111;
-      margin-top: 18px;
-      text-decoration: none;
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
     .loading {
-      text-align: center;
-      color: #666;
-      padding: 20px;
+      background: #e0f2fe;
+      color: #075985;
     }
 
-    @media (max-width: 600px) {
-      .header-content {
-        flex-direction: column;
-      }
+    .track-link {
+      display: block;
+      margin-top: 15px;
+      text-align: center;
+      background: #111827;
+      color: white;
+      padding: 13px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #2563eb;
+      text-decoration: none;
     }
   </style>
 </head>
@@ -182,79 +155,85 @@
 <body>
 
 <header>
-  <div class="header-content">
-    <div class="logo">Edesvino</div>
-
-    <a class="back" href="index.html">
-      ← Back to Shop
-    </a>
-  </div>
+  <h1>Edesvino</h1>
 </header>
 
 <div class="container">
 
   <div class="card">
 
-    <h1>Checkout</h1>
+    <h2>Checkout</h2>
 
-    <p style="text-align:center;color:#666;">
-      Complete your order securely
-    </p>
-
-    <div id="productArea">
-      <div class="loading">
-        Loading product...
-      </div>
+    <div id="productBox" class="product">
+      Loading product...
     </div>
 
-    <div id="checkoutForm">
+    <form id="checkoutForm">
 
-      <label for="customerName">
-        Full Name
-      </label>
+      <label for="customerName">Full Name</label>
 
       <input
         type="text"
         id="customerName"
-        placeholder="Enter your full name"
+        required
       >
 
-      <label for="customerPhone">
-        Phone Number
-      </label>
+      <label for="customerPhone">Phone Number</label>
 
       <input
         type="tel"
         id="customerPhone"
-        placeholder="Enter your phone number"
+        required
       >
 
-      <label for="deliveryAddress">
-        Delivery Address
-      </label>
+      <label for="deliveryAddress">Delivery Address</label>
 
       <textarea
         id="deliveryAddress"
-        placeholder="Enter your delivery address"
+        required
       ></textarea>
 
       <button
         id="payButton"
-        onclick="startPayment()">
-
+        type="submit"
+      >
         Continue to Payment
-
       </button>
 
-      <div id="message"></div>
+    </form>
 
-    </div>
+    <div
+      id="message"
+      class="message"
+    ></div>
+
+    <a
+      id="trackLink"
+      class="track-link"
+      href="track-order.html"
+      style="display:none;"
+    >
+      Track Your Order
+    </a>
+
+    <a
+      href="index.html"
+      class="back"
+    >
+      ← Back to Marketplace
+    </a>
 
   </div>
 
 </div>
 
+
 <script>
+
+
+/* =====================================================
+   SUPABASE SETTINGS
+===================================================== */
 
 const SUPABASE_URL =
   "https://lxszilqypuglxyfyukdg.supabase.co";
@@ -262,20 +241,27 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-/*
-   EXISTING SMART-TASK FUNCTION
-   Used only to initialize Paystack payment.
-*/
+
+/* =====================================================
+   PAYMENT INITIALIZATION FUNCTION
+===================================================== */
+
 const EDGE_FUNCTION_URL =
   SUPABASE_URL + "/functions/v1/smart-task";
 
-/*
-   NEW VERIFY-PAYSTACK FUNCTION
-   Used to securely verify the Paystack transaction.
-*/
-const VERIFY_FUNCTION_URL =
-  SUPABASE_URL + "/functions/v1/verify-paystack";
 
+/* =====================================================
+   PAYMENT VERIFICATION FUNCTION
+   EXACT SECTION
+===================================================== */
+
+const VERIFY_FUNCTION_URL =
+  SUPABASE_URL + "/functions/v1/quick-function";
+
+
+/* =====================================================
+   SUPABASE CLIENT
+===================================================== */
 
 const supabaseClient =
   window.supabase.createClient(
@@ -284,461 +270,552 @@ const supabaseClient =
   );
 
 
-let currentProduct = null;
+/* =====================================================
+   PAGE ELEMENTS
+===================================================== */
 
+const productBox =
+  document.getElementById(
+    "productBox"
+  );
 
-/* --------------------------------
-   GET PRODUCT FROM URL
--------------------------------- */
+const checkoutForm =
+  document.getElementById(
+    "checkoutForm"
+  );
 
-const urlParams =
-  new URLSearchParams(
-    window.location.search
+const payButton =
+  document.getElementById(
+    "payButton"
+  );
+
+const message =
+  document.getElementById(
+    "message"
+  );
+
+const trackLink =
+  document.getElementById(
+    "trackLink"
   );
 
 
-const productName =
-  urlParams.get("product");
+let currentProduct = null;
 
 
-/* --------------------------------
+/* =====================================================
+   SHOW MESSAGE
+===================================================== */
+
+function showMessage(
+  text,
+  type
+) {
+
+  message.textContent =
+    text;
+
+  message.className =
+    "message " + type;
+
+  message.style.display =
+    "block";
+}
+
+
+/* =====================================================
    LOAD PRODUCT
--------------------------------- */
+===================================================== */
 
 async function loadProduct() {
 
-  const productArea =
-    document.getElementById(
-      "productArea"
-    );
-
-
-  if (!productName) {
-
-    productArea.innerHTML =
-      '<div class="message error">No product was selected.</div>';
-
-    document.getElementById(
-      "checkoutForm"
-    ).style.display = "none";
-
-    return;
-  }
-
-
   try {
 
-    const { data, error } =
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const productName =
+      params.get("product");
+
+
+    if (!productName) {
+
+      productBox.innerHTML =
+        "No product selected.";
+
+      return;
+    }
+
+
+    const {
+      data,
+      error
+    } =
       await supabaseClient
         .from("products")
         .select("*")
-        .eq("name", productName)
+        .eq(
+          "name",
+          productName
+        )
         .limit(1)
         .maybeSingle();
 
 
     if (error) {
-
-      console.error(error);
-
-      productArea.innerHTML =
-        '<div class="message error">Unable to load this product.</div>';
-
-      return;
+      throw error;
     }
 
 
     if (!data) {
 
-      productArea.innerHTML =
-        '<div class="message error">Product not found.</div>';
+      productBox.innerHTML =
+        "Product not found.";
 
       return;
     }
 
 
-    currentProduct = data;
+    currentProduct =
+      data;
 
 
-    const price =
-      Number(
-        data.price || 0
-      ).toLocaleString();
+    productBox.innerHTML = `
 
+      <div class="product-name">
+        ${data.name || "Product"}
+      </div>
 
-    productArea.innerHTML = `
-
-      <h2>
-        ${escapeHtml(data.name)}
-      </h2>
-
-      <p class="description">
-        ${escapeHtml(
-          data.description ||
-          "No description available."
-        )}
-      </p>
+      <div>
+        ${data.description || ""}
+      </div>
 
       <div class="price">
-        ₦${price}
+        ₦${Number(
+          data.price || 0
+        ).toLocaleString()}
       </div>
 
       <div class="store">
         Store:
-        ${escapeHtml(
-          data.store ||
-          "Edesvino Seller"
-        )}
+        ${
+          data.store_name ||
+          data.seller_name ||
+          "Edesvino"
+        }
       </div>
 
     `;
 
+
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
 
-    productArea.innerHTML =
-      '<div class="message error">Something went wrong while loading the product.</div>';
+    productBox.innerHTML =
+      "Unable to load product.";
   }
 }
 
 
-/* --------------------------------
-   START PAYMENT
--------------------------------- */
+/* =====================================================
+   CREATE ORDER
+===================================================== */
 
-async function startPayment() {
+async function createOrder(
+  paymentResult
+) {
 
-  if (!currentProduct) {
-
-    showMessage(
-      "Product information is not ready yet. Please wait a moment and try again.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const customerName =
-    document
-      .getElementById(
-        "customerName"
-      )
-      .value
-      .trim();
-
-
-  const customerPhone =
-    document
-      .getElementById(
-        "customerPhone"
-      )
-      .value
-      .trim();
-
-
-  const deliveryAddress =
-    document
-      .getElementById(
-        "deliveryAddress"
-      )
-      .value
-      .trim();
-
-
-  if (!customerName) {
-
-    showMessage(
-      "Please enter your full name.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if (!customerPhone) {
-
-    showMessage(
-      "Please enter your phone number.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if (!deliveryAddress) {
-
-    showMessage(
-      "Please enter your delivery address.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const payButton =
-    document.getElementById(
-      "payButton"
+  const checkoutData =
+    JSON.parse(
+      sessionStorage.getItem(
+        "edesvinoCheckout"
+      ) || "{}"
     );
 
 
-  payButton.disabled = true;
-
-  payButton.textContent =
-    "Preparing Payment...";
+  const paymentReference =
+    paymentResult.reference;
 
 
-  try {
-
-    const {
-      data: {
-        user
-      }
-    } =
-      await supabaseClient.auth.getUser();
+  const idempotencyKey =
+    "edesvinoPayment_" +
+    paymentReference;
 
 
-    const customerId =
-      user ? user.id : null;
+  const existingOrder =
+    sessionStorage.getItem(
+      idempotencyKey
+    );
 
 
-    const cleanPhone =
-      customerPhone.replace(
-        /\D/g,
-        ""
-      );
+  if (existingOrder) {
 
-
-    const customerEmail =
-      cleanPhone +
-      "@customer.edesvino.com";
-
-
-    const checkoutInfo = {
-
-      product_name:
-        currentProduct.name,
-
-      seller_id:
-        currentProduct.seller_id,
-
-      customer_id:
-        customerId,
-
-      customer_name:
-        customerName,
-
-      customer_phone:
-        customerPhone,
-
-      delivery_address:
-        deliveryAddress,
-
-      price:
-        Number(
-          currentProduct.price
-        )
-
+    return {
+      id: existingOrder
     };
+  }
 
 
-    sessionStorage.setItem(
-      "edesvinoCheckout",
-      JSON.stringify(
-        checkoutInfo
-      )
-    );
-
-
-    const callbackUrl =
-      window.location.origin +
-      window.location.pathname;
-
-
-    const response =
-      await fetch(
-        EDGE_FUNCTION_URL,
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("orders")
+      .insert([
         {
 
-          method: "POST",
+          product_name:
+            checkoutData.product_name,
 
-          headers: {
+          price:
+            checkoutData.price,
 
-            "Content-Type":
-              "application/json",
+          customer_name:
+            checkoutData.customer_name,
 
-            "apikey":
-              SUPABASE_KEY,
+          customer_phone:
+            checkoutData.customer_phone,
 
-            "Authorization":
-              "Bearer " +
-              SUPABASE_KEY
+          delivery_address:
+            checkoutData.delivery_address,
 
-          },
+          seller_id:
+            checkoutData.seller_id ||
+            null,
 
-          body: JSON.stringify({
+          customer_id:
+            checkoutData.customer_id ||
+            null,
 
-            action:
-              "initialize",
-
-            email:
-              customerEmail,
-
-            amount:
-              Number(
-                currentProduct.price
-              ),
-
-            callback_url:
-              callbackUrl,
-
-            metadata: {
-
-              product_name:
-                currentProduct.name,
-
-              seller_id:
-                currentProduct.seller_id,
-
-              customer_id:
-                customerId,
-
-              customer_name:
-                customerName,
-
-              customer_phone:
-                customerPhone,
-
-              delivery_address:
-                deliveryAddress
-
-            }
-
-          })
+          status:
+            "Pending"
 
         }
-      );
+      ])
+      .select()
+      .single();
 
 
-    const result =
-      await response.json();
+  if (error) {
 
-
-    if (
-      !response.ok ||
-      !result.status
-    ) {
-
-      console.error(result);
-
-      throw new Error(
-        result.message ||
-        "Unable to initialize payment."
-      );
-    }
-
-
-    if (
-      !result.data ||
-      !result.data.authorization_url
-    ) {
-
-      throw new Error(
-        "Paystack did not return a payment link."
-      );
-    }
-
-
-    window.location.href =
-      result.data.authorization_url;
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    showMessage(
-      error.message ||
-      "Unable to start payment. Please try again.",
-      "error"
+    console.error(
+      error
     );
+
+    throw error;
+  }
+
+
+  sessionStorage.setItem(
+    idempotencyKey,
+    String(data.id)
+  );
+
+
+  return data;
+}
+
+
+/* =====================================================
+   CONTINUE TO PAYMENT
+===================================================== */
+
+checkoutForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+
+    if (!currentProduct) {
+
+      showMessage(
+        "Product information is not available.",
+        "error"
+      );
+
+      return;
+    }
 
 
     payButton.disabled =
-      false;
+      true;
 
-    payButton.textContent =
-      "Continue to Payment";
+
+    showMessage(
+      "Preparing your payment...",
+      "loading"
+    );
+
+
+    try {
+
+      const {
+        data: {
+          user
+        },
+        error: userError
+      } =
+        await supabaseClient
+          .auth
+          .getUser();
+
+
+      if (
+        userError ||
+        !user
+      ) {
+
+        throw new Error(
+          "Please login before placing an order."
+        );
+      }
+
+
+      const customerName =
+        document
+          .getElementById(
+            "customerName"
+          )
+          .value
+          .trim();
+
+
+      const customerPhone =
+        document
+          .getElementById(
+            "customerPhone"
+          )
+          .value
+          .trim();
+
+
+      const deliveryAddress =
+        document
+          .getElementById(
+            "deliveryAddress"
+          )
+          .value
+          .trim();
+
+
+      if (
+        !customerName ||
+        !customerPhone ||
+        !deliveryAddress
+      ) {
+
+        throw new Error(
+          "Please complete all customer details."
+        );
+      }
+
+
+      const checkoutData = {
+
+        product_name:
+          currentProduct.name,
+
+        price:
+          Number(
+            currentProduct.price
+          ),
+
+        seller_id:
+          currentProduct.seller_id ||
+          null,
+
+        customer_id:
+          user.id,
+
+        customer_name:
+          customerName,
+
+        customer_phone:
+          customerPhone,
+
+        delivery_address:
+          deliveryAddress
+
+      };
+
+
+      sessionStorage.setItem(
+        "edesvinoCheckout",
+        JSON.stringify(
+          checkoutData
+        )
+      );
+
+
+      const callbackUrl =
+        window.location.origin +
+        window.location.pathname;
+
+
+      const response =
+        await fetch(
+          EDGE_FUNCTION_URL,
+          {
+
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+
+                action:
+                  "initialize",
+
+                email:
+                  user.email,
+
+                amount:
+                  Math.round(
+                    Number(
+                      currentProduct.price
+                    ) * 100
+                  ),
+
+                callback_url:
+                  callbackUrl,
+
+                metadata: {
+
+                  product_name:
+                    currentProduct.name,
+
+                  seller_id:
+                    currentProduct.seller_id ||
+                    null,
+
+                  customer_id:
+                    user.id,
+
+                  customer_name:
+                    customerName,
+
+                  customer_phone:
+                    customerPhone
+
+                }
+
+              })
+
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (
+        !response.ok ||
+        !result ||
+        !result.authorization_url
+      ) {
+
+        throw new Error(
+          result?.message ||
+          "Unable to initialize Paystack payment."
+        );
+      }
+
+
+      window.location.href =
+        result.authorization_url;
+
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      showMessage(
+        error.message ||
+        "Payment initialization failed.",
+        "error"
+      );
+
+
+      payButton.disabled =
+        false;
+    }
+
   }
-}
+);
 
 
-/* --------------------------------
-   VERIFY PAYMENT
-   USING verify-paystack
--------------------------------- */
+/* =====================================================
+   VERIFY PAYMENT AFTER PAYSTACK RETURNS
+===================================================== */
 
-async function verifyPayment(
-  reference
-) {
+async function verifyPayment() {
 
-  const productArea =
-    document.getElementById(
-      "productArea"
+  const params =
+    new URLSearchParams(
+      window.location.search
     );
 
 
-  const checkoutForm =
-    document.getElementById(
-      "checkoutForm"
+  const reference =
+    params.get(
+      "reference"
+    ) ||
+    params.get(
+      "trxref"
     );
 
 
-  productArea.innerHTML =
-    '<div class="loading">Verifying your payment securely...</div>';
+  if (!reference) {
+    return;
+  }
 
 
-  checkoutForm.style.display =
-    "none";
+  showMessage(
+    "Verifying your payment with Paystack...",
+    "loading"
+  );
 
 
   try {
-
-    /*
-       CALL NEW verify-paystack FUNCTION
-    */
 
     const response =
       await fetch(
         VERIFY_FUNCTION_URL,
         {
 
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
 
             "Content-Type":
-              "application/json",
-
-            "apikey":
-              SUPABASE_KEY,
-
-            "Authorization":
-              "Bearer " +
-              SUPABASE_KEY
+              "application/json"
 
           },
 
-          body: JSON.stringify({
+          body:
+            JSON.stringify({
 
-            reference:
-              reference
+              reference:
+                reference
 
-          })
+            })
 
         }
       );
@@ -749,20 +826,10 @@ async function verifyPayment(
 
 
     console.log(
-      "Paystack verification result:",
+      "Paystack verification:",
       result
     );
 
-
-    /*
-       verify-paystack returns:
-       success
-       paid
-       reference
-       amount
-       currency
-       status
-    */
 
     if (
       !response.ok ||
@@ -776,430 +843,95 @@ async function verifyPayment(
     }
 
 
-    if (
-      result.paid !== true
-    ) {
+    if (!result.paid) {
 
       throw new Error(
-        "Paystack has not confirmed this payment as successful."
+        "Payment was not successful."
       );
     }
 
 
-    /*
-       Payment has now been
-       verified by Paystack.
-    */
+    const paymentResult = {
 
-    await createOrder(
-      result
+      reference:
+        result.reference ||
+        reference,
+
+      amount:
+        result.amount ||
+        0,
+
+      status:
+        result.status
+
+    };
+
+
+    const order =
+      await createOrder(
+        paymentResult
+      );
+
+
+    checkoutForm.style.display =
+      "none";
+
+
+    showMessage(
+
+      "Payment was successfully verified by Paystack. " +
+      "Your order has been created. " +
+      "Order #" +
+      order.id +
+      " — ₦" +
+      Number(
+        paymentResult.amount / 100
+      ).toLocaleString(),
+
+      "success"
+
+    );
+
+
+    trackLink.style.display =
+      "block";
+
+
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname
     );
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
 
-    productArea.innerHTML = `
 
-      <div class="message error">
+    showMessage(
+      error.message ||
+      "Payment verification failed.",
+      "error"
+    );
 
-        <strong>
-          Payment verification failed.
-        </strong>
 
-        <br><br>
-
-        ${escapeHtml(
-          error.message
-        )}
-
-        <br><br>
-
-        If you were charged, please contact Edesvino support.
-
-      </div>
-
-      <a
-        class="continue"
-        href="index.html">
-
-        ← Continue Shopping
-
-      </a>
-
-    `;
-
-    checkoutForm.style.display =
-      "none";
+    payButton.disabled =
+      false;
   }
 }
 
 
-/* --------------------------------
-   CREATE ORDER
--------------------------------- */
+/* =====================================================
+   START CHECKOUT PAGE
+===================================================== */
 
-async function createOrder(
-  paymentData
-) {
+loadProduct();
 
-  const savedCheckout =
-    sessionStorage.getItem(
-      "edesvinoCheckout"
-    );
+verifyPayment();
 
-
-  if (!savedCheckout) {
-
-    throw new Error(
-      "Checkout information could not be recovered."
-    );
-  }
-
-
-  const checkout =
-    JSON.parse(
-      savedCheckout
-    );
-
-
-  const {
-    data: {
-      user
-    }
-  } =
-    await supabaseClient.auth.getUser();
-
-
-  const customerId =
-    user
-      ? user.id
-      : checkout.customer_id || null;
-
-
-  /*
-     PAYMENT REFERENCE
-     FROM VERIFIED PAYSTACK RESULT
-  */
-
-  const paymentReference =
-    paymentData.reference;
-
-
-  const idempotencyKey =
-    "edesvinoPayment_" +
-    paymentReference;
-
-
-  const existingPayment =
-    sessionStorage.getItem(
-      idempotencyKey
-    );
-
-
-  if (existingPayment) {
-
-    showSuccess(
-      existingPayment,
-
-      Number(
-        paymentData.amount || 0
-      ) / 100
-    );
-
-    return;
-  }
-
-
-  /*
-     CREATE ORDER ONLY AFTER
-     PAYSTACK VERIFICATION SUCCEEDS
-  */
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("orders")
-      .insert({
-
-        product_name:
-          checkout.product_name,
-
-        price:
-          checkout.price,
-
-        customer_name:
-          checkout.customer_name,
-
-        customer_phone:
-          checkout.customer_phone,
-
-        delivery_address:
-          checkout.delivery_address,
-
-        seller_id:
-          checkout.seller_id,
-
-        customer_id:
-          customerId,
-
-        status:
-          "Pending"
-
-      })
-      .select("id")
-      .single();
-
-
-  if (error) {
-
-    console.error(error);
-
-    throw new Error(
-      "Payment was successfully verified, but the order could not be created. Please contact Edesvino support."
-    );
-  }
-
-
-  const orderId =
-    data.id;
-
-
-  sessionStorage.setItem(
-    idempotencyKey,
-    String(orderId)
-  );
-
-
-  showSuccess(
-    orderId,
-
-    Number(
-      paymentData.amount || 0
-    ) / 100
-  );
-
-
-  sessionStorage.removeItem(
-    "edesvinoCheckout"
-  );
-}
-
-
-/* --------------------------------
-   SUCCESS SCREEN
--------------------------------- */
-
-function showSuccess(
-  orderId,
-  amount
-) {
-
-  const productArea =
-    document.getElementById(
-      "productArea"
-    );
-
-
-  const checkoutForm =
-    document.getElementById(
-      "checkoutForm"
-    );
-
-
-  const trackingUrl =
-    "track-order.html?order=" +
-    encodeURIComponent(
-      orderId
-    );
-
-
-  productArea.innerHTML = `
-
-    <div class="message success">
-
-      <h2>
-        Order Successful! 🎉
-      </h2>
-
-      <p>
-        Your payment was successfully verified by Paystack.
-      </p>
-
-      <div class="order-number">
-        Order #${escapeHtml(
-          orderId
-        )}
-      </div>
-
-      <p>
-        Amount:
-
-        <strong>
-          ₦${Number(
-            amount || 0
-          ).toLocaleString()}
-        </strong>
-      </p>
-
-    </div>
-
-
-    <a
-      class="track"
-      href="${trackingUrl}">
-
-      Track Your Order
-
-    </a>
-
-
-    <a
-      class="continue"
-      href="index.html">
-
-      ← Continue Shopping
-
-    </a>
-
-  `;
-
-
-  checkoutForm.style.display =
-    "none";
-
-
-  const cleanUrl =
-    window.location.origin +
-    window.location.pathname +
-    "?success=" +
-    encodeURIComponent(
-      orderId
-    );
-
-
-  window.history.replaceState(
-    {},
-    document.title,
-    cleanUrl
-  );
-}
-
-
-/* --------------------------------
-   CHECK FOR PAYSTACK RETURN
--------------------------------- */
-
-const reference =
-  urlParams.get("reference") ||
-  urlParams.get("trxref");
-
-
-if (reference) {
-
-  verifyPayment(
-    reference
-  );
-
-} else {
-
-  loadProduct();
-
-}
-
-
-/* --------------------------------
-   RESET BUTTON WHEN PAGE RETURNS
--------------------------------- */
-
-window.addEventListener(
-  "pageshow",
-  function() {
-
-    const payButton =
-      document.getElementById(
-        "payButton"
-      );
-
-
-    if (
-      payButton &&
-      payButton.disabled
-    ) {
-
-      payButton.disabled =
-        false;
-
-      payButton.textContent =
-        "Continue to Payment";
-    }
-
-  }
-);
-
-
-/* --------------------------------
-   MESSAGE
--------------------------------- */
-
-function showMessage(
-  message,
-  type
-) {
-
-  const messageBox =
-    document.getElementById(
-      "message"
-    );
-
-
-  messageBox.innerHTML = `
-
-    <div class="message ${type}">
-
-      ${escapeHtml(message)}
-
-    </div>
-
-  `;
-}
-
-
-/* --------------------------------
-   SECURITY
--------------------------------- */
-
-function escapeHtml(
-  value
-) {
-
-  return String(
-    value || ""
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-}
 
 </script>
 
