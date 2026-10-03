@@ -262,8 +262,19 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
+/*
+   EXISTING SMART-TASK FUNCTION
+   Used only to initialize Paystack payment.
+*/
 const EDGE_FUNCTION_URL =
   SUPABASE_URL + "/functions/v1/smart-task";
+
+/*
+   NEW VERIFY-PAYSTACK FUNCTION
+   Used to securely verify the Paystack transaction.
+*/
+const VERIFY_FUNCTION_URL =
+  SUPABASE_URL + "/functions/v1/verify-paystack";
 
 
 const supabaseClient =
@@ -483,10 +494,6 @@ async function startPayment() {
 
   try {
 
-    /*
-       GET LOGGED-IN CUSTOMER
-    */
-
     const {
       data: {
         user
@@ -494,12 +501,6 @@ async function startPayment() {
     } =
       await supabaseClient.auth.getUser();
 
-
-    /*
-       CUSTOMER ID
-       If the customer is logged in,
-       their Supabase user ID is saved.
-    */
 
     const customerId =
       user ? user.id : null;
@@ -553,18 +554,10 @@ async function startPayment() {
     );
 
 
-    /* ------------------------------
-       PAYSTACK CALLBACK URL
-    ------------------------------ */
-
     const callbackUrl =
       window.location.origin +
       window.location.pathname;
 
-
-    /* ------------------------------
-       INITIALIZE PAYSTACK
-    ------------------------------ */
 
     const response =
       await fetch(
@@ -686,6 +679,7 @@ async function startPayment() {
 
 /* --------------------------------
    VERIFY PAYMENT
+   USING verify-paystack
 -------------------------------- */
 
 async function verifyPayment(
@@ -705,7 +699,7 @@ async function verifyPayment(
 
 
   productArea.innerHTML =
-    '<div class="loading">Verifying your payment...</div>';
+    '<div class="loading">Verifying your payment securely...</div>';
 
 
   checkoutForm.style.display =
@@ -714,9 +708,13 @@ async function verifyPayment(
 
   try {
 
+    /*
+       CALL NEW verify-paystack FUNCTION
+    */
+
     const response =
       await fetch(
-        EDGE_FUNCTION_URL,
+        VERIFY_FUNCTION_URL,
         {
 
           method: "POST",
@@ -737,9 +735,6 @@ async function verifyPayment(
 
           body: JSON.stringify({
 
-            action:
-              "verify",
-
             reference:
               reference
 
@@ -753,9 +748,25 @@ async function verifyPayment(
       await response.json();
 
 
+    console.log(
+      "Paystack verification result:",
+      result
+    );
+
+
+    /*
+       verify-paystack returns:
+       success
+       paid
+       reference
+       amount
+       currency
+       status
+    */
+
     if (
       !response.ok ||
-      !result.status
+      !result.success
     ) {
 
       throw new Error(
@@ -766,18 +777,22 @@ async function verifyPayment(
 
 
     if (
-      !result.data ||
-      result.data.status !== "success"
+      result.paid !== true
     ) {
 
       throw new Error(
-        "Payment was not successful."
+        "Paystack has not confirmed this payment as successful."
       );
     }
 
 
+    /*
+       Payment has now been
+       verified by Paystack.
+    */
+
     await createOrder(
-      result.data
+      result
     );
 
 
@@ -801,7 +816,7 @@ async function verifyPayment(
 
         <br><br>
 
-        Please contact Edesvino support if you were charged.
+        If you were charged, please contact Edesvino support.
 
       </div>
 
@@ -814,7 +829,6 @@ async function verifyPayment(
       </a>
 
     `;
-
 
     checkoutForm.style.display =
       "none";
@@ -850,10 +864,6 @@ async function createOrder(
     );
 
 
-  /* --------------------------------
-     GET CURRENT CUSTOMER
-  -------------------------------- */
-
   const {
     data: {
       user
@@ -862,20 +872,16 @@ async function createOrder(
     await supabaseClient.auth.getUser();
 
 
-  /*
-     If the customer was logged in,
-     use their current Supabase ID.
-  */
-
   const customerId =
     user
       ? user.id
       : checkout.customer_id || null;
 
 
-  /* --------------------------------
-     PREVENT DUPLICATE ORDER
-  -------------------------------- */
+  /*
+     PAYMENT REFERENCE
+     FROM VERIFIED PAYSTACK RESULT
+  */
 
   const paymentReference =
     paymentData.reference;
@@ -894,26 +900,22 @@ async function createOrder(
 
   if (existingPayment) {
 
-    const existingOrderId =
-      existingPayment;
-
-
     showSuccess(
-      existingOrderId,
+      existingPayment,
 
       Number(
         paymentData.amount || 0
       ) / 100
     );
 
-
     return;
   }
 
 
-  /* --------------------------------
-     INSERT ORDER
-  -------------------------------- */
+  /*
+     CREATE ORDER ONLY AFTER
+     PAYSTACK VERIFICATION SUCCEEDS
+  */
 
   const {
     data,
@@ -957,7 +959,7 @@ async function createOrder(
     console.error(error);
 
     throw new Error(
-      "Payment was successful, but the order could not be created. Please contact Edesvino support."
+      "Payment was successfully verified, but the order could not be created. Please contact Edesvino support."
     );
   }
 
@@ -966,19 +968,11 @@ async function createOrder(
     data.id;
 
 
-  /* --------------------------------
-     SAVE PAYMENT REFERENCE
-  -------------------------------- */
-
   sessionStorage.setItem(
     idempotencyKey,
     String(orderId)
   );
 
-
-  /* --------------------------------
-     SHOW SUCCESS
-  -------------------------------- */
 
   showSuccess(
     orderId,
@@ -1032,7 +1026,7 @@ function showSuccess(
       </h2>
 
       <p>
-        Your payment was successfully verified.
+        Your payment was successfully verified by Paystack.
       </p>
 
       <div class="order-number">
