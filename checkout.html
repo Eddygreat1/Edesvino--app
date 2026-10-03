@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Checkout - Edesvino</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Checkout - Edesvino</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
     * {
       box-sizing: border-box;
     }
@@ -115,6 +108,7 @@
       padding: 15px;
       border-radius: 8px;
       display: none;
+      word-break: break-word;
     }
 
     .success {
@@ -150,91 +144,76 @@
       color: #2563eb;
       text-decoration: none;
     }
-  </style>
-</head>
-
-<body>
-
-<header>
+  </style></head><body><header>
   <h1>Edesvino</h1>
-</header>
+</header><div class="container">  <div class="card"><h2>Checkout</h2>
 
-<div class="container">
-
-  <div class="card">
-
-    <h2>Checkout</h2>
-
-    <div id="productBox" class="product">
-      Loading product...
-    </div>
-
-    <form id="checkoutForm">
-
-      <label for="customerName">
-        Full Name
-      </label>
-
-      <input
-        type="text"
-        id="customerName"
-        required
-      >
-
-      <label for="customerPhone">
-        Phone Number
-      </label>
-
-      <input
-        type="tel"
-        id="customerPhone"
-        required
-      >
-
-      <label for="deliveryAddress">
-        Delivery Address
-      </label>
-
-      <textarea
-        id="deliveryAddress"
-        required
-      ></textarea>
-
-      <button
-        id="payButton"
-        type="submit"
-      >
-        Continue to Payment
-      </button>
-
-    </form>
-
-    <div
-      id="message"
-      class="message"
-    ></div>
-
-    <a
-      id="trackLink"
-      class="track-link"
-      href="track-order.html"
-      style="display:none;"
-    >
-      Track Your Order
-    </a>
-
-    <a
-      href="index.html"
-      class="back"
-    >
-      ← Back to Marketplace
-    </a>
-
-  </div>
-
+<div id="productBox" class="product">
+  Loading product...
 </div>
 
-<script>
+<form id="checkoutForm">
+
+  <label for="customerName">
+    Full Name
+  </label>
+
+  <input
+    type="text"
+    id="customerName"
+    required
+  >
+
+  <label for="customerPhone">
+    Phone Number
+  </label>
+
+  <input
+    type="tel"
+    id="customerPhone"
+    required
+  >
+
+  <label for="deliveryAddress">
+    Delivery Address
+  </label>
+
+  <textarea
+    id="deliveryAddress"
+    required
+  ></textarea>
+
+  <button
+    id="payButton"
+    type="submit"
+  >
+    Continue to Payment
+  </button>
+
+</form>
+
+<div
+  id="message"
+  class="message"
+></div>
+
+<a
+  id="trackLink"
+  class="track-link"
+  href="track-order.html"
+  style="display:none;"
+>
+  Track Your Order
+</a>
+
+<a
+  href="index.html"
+  class="back"
+>
+  ← Back to Marketplace
+</a>
+
+  </div></div><script>
 
 /* =====================================================
    SUPABASE SETTINGS
@@ -274,30 +253,19 @@ const supabaseClient =
 ===================================================== */
 
 const productBox =
-  document.getElementById(
-    "productBox"
-  );
+  document.getElementById("productBox");
 
 const checkoutForm =
-  document.getElementById(
-    "checkoutForm"
-  );
+  document.getElementById("checkoutForm");
 
 const payButton =
-  document.getElementById(
-    "payButton"
-  );
+  document.getElementById("payButton");
 
 const message =
-  document.getElementById(
-    "message"
-  );
+  document.getElementById("message");
 
 const trackLink =
-  document.getElementById(
-    "trackLink"
-  );
-
+  document.getElementById("trackLink");
 
 let currentProduct = null;
 
@@ -306,19 +274,14 @@ let currentProduct = null;
    SHOW MESSAGE
 ===================================================== */
 
-function showMessage(
-  text,
-  type
-) {
+function showMessage(text, type) {
 
-  message.textContent =
-    text;
+  message.textContent = text;
 
   message.className =
     "message " + type;
 
-  message.style.display =
-    "block";
+  message.style.display = "block";
 }
 
 
@@ -338,7 +301,6 @@ async function loadProduct() {
     const productName =
       params.get("product");
 
-
     if (!productName) {
 
       productBox.innerHTML =
@@ -347,7 +309,6 @@ async function loadProduct() {
       return;
     }
 
-
     const {
       data,
       error
@@ -355,18 +316,13 @@ async function loadProduct() {
       await supabaseClient
         .from("products")
         .select("*")
-        .eq(
-          "name",
-          productName
-        )
+        .eq("name", productName)
         .limit(1)
         .maybeSingle();
-
 
     if (error) {
       throw error;
     }
-
 
     if (!data) {
 
@@ -376,10 +332,7 @@ async function loadProduct() {
       return;
     }
 
-
-    currentProduct =
-      data;
-
+    currentProduct = data;
 
     productBox.innerHTML = `
 
@@ -408,7 +361,6 @@ async function loadProduct() {
 
     `;
 
-
   } catch (error) {
 
     console.error(error);
@@ -423,9 +375,7 @@ async function loadProduct() {
    CREATE ORDER
 ===================================================== */
 
-async function createOrder(
-  paymentResult
-) {
+async function createOrder(paymentResult) {
 
   const checkoutData =
     JSON.parse(
@@ -434,21 +384,17 @@ async function createOrder(
       ) || "{}"
     );
 
-
   const paymentReference =
     paymentResult.reference;
-
 
   const idempotencyKey =
     "edesvinoPayment_" +
     paymentReference;
 
-
   const existingOrder =
     sessionStorage.getItem(
       idempotencyKey
     );
-
 
   if (existingOrder) {
 
@@ -456,7 +402,6 @@ async function createOrder(
       id: existingOrder
     };
   }
-
 
   const {
     data,
@@ -496,7 +441,6 @@ async function createOrder(
       .select()
       .single();
 
-
   if (error) {
 
     console.error(error);
@@ -504,12 +448,10 @@ async function createOrder(
     throw error;
   }
 
-
   sessionStorage.setItem(
     idempotencyKey,
     String(data.id)
   );
-
 
   return data;
 }
@@ -525,7 +467,6 @@ checkoutForm.addEventListener(
 
     event.preventDefault();
 
-
     if (!currentProduct) {
 
       showMessage(
@@ -536,16 +477,12 @@ checkoutForm.addEventListener(
       return;
     }
 
-
-    payButton.disabled =
-      true;
-
+    payButton.disabled = true;
 
     showMessage(
       "Preparing your payment...",
       "loading"
     );
-
 
     try {
 
@@ -559,44 +496,30 @@ checkoutForm.addEventListener(
           .auth
           .getUser();
 
-
-      if (
-        userError ||
-        !user
-      ) {
+      if (userError || !user) {
 
         throw new Error(
           "Please login before placing an order."
         );
       }
 
-
       const customerName =
         document
-          .getElementById(
-            "customerName"
-          )
+          .getElementById("customerName")
           .value
           .trim();
-
 
       const customerPhone =
         document
-          .getElementById(
-            "customerPhone"
-          )
+          .getElementById("customerPhone")
           .value
           .trim();
-
 
       const deliveryAddress =
         document
-          .getElementById(
-            "deliveryAddress"
-          )
+          .getElementById("deliveryAddress")
           .value
           .trim();
-
 
       if (
         !customerName ||
@@ -608,7 +531,6 @@ checkoutForm.addEventListener(
           "Please complete all customer details."
         );
       }
-
 
       const checkoutData = {
 
@@ -635,9 +557,7 @@ checkoutForm.addEventListener(
 
         delivery_address:
           deliveryAddress
-
       };
-
 
       sessionStorage.setItem(
         "edesvinoCheckout",
@@ -646,11 +566,10 @@ checkoutForm.addEventListener(
         )
       );
 
-
       const callbackUrl =
         window.location.origin +
-        window.location.pathname;
-
+        window.location.pathname +
+        window.location.search;
 
       /* =================================================
          INITIALIZE PAYSTACK PAYMENT
@@ -710,22 +629,21 @@ checkoutForm.addEventListener(
 
                   customer_phone:
                     customerPhone
-
                 }
-
               })
           }
         );
 
-
       const result =
         await response.json();
 
+      console.log(
+        "Paystack initialization:",
+        result
+      );
 
       if (
-        !response.ok ||
-        !result ||
-        !result.authorization_url
+        !response.ok
       ) {
 
         throw new Error(
@@ -734,10 +652,39 @@ checkoutForm.addEventListener(
         );
       }
 
+      /*
+       * SMART-TASK MAY RETURN THE URL
+       * UNDER DIFFERENT PROPERTY NAMES.
+       */
 
-      window.location.href =
-        result.authorization_url;
+      const authorizationUrl =
+        result?.authorization_url ||
+        result?.data?.authorization_url ||
+        result?.data?.data?.authorization_url ||
+        result?.authorizationUrl ||
+        result?.data?.authorizationUrl;
 
+      if (!authorizationUrl) {
+
+        throw new Error(
+          result?.message ||
+          "Paystack authorization URL was not returned."
+        );
+      }
+
+      showMessage(
+        "Opening Paystack payment...",
+        "loading"
+      );
+
+      /*
+       * IMPORTANT:
+       * Use the actual Paystack authorization URL.
+       */
+
+      window.location.assign(
+        authorizationUrl
+      );
 
     } catch (error) {
 
@@ -749,8 +696,7 @@ checkoutForm.addEventListener(
         "error"
       );
 
-      payButton.disabled =
-        false;
+      payButton.disabled = false;
     }
 
   }
@@ -768,26 +714,18 @@ async function verifyPayment() {
       window.location.search
     );
 
-
   const reference =
-    params.get(
-      "reference"
-    ) ||
-    params.get(
-      "trxref"
-    );
-
+    params.get("reference") ||
+    params.get("trxref");
 
   if (!reference) {
     return;
   }
 
-
   showMessage(
     "Verifying your payment with Paystack...",
     "loading"
   );
-
 
   try {
 
@@ -817,16 +755,13 @@ async function verifyPayment() {
         }
       );
 
-
     const result =
       await response.json();
-
 
     console.log(
       "Paystack verification:",
       result
     );
-
 
     if (
       !response.ok ||
@@ -839,14 +774,12 @@ async function verifyPayment() {
       );
     }
 
-
     if (!result.paid) {
 
       throw new Error(
         "Payment was not successful."
       );
     }
-
 
     const paymentResult = {
 
@@ -863,16 +796,13 @@ async function verifyPayment() {
 
     };
 
-
     const order =
       await createOrder(
         paymentResult
       );
 
-
     checkoutForm.style.display =
       "none";
-
 
     showMessage(
       "Payment was successfully verified by Paystack. " +
@@ -886,17 +816,14 @@ async function verifyPayment() {
       "success"
     );
 
-
     trackLink.style.display =
       "block";
-
 
     window.history.replaceState(
       {},
       document.title,
       window.location.pathname
     );
-
 
   } catch (error) {
 
@@ -908,8 +835,7 @@ async function verifyPayment() {
       "error"
     );
 
-    payButton.disabled =
-      false;
+    payButton.disabled = false;
   }
 }
 
@@ -922,7 +848,5 @@ loadProduct();
 
 verifyPayment();
 
-</script>
-
-</body>
+</script></body>
 </html>
