@@ -7,7 +7,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>Edesvino - My Orders</title>
+<title>Edesvino - Track Your Order</title>
 
 <style>
 
@@ -96,7 +96,7 @@ h1 {
     <h1>Edesvino</h1>
 
     <p class="subtitle">
-      My Orders
+      Track Your Order
     </p>
 
     <div id="ordersContainer">
@@ -174,8 +174,7 @@ async function loadOrders() {
 
 
   /*
-    First try the proper customer_id
-    connection.
+    First try customer_id.
   */
 
   let {
@@ -198,13 +197,8 @@ async function loadOrders() {
 
 
   /*
-    If no orders are connected to
-    customer_id, try the customer's
-    registered name.
-
-    This supports existing orders
-    that were created before the
-    customer_id connection was added.
+    If customer_id does not find
+    existing orders, use customer name.
   */
 
   if (
@@ -319,7 +313,7 @@ async function loadOrders() {
       </p>
 
       <p>
-        <strong>Price:</strong>
+        <strong>Amount:</strong>
         ₦${Number(
           order.price || 0
         ).toLocaleString()}
@@ -334,36 +328,20 @@ async function loadOrders() {
       </p>
 
       <p>
-        <strong>Phone:</strong>
+        <strong>Order Date:</strong>
         ${escapeHtml(
-          order.customer_phone ||
-          ""
+          orderDate
         )}
       </p>
 
       <p>
-        <strong>Delivery Address:</strong>
-        ${escapeHtml(
-          order.delivery_address ||
-          ""
-        )}
-      </p>
-
-      <p>
-        <strong>Status:</strong>
+        <strong>Order Status:</strong>
         <span class="status">
           ${escapeHtml(
             order.status ||
             "Pending"
           )}
         </span>
-      </p>
-
-      <p>
-        <strong>Order Date:</strong>
-        ${escapeHtml(
-          orderDate
-        )}
       </p>
 
     `;
