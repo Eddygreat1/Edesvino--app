@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Track Order - Edesvino</title>
+  <title>Track Your Order - Edesvino</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -15,391 +14,200 @@
 
     body {
       margin: 0;
-      padding: 20px;
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f5f5f5;
       color: #222;
     }
 
-    .container {
-      max-width: 500px;
-      margin: 40px auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      text-align: center;
-      margin-top: 0;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #555;
-    }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      margin: 15px 0;
-      border: 1px solid #ccc;
-      border-radius: 7px;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
+    header {
       background: #111;
       color: white;
-      border: none;
-      border-radius: 7px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-    }
-
-    #result {
-      margin-top: 25px;
-    }
-
-    .order-box {
-      background: #f8f8f8;
       padding: 18px;
-      border-radius: 8px;
-      line-height: 1.6;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 25px auto;
+      padding: 15px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 18px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      margin-top: 0;
     }
 
     .status {
       font-weight: bold;
-    }
-
-    .error {
-      background: #fff0f0;
-      padding: 15px;
-      border-radius: 8px;
-      color: #a00000;
+      font-size: 18px;
     }
 
     .back {
-      display: block;
-      text-align: center;
-      margin-top: 25px;
-      color: #111;
+      display: inline-block;
+      margin-top: 10px;
       text-decoration: none;
+      color: #111;
+      font-weight: bold;
+    }
+
+    .message {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
 
+<header>
+  <h1>Edesvino</h1>
+  <p>Track Your Order</p>
+</header>
+
 <div class="container">
 
-  <h1>Edesvino</h1>
+  <div id="orders">
+    <div class="message">Loading your orders...</div>
+  </div>
 
-  <p class="subtitle">
-    Track Your Order
-  </p>
-
-  <input
-    type="number"
-    id="orderNumber"
-    placeholder="Enter your order number"
-  >
-
-  <button
-    id="trackButton"
-    onclick="trackOrder()"
-  >
-    Track Order
-  </button>
-
-  <div id="result"></div>
-
-  <a
-    class="back"
-    href="index.html"
-  >
-    ← Back to Edesvino
-  </a>
+  <a class="back" href="index.html">← Back to Edesvino</a>
 
 </div>
 
-
 <script>
+  const SUPABASE_URL = "https://lxszilqypuglxyfyukdg.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
-const SUPABASE_URL =
-  "https://lxszilqypuglxyfyukdg.supabase.co";
-
-const SUPABASE_KEY =
-  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
-
-
-const supabaseClient =
-  window.supabase.createClient(
+  const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_ANON_KEY
   );
 
+  async function loadOrders() {
+    const ordersContainer = document.getElementById("orders");
 
-const orderInput =
-  document.getElementById(
-    "orderNumber"
-  );
+    try {
+      const {
+        data: { user },
+        error: userError
+      } = await supabaseClient.auth.getUser();
 
+      if (userError || !user) {
+        ordersContainer.innerHTML = `
+          <div class="message">
+            <p>Please log in to track your orders.</p>
+            <a href="customer-login.html">Customer Login</a>
+          </div>
+        `;
+        return;
+      }
 
-const result =
-  document.getElementById(
-    "result"
-  );
+      const { data: orders, error } = await supabaseClient
+        .from("orders")
+        .select("*")
+        .eq("customer_email", user.email)
+        .order("created_at", { ascending: false });
 
+      if (error) {
+        console.error(error);
+        ordersContainer.innerHTML = `
+          <div class="message">
+            <p>Unable to load your orders.</p>
+            <p>${error.message}</p>
+          </div>
+        `;
+        return;
+      }
 
-const trackButton =
-  document.getElementById(
-    "trackButton"
-  );
+      if (!orders || orders.length === 0) {
+        ordersContainer.innerHTML = `
+          <div class="message">
+            <p>No orders found.</p>
+          </div>
+        `;
+        return;
+      }
 
+      ordersContainer.innerHTML = "";
 
-async function trackOrder(orderId = null) {
+      orders.forEach(order => {
+        const product =
+          order.product_name ||
+          order.product ||
+          "Product";
 
-  const orderNumber =
-    orderId ||
-    orderInput.value.trim();
+        const amount =
+          order.price ??
+          order.amount ??
+          0;
 
+        const customer =
+          order.customer_name ||
+          order.customer ||
+          "Customer";
 
-  if (!orderNumber) {
+        const status =
+          order.status ||
+          "Pending";
 
-    result.innerHTML =
-      '<div class="error">' +
-      'Please enter your order number.' +
-      '</div>';
+        const orderDate =
+          order.created_at
+            ? new Date(order.created_at).toLocaleString()
+            : "N/A";
 
-    return;
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+          <h2>Order #${order.id}</h2>
+
+          <p><strong>Product:</strong><br>
+          ${product}</p>
+
+          <p><strong>Amount:</strong><br>
+          ₦${Number(amount).toLocaleString()}</p>
+
+          <p><strong>Customer:</strong><br>
+          ${customer}</p>
+
+          <p><strong>Order Date:</strong><br>
+          ${orderDate}</p>
+
+          <p class="status">
+            <strong>Order Status:</strong><br>
+            ${status}
+          </p>
+        `;
+
+        ordersContainer.appendChild(card);
+      });
+
+    } catch (error) {
+      console.error(error);
+
+      ordersContainer.innerHTML = `
+        <div class="message">
+          <p>An unexpected error occurred.</p>
+        </div>
+      `;
+    }
   }
 
-
-  orderInput.value =
-    orderNumber;
-
-
-  trackButton.disabled =
-    true;
-
-  trackButton.textContent =
-    "Checking...";
-
-
-  result.innerHTML =
-    "<p>Checking your order...</p>";
-
-
-  try {
-
-    const response =
-      await fetch(
-        SUPABASE_URL +
-        "/rest/v1/orders?id=eq." +
-        encodeURIComponent(orderNumber) +
-        "&select=id,product_name,price,customer_name,created_at,status",
-        {
-          method: "GET",
-
-          headers: {
-            "apikey":
-              SUPABASE_KEY,
-
-            "Authorization":
-              "Bearer " +
-              SUPABASE_KEY
-          }
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (!response.ok) {
-
-      console.error(data);
-
-      result.innerHTML =
-        '<div class="error">' +
-        'Unable to check the order. ' +
-        'Please try again.' +
-        '</div>';
-
-      return;
-    }
-
-
-    if (
-      !Array.isArray(data) ||
-      data.length === 0
-    ) {
-
-      result.innerHTML =
-        '<div class="error">' +
-        '<strong>Order not found.</strong>' +
-        '<br>Please check your order number.' +
-        '</div>';
-
-      return;
-    }
-
-
-    const order =
-      data[0];
-
-
-    const orderDate =
-      new Date(
-        order.created_at
-      ).toLocaleString();
-
-
-    const amount =
-      Number(
-        order.price || 0
-      ).toLocaleString();
-
-
-    result.innerHTML = `
-
-      <div class="order-box">
-
-        <h2>
-          Order #${order.id}
-        </h2>
-
-        <p>
-          <strong>Product:</strong><br>
-          ${escapeHtml(
-            order.product_name ||
-            "N/A"
-          )}
-        </p>
-
-        <p>
-          <strong>Amount:</strong><br>
-          ₦${amount}
-        </p>
-
-        <p>
-          <strong>Customer:</strong><br>
-          ${escapeHtml(
-            order.customer_name ||
-            "N/A"
-          )}
-        </p>
-
-        <p>
-          <strong>Order Date:</strong><br>
-          ${orderDate}
-        </p>
-
-        <p>
-          <strong>Order Status:</strong><br>
-
-          <span class="status">
-            ${escapeHtml(
-              order.status ||
-              "Pending"
-            )}
-          </span>
-
-        </p>
-
-      </div>
-
-    `;
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    result.innerHTML =
-      '<div class="error">' +
-      'Something went wrong while checking the order.' +
-      '</div>';
-
-  } finally {
-
-    trackButton.disabled =
-      false;
-
-    trackButton.textContent =
-      "Track Order";
-
-  }
-
-}
-
-
-/* --------------------------------
-   AUTOMATIC ORDER TRACKING
--------------------------------- */
-
-const urlParams =
-  new URLSearchParams(
-    window.location.search
-  );
-
-
-const orderFromUrl =
-  urlParams.get("order");
-
-
-if (orderFromUrl) {
-
-  orderInput.value =
-    orderFromUrl;
-
-  trackOrder(
-    orderFromUrl
-  );
-
-}
-
-
-/* --------------------------------
-   HTML SAFETY
--------------------------------- */
-
-function escapeHtml(value) {
-
-  return String(value || "")
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
-}
-
+  loadOrders();
 </script>
 
 </body>
