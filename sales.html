@@ -163,7 +163,7 @@ body {
         </div>
 
         <p class="note">
-          Seller receives 95% of delivered sales.
+          Seller receives the remaining amount after commission.
         </p>
 
       </div>
@@ -226,16 +226,6 @@ window.supabase.createClient(
 );
 
 
-/*
-  Edesvino marketplace commission.
-
-  5% goes to Edesvino.
-  95% goes to the seller.
-*/
-
-const COMMISSION_RATE = 0.05;
-
-
 function formatNaira(amount) {
 
   return "₦" +
@@ -277,6 +267,10 @@ async function loadSales() {
     userData.user;
 
 
+  /*
+    Load seller orders.
+  */
+
   const {
     data: orders,
     error
@@ -303,6 +297,10 @@ async function loadSales() {
 
   }
 
+
+  /*
+    Calculate total delivered sales.
+  */
 
   let completedSales = 0;
 
@@ -336,16 +334,76 @@ async function loadSales() {
 
 
   /*
-    Calculate Edesvino's 5% commission.
+    Get the actual commission records
+    stored in the database.
   */
 
-  const commission =
-    completedSales *
-    COMMISSION_RATE;
+  const {
+    data: commissionRecords,
+    error: commissionError
+  } =
+    await supabaseClient
+      .from("platform_commissions")
+      .select(
+        "order_id, commission_amount, seller_amount"
+      )
+      .in(
+        "order_id",
+        orders && orders.length
+          ? orders.map(
+              function(order) {
+                return order.id;
+              }
+            )
+          : [-1]
+      );
 
 
   /*
-    Seller receives the remaining 95%.
+    If commission records cannot be read,
+    show a clear error instead of silently
+    displaying an incorrect amount.
+  */
+
+  if (commissionError) {
+
+    loading.textContent =
+      "Unable to load commission records: " +
+      commissionError.message;
+
+    return;
+
+  }
+
+
+  /*
+    Add the actual commission amounts
+    recorded in the database.
+  */
+
+  let commission = 0;
+
+
+  if (commissionRecords) {
+
+    commissionRecords.forEach(
+      function(record) {
+
+        commission +=
+          Number(
+            record.commission_amount
+          ) || 0;
+
+      }
+    );
+
+  }
+
+
+  /*
+    Seller earnings are total delivered
+    sales minus the actual recorded
+    Edesvino commission.
   */
 
   const sellerEarnings =
