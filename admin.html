@@ -197,6 +197,21 @@ body {
       </div>
 
 
+      <div class="stat">
+
+        <h2>Total Customers</h2>
+
+        <div
+          class="amount"
+          id="totalCustomers">
+
+          0
+
+        </div>
+
+      </div>
+
+
       <p class="note">
         Platform earnings are based on
         recorded commissions from delivered orders.
@@ -266,10 +281,6 @@ async function loadAdminDashboard() {
     document.getElementById("adminContent");
 
 
-  /*
-    Check logged-in user.
-  */
-
   const {
     data: userData,
     error: userError
@@ -294,11 +305,6 @@ async function loadAdminDashboard() {
   const user =
     userData.user;
 
-
-  /*
-    Check whether the user is
-    registered as a platform admin.
-  */
 
   const {
     data: adminRecord,
@@ -330,10 +336,6 @@ async function loadAdminDashboard() {
   }
 
 
-  /*
-    Load all commission records.
-  */
-
   const {
     data: commissions,
     error: commissionError
@@ -364,22 +366,14 @@ async function loadAdminDashboard() {
   }
 
 
-  /*
-    Load total number of orders.
-  */
-
   const {
-    count: totalOrders,
+    data: orders,
     error: ordersError
   } =
     await supabaseClient
       .from("orders")
       .select(
-        "id",
-        {
-          count: "exact",
-          head: true
-        }
+        "id, customer_id"
       );
 
 
@@ -387,13 +381,48 @@ async function loadAdminDashboard() {
 
     loading.innerHTML =
       '<p class="error">' +
-      'Unable to load total orders: ' +
+      'Unable to load orders: ' +
       ordersError.message +
       '</p>';
 
     return;
 
   }
+
+
+  const totalOrders =
+    orders
+      ? orders.length
+      : 0;
+
+
+  const customerIds =
+    new Set();
+
+
+  if (orders) {
+
+    orders.forEach(
+      function(order) {
+
+        if (
+          order.customer_id
+        ) {
+
+          customerIds.add(
+            order.customer_id
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  const totalCustomers =
+    customerIds.size;
 
 
   let totalSales = 0;
@@ -462,7 +491,13 @@ async function loadAdminDashboard() {
   document.getElementById(
     "totalOrders"
   ).textContent =
-    totalOrders || 0;
+    totalOrders;
+
+
+  document.getElementById(
+    "totalCustomers"
+  ).textContent =
+    totalCustomers;
 
 
   const records =
