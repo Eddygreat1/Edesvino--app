@@ -91,6 +91,10 @@ body {
   font-weight: bold;
 }
 
+.success {
+  color: #047857;
+}
+
 </style>
 
 </head>
@@ -281,313 +285,402 @@ async function loadAdminDashboard() {
     document.getElementById("adminContent");
 
 
-  const {
-    data: userData,
-    error: userError
-  } =
-    await supabaseClient.auth.getUser();
+  try {
+
+    /*
+      STEP 1
+      Check that the user is logged in.
+    */
+
+    const {
+      data: userData,
+      error: userError
+    } =
+      await supabaseClient.auth.getUser();
 
 
-  if (
-    userError ||
-    !userData.user
-  ) {
+    if (
+      userError ||
+      !userData.user
+    ) {
 
-    window.location.replace(
-      "login.html"
-    );
-
-    return;
-
-  }
-
-
-  const user =
-    userData.user;
-
-
-  const {
-    data: adminRecord,
-    error: adminError
-  } =
-    await supabaseClient
-      .from("platform_admins")
-      .select("user_id")
-      .eq(
-        "user_id",
-        user.id
-      )
-      .maybeSingle();
-
-
-  if (
-    adminError ||
-    !adminRecord
-  ) {
-
-    loading.innerHTML =
-      '<p class="error">' +
-      'Access denied. ' +
-      'You are not a platform administrator.' +
-      '</p>';
-
-    return;
-
-  }
-
-
-  const {
-    data: commissions,
-    error: commissionError
-  } =
-    await supabaseClient
-      .from("platform_commissions")
-      .select(
-        "order_id, order_amount, commission_amount, seller_amount, created_at"
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
+      window.location.replace(
+        "login.html"
       );
 
+      return;
 
-  if (commissionError) {
+    }
 
-    loading.innerHTML =
-      '<p class="error">' +
-      'Unable to load commission records: ' +
-      commissionError.message +
-      '</p>';
 
-    return;
+    const user =
+      userData.user;
 
-  }
 
+    /*
+      STEP 2
+      Check platform_admins table.
 
-  const {
-    data: orders,
-    error: ordersError
-  } =
-    await supabaseClient
-      .from("orders")
-      .select(
-        "id, customer_id"
-      );
+      Only a user whose ID exists in
+      platform_admins can enter.
+    */
 
+    const {
+      data: adminRecord,
+      error: adminError
+    } =
+      await supabaseClient
+        .from("platform_admins")
+        .select("user_id")
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
 
-  if (ordersError) {
 
-    loading.innerHTML =
-      '<p class="error">' +
-      'Unable to load orders: ' +
-      ordersError.message +
-      '</p>';
+    if (adminError) {
 
-    return;
+      loading.innerHTML =
+        '<p class="error">' +
+        'Unable to verify admin access: ' +
+        adminError.message +
+        '</p>';
 
-  }
+      return;
 
+    }
 
-  const totalOrders =
-    orders
-      ? orders.length
-      : 0;
 
+    if (!adminRecord) {
 
-  const customerIds =
-    new Set();
+      loading.innerHTML =
+        '<p class="error">' +
+        'Access denied. ' +
+        'You are not a platform administrator.' +
+        '</p>';
 
+      return;
 
-  if (orders) {
+    }
 
-    orders.forEach(
-      function(order) {
 
-        if (
-          order.customer_id
-        ) {
+    /*
+      STEP 3
+      Load commission records.
+    */
 
-          customerIds.add(
-            order.customer_id
-          );
-
-        }
-
-      }
-    );
-
-  }
-
-
-  const totalCustomers =
-    customerIds.size;
-
-
-  let totalSales = 0;
-  let totalCommission = 0;
-  let totalSellerEarnings = 0;
-
-
-  if (commissions) {
-
-    commissions.forEach(
-      function(record) {
-
-        totalSales +=
-          Number(
-            record.order_amount
-          ) || 0;
-
-        totalCommission +=
-          Number(
-            record.commission_amount
-          ) || 0;
-
-        totalSellerEarnings +=
-          Number(
-            record.seller_amount
-          ) || 0;
-
-      }
-    );
-
-  }
-
-
-  document.getElementById(
-    "totalSales"
-  ).textContent =
-    formatNaira(
-      totalSales
-    );
-
-
-  document.getElementById(
-    "totalCommission"
-  ).textContent =
-    formatNaira(
-      totalCommission
-    );
-
-
-  document.getElementById(
-    "sellerEarnings"
-  ).textContent =
-    formatNaira(
-      totalSellerEarnings
-    );
-
-
-  document.getElementById(
-    "completedOrders"
-  ).textContent =
-    commissions
-      ? commissions.length
-      : 0;
-
-
-  document.getElementById(
-    "totalOrders"
-  ).textContent =
-    totalOrders;
-
-
-  document.getElementById(
-    "totalCustomers"
-  ).textContent =
-    totalCustomers;
-
-
-  const records =
-    document.getElementById(
-      "records"
-    );
-
-
-  if (
-    !commissions ||
-    commissions.length === 0
-  ) {
-
-    records.innerHTML =
-      "<p>No commission records yet.</p>";
-
-  } else {
-
-    commissions.forEach(
-      function(record) {
-
-        const item =
-          document.createElement(
-            "div"
-          );
-
-
-        item.className =
-          "record";
-
-
-        item.innerHTML = `
-
-          <strong>
-            Order #${record.order_id}
-          </strong>
-
-          <p>
-            Order Amount:
-            ${formatNaira(
-              record.order_amount
-            )}
-          </p>
-
-          <p>
-            Edesvino Commission:
-            ${formatNaira(
-              record.commission_amount
-            )}
-          </p>
-
-          <p>
-            Seller Earnings:
-            ${formatNaira(
-              record.seller_amount
-            )}
-          </p>
-
-          <p>
-            Date:
-            ${
-              record.created_at
-                ? new Date(
-                    record.created_at
-                  ).toLocaleString(
-                    "en-NG"
-                  )
-                : "Unknown"
-            }
-          </p>
-
-        `;
-
-
-        records.appendChild(
-          item
+    const {
+      data: commissions,
+      error: commissionError
+    } =
+      await supabaseClient
+        .from("platform_commissions")
+        .select(
+          "order_id, order_amount, commission_amount, seller_amount, created_at"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
         );
 
-      }
+
+    if (commissionError) {
+
+      loading.innerHTML =
+        '<p class="error">' +
+        'Unable to load commission records: ' +
+        commissionError.message +
+        '</p>';
+
+      return;
+
+    }
+
+
+    /*
+      STEP 4
+      Load all orders.
+    */
+
+    const {
+      data: orders,
+      error: ordersError
+    } =
+      await supabaseClient
+        .from("orders")
+        .select(
+          "id, customer_id, status"
+        );
+
+
+    if (ordersError) {
+
+      loading.innerHTML =
+        '<p class="error">' +
+        'Unable to load orders: ' +
+        ordersError.message +
+        '</p>';
+
+      return;
+
+    }
+
+
+    /*
+      STEP 5
+      Count all orders.
+    */
+
+    const totalOrders =
+      orders
+        ? orders.length
+        : 0;
+
+
+    /*
+      STEP 6
+      Count unique customers.
+    */
+
+    const customerIds =
+      new Set();
+
+
+    if (orders) {
+
+      orders.forEach(
+        function(order) {
+
+          if (
+            order.customer_id
+          ) {
+
+            customerIds.add(
+              order.customer_id
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+
+    const totalCustomers =
+      customerIds.size;
+
+
+    /*
+      STEP 7
+      Calculate totals from commission records.
+
+      Commission records represent
+      completed/delivered platform sales.
+    */
+
+    let totalSales = 0;
+
+    let totalCommission = 0;
+
+    let totalSellerEarnings = 0;
+
+
+    if (commissions) {
+
+      commissions.forEach(
+        function(record) {
+
+          totalSales +=
+            Number(
+              record.order_amount
+            ) || 0;
+
+          totalCommission +=
+            Number(
+              record.commission_amount
+            ) || 0;
+
+          totalSellerEarnings +=
+            Number(
+              record.seller_amount
+            ) || 0;
+
+        }
+      );
+
+    }
+
+
+    /*
+      STEP 8
+      Display totals.
+    */
+
+    document.getElementById(
+      "totalSales"
+    ).textContent =
+      formatNaira(
+        totalSales
+      );
+
+
+    document.getElementById(
+      "totalCommission"
+    ).textContent =
+      formatNaira(
+        totalCommission
+      );
+
+
+    document.getElementById(
+      "sellerEarnings"
+    ).textContent =
+      formatNaira(
+        totalSellerEarnings
+      );
+
+
+    document.getElementById(
+      "completedOrders"
+    ).textContent =
+      commissions
+        ? commissions.length
+        : 0;
+
+
+    document.getElementById(
+      "totalOrders"
+    ).textContent =
+      totalOrders;
+
+
+    document.getElementById(
+      "totalCustomers"
+    ).textContent =
+      totalCustomers;
+
+
+    /*
+      STEP 9
+      Display commission records.
+    */
+
+    const records =
+      document.getElementById(
+        "records"
+      );
+
+
+    if (
+      !commissions ||
+      commissions.length === 0
+    ) {
+
+      records.innerHTML =
+        "<p>No commission records yet.</p>";
+
+    } else {
+
+      records.innerHTML = "";
+
+
+      commissions.forEach(
+        function(record) {
+
+          const item =
+            document.createElement(
+              "div"
+            );
+
+
+          item.className =
+            "record";
+
+
+          item.innerHTML = `
+
+            <strong>
+              Order #${record.order_id}
+            </strong>
+
+            <p>
+              Order Amount:
+              ${formatNaira(
+                record.order_amount
+              )}
+            </p>
+
+            <p>
+              Edesvino Commission:
+              ${formatNaira(
+                record.commission_amount
+              )}
+            </p>
+
+            <p>
+              Seller Earnings:
+              ${formatNaira(
+                record.seller_amount
+              )}
+            </p>
+
+            <p>
+              Date:
+              ${
+                record.created_at
+                  ? new Date(
+                      record.created_at
+                    ).toLocaleString(
+                      "en-NG"
+                    )
+                  : "Unknown"
+              }
+            </p>
+
+          `;
+
+
+          records.appendChild(
+            item
+          );
+
+        }
+      );
+
+    }
+
+
+    /*
+      STEP 10
+      Show the dashboard.
+    */
+
+    loading.style.display =
+      "none";
+
+    content.style.display =
+      "block";
+
+
+  } catch (error) {
+
+    console.error(
+      "Admin dashboard error:",
+      error
     );
 
+
+    loading.innerHTML =
+      '<p class="error">' +
+      'Something went wrong: ' +
+      error.message +
+      '</p>';
+
   }
-
-
-  loading.style.display =
-    "none";
-
-
-  content.style.display =
-    "block";
 
 }
 
