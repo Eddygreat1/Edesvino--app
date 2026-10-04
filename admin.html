@@ -182,6 +182,21 @@ body {
       </div>
 
 
+      <div class="stat">
+
+        <h2>Total Orders</h2>
+
+        <div
+          class="amount"
+          id="totalOrders">
+
+          0
+
+        </div>
+
+      </div>
+
+
       <p class="note">
         Platform earnings are based on
         recorded commissions from delivered orders.
@@ -349,6 +364,38 @@ async function loadAdminDashboard() {
   }
 
 
+  /*
+    Load total number of orders.
+  */
+
+  const {
+    count: totalOrders,
+    error: ordersError
+  } =
+    await supabaseClient
+      .from("orders")
+      .select(
+        "id",
+        {
+          count: "exact",
+          head: true
+        }
+      );
+
+
+  if (ordersError) {
+
+    loading.innerHTML =
+      '<p class="error">' +
+      'Unable to load total orders: ' +
+      ordersError.message +
+      '</p>';
+
+    return;
+
+  }
+
+
   let totalSales = 0;
   let totalCommission = 0;
   let totalSellerEarnings = 0;
@@ -410,6 +457,12 @@ async function loadAdminDashboard() {
     commissions
       ? commissions.length
       : 0;
+
+
+  document.getElementById(
+    "totalOrders"
+  ).textContent =
+    totalOrders || 0;
 
 
   const records =
