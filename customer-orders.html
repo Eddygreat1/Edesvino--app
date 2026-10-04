@@ -7,7 +7,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>Edesvino - Track Your Order</title>
+<title>Edesvino - My Orders</title>
 
 <style>
 
@@ -68,6 +68,10 @@ h1 {
   padding: 20px;
 }
 
+.error {
+  color: #b91c1c;
+}
+
 .links {
   text-align: center;
   margin-top: 20px;
@@ -96,7 +100,7 @@ h1 {
     <h1>Edesvino</h1>
 
     <p class="subtitle">
-      Track Your Order
+      My Orders
     </p>
 
     <div id="ordersContainer">
@@ -111,6 +115,10 @@ h1 {
 
       <a href="customer-dashboard.html">
         Customer Dashboard
+      </a>
+
+      <a href="track-order.html">
+        Track Order
       </a>
 
       <a href="index.html">
@@ -134,10 +142,18 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
+
 const supabaseClient =
 window.supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_KEY
+  SUPABASE_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
 );
 
 
@@ -149,240 +165,358 @@ async function loadOrders() {
     );
 
 
-  const {
-    data: userData,
-    error: userError
-  } =
-  await supabaseClient.auth.getUser();
+  try {
 
+    /*
+      Give Supabase a moment to restore
+      the existing customer session.
+    */
 
-  if (
-    userError ||
-    !userData.user
-  ) {
-
-    window.location.href =
-      "customer-login.html";
-
-    return;
-
-  }
-
-
-  const user =
-    userData.user;
-
-
-  /*
-    First try customer_id.
-  */
-
-  let {
-    data: orders,
-    error
-  } =
-  await supabaseClient
-    .from("orders")
-    .select("*")
-    .eq(
-      "customer_id",
-      user.id
-    )
-    .order(
-      "created_at",
-      {
-        ascending: false
+    await new Promise(
+      function(resolve) {
+        setTimeout(
+          resolve,
+          500
+        );
       }
     );
 
 
-  /*
-    If customer_id does not find
-    existing orders, use customer name.
-  */
+    /*
+      Get the current session first.
+    */
 
-  if (
-    !error &&
-    (!orders ||
-      orders.length === 0)
-  ) {
-
-    const customerName =
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      "Endurance Edirin Jackson";
-
-
-    const fallbackResult =
-      await supabaseClient
-        .from("orders")
-        .select("*")
-        .eq(
-          "customer_name",
-          customerName
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false
-          }
-        );
+    const {
+      data: sessionData,
+      error: sessionError
+    } =
+      await supabaseClient.auth.getSession();
 
 
     if (
-      !fallbackResult.error &&
-      fallbackResult.data
+      sessionError
     ) {
 
-      orders =
-        fallbackResult.data;
+      throw sessionError;
 
     }
 
-  }
+
+    let session =
+      sessionData.session;
 
 
-  if (error) {
+    /*
+      If no session is immediately available,
+      give Supabase another moment to restore it.
+    */
 
-    console.error(error);
+    if (!session) {
+
+      await new Promise(
+        function(resolve) {
+          setTimeout(
+            resolve,
+            1000
+          );
+        }
+      );
+
+
+      const retry =
+        await supabaseClient.auth.getSession();
+
+
+      session =
+        retry.data.session;
+
+    }
+
+
+    /*
+      Still no session means the customer
+      is genuinely logged out.
+    */
+
+    if (!session) {
+
+      window.location.replace(
+        "customer-login.html"
+      );
+
+      return;
+
+    }
+
+
+    /*
+      Get the authenticated user.
+    */
+
+    const {
+      data: userData,
+      error: userError
+    } =
+    await supabaseClient.auth.getUser();
+
+
+    if (
+      userError ||
+      !userData.user
+    ) {
+
+      window.location.replace(
+        "customer-login.html"
+      );
+
+      return;
+
+    }
+
+
+    const user =
+      userData.user;
+
+
+    /*
+      First find orders using customer_id.
+    */
+
+    let {
+      data: orders,
+      error
+    } =
+    await supabaseClient
+      .from("orders")
+      .select("*")
+      .eq(
+        "customer_id",
+        user.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+
+    /*
+      If older orders don't have customer_id,
+      use the customer's name as a fallback.
+    */
+
+    if (
+      !error &&
+      (!orders ||
+       orders.length === 0)
+    ) {
+
+      const customerName =
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        "Endurance Edirin Jackson";
+
+
+      const fallbackResult =
+        await supabaseClient
+          .from("orders")
+          .select("*")
+          .eq(
+            "customer_name",
+            customerName
+          )
+          .order(
+            "created_at",
+            {
+              ascending: false
+            }
+          );
+
+
+      if (
+        !fallbackResult.error &&
+        fallbackResult.data
+      ) {
+
+        orders =
+          fallbackResult.data;
+
+      }
+
+    }
+
+
+    if (error) {
+
+      throw error;
+
+    }
+
+
+    /*
+      No orders.
+    */
+
+    if (
+      !orders ||
+      orders.length === 0
+    ) {
+
+      container.innerHTML = `
+        <div class="empty">
+          You don't have any orders yet.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    /*
+      Display orders.
+    */
+
+    container.innerHTML = "";
+
+
+    orders.forEach(
+      function(order) {
+
+        const orderDate =
+          order.created_at
+          ? new Date(
+              order.created_at
+            ).toLocaleString(
+              "en-NG"
+            )
+          : "Not available";
+
+
+        const orderBox =
+          document.createElement(
+            "div"
+          );
+
+
+        orderBox.className =
+          "order";
+
+
+        orderBox.innerHTML = `
+
+          <h2>
+            Order #${escapeHtml(
+              order.id
+            )}
+          </h2>
+
+          <p>
+            <strong>Product:</strong>
+            ${escapeHtml(
+              order.product_name ||
+              "Product"
+            )}
+          </p>
+
+          <p>
+            <strong>Amount:</strong>
+            ₦${Number(
+              order.price || 0
+            ).toLocaleString(
+              "en-NG"
+            )}
+          </p>
+
+          <p>
+            <strong>Customer:</strong>
+            ${escapeHtml(
+              order.customer_name ||
+              ""
+            )}
+          </p>
+
+          <p>
+            <strong>Order Date:</strong>
+            ${escapeHtml(
+              orderDate
+            )}
+          </p>
+
+          <p>
+            <strong>Order Status:</strong>
+            <span class="status">
+              ${escapeHtml(
+                order.status ||
+                "Pending"
+              )}
+            </span>
+          </p>
+
+        `;
+
+
+        container.appendChild(
+          orderBox
+        );
+
+      }
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Customer orders error:",
+      error
+    );
+
 
     container.innerHTML = `
       <div class="error">
         Unable to load your orders.
         <br><br>
-        ${escapeHtml(error.message)}
+        ${escapeHtml(
+          error.message
+        )}
       </div>
     `;
 
-    return;
-
   }
-
-
-  if (
-    !orders ||
-    orders.length === 0
-  ) {
-
-    container.innerHTML = `
-      <div class="empty">
-        You don't have any orders yet.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  container.innerHTML = "";
-
-
-  orders.forEach(function(order) {
-
-    const orderDate =
-      order.created_at
-      ? new Date(
-          order.created_at
-        ).toLocaleString()
-      : "Not available";
-
-
-    const orderBox =
-      document.createElement(
-        "div"
-      );
-
-
-    orderBox.className =
-      "order";
-
-
-    orderBox.innerHTML = `
-
-      <h2>
-        Order #${escapeHtml(order.id)}
-      </h2>
-
-      <p>
-        <strong>Product:</strong>
-        ${escapeHtml(
-          order.product_name ||
-          "Product"
-        )}
-      </p>
-
-      <p>
-        <strong>Amount:</strong>
-        ₦${Number(
-          order.price || 0
-        ).toLocaleString()}
-      </p>
-
-      <p>
-        <strong>Customer:</strong>
-        ${escapeHtml(
-          order.customer_name ||
-          ""
-        )}
-      </p>
-
-      <p>
-        <strong>Order Date:</strong>
-        ${escapeHtml(
-          orderDate
-        )}
-      </p>
-
-      <p>
-        <strong>Order Status:</strong>
-        <span class="status">
-          ${escapeHtml(
-            order.status ||
-            "Pending"
-          )}
-        </span>
-      </p>
-
-    `;
-
-
-    container.appendChild(
-      orderBox
-    );
-
-  });
 
 }
 
 
-/* --------------------------------
-   HTML SAFETY
--------------------------------- */
+/*
+  HTML safety.
+*/
 
 function escapeHtml(value) {
 
-  return String(value || "")
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
+  return String(
+    value || ""
+  )
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
 
 }
 
