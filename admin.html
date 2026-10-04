@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Edesvino - Admin Dashboard</title>
+
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+}
+
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.card {
+  background: white;
+  margin-top: 15px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.stat {
+  padding: 15px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.stat:last-child {
+  border-bottom: none;
+}
+
+.stat h2 {
+  margin-bottom: 5px;
+}
+
+.amount {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.record {
+  border-bottom: 1px solid #ddd;
+  padding: 15px 0;
+}
+
+.record:last-child {
+  border-bottom: none;
+}
+
+.message {
+  text-align: center;
+  padding: 20px;
+}
+
+.back {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: #111827;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.note {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.error {
+  color: #b91c1c;
+  font-weight: bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+
+    <h1>Edesvino</h1>
+
+    <p>Platform Admin Dashboard</p>
+
+  </div>
+
+
+  <div id="loading"
+       class="message">
+
+    Checking admin access...
+
+  </div>
+
+
+  <div id="adminContent"
+       style="display:none;">
+
+
+    <div class="card">
+
+      <div class="stat">
+
+        <h2>Total Delivered Sales</h2>
+
+        <div
+          class="amount"
+          id="totalSales">
+
+          ₦0
+
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <h2>Edesvino Commission</h2>
+
+        <div
+          class="amount"
+          id="totalCommission">
+
+          ₦0
+
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <h2>Total Seller Earnings</h2>
+
+        <div
+          class="amount"
+          id="sellerEarnings">
+
+          ₦0
+
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <h2>Completed Orders</h2>
+
+        <div
+          class="amount"
+          id="completedOrders">
+
+          0
+
+        </div>
+
+      </div>
+
+
+      <p class="note">
+        Platform earnings are based on
+        recorded commissions from delivered orders.
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Commission Records</h2>
+
+      <div id="records"></div>
+
+    </div>
+
+
+  </div>
+
+
+  <a
+    class="back"
+    href="dashboard.html">
+
+    ← Back to Seller Dashboard
+
+  </a>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<script>
+
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+
+const supabaseClient =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+function formatNaira(amount) {
+
+  return "₦" +
+    Number(amount || 0).toLocaleString(
+      "en-NG"
+    );
+
+}
+
+
+async function loadAdminDashboard() {
+
+  const loading =
+    document.getElementById("loading");
+
+  const content =
+    document.getElementById("adminContent");
+
+
+  /*
+    Check logged-in user.
+  */
+
+  const {
+    data: userData,
+    error: userError
+  } =
+    await supabaseClient.auth.getUser();
+
+
+  if (
+    userError ||
+    !userData.user
+  ) {
+
+    window.location.replace(
+      "login.html"
+    );
+
+    return;
+
+  }
+
+
+  const user =
+    userData.user;
+
+
+  /*
+    Check whether the user is
+    registered as a platform admin.
+  */
+
+  const {
+    data: adminRecord,
+    error: adminError
+  } =
+    await supabaseClient
+      .from("platform_admins")
+      .select("user_id")
+      .eq(
+        "user_id",
+        user.id
+      )
+      .maybeSingle();
+
+
+  if (
+    adminError ||
+    !adminRecord
+  ) {
+
+    loading.innerHTML =
+      '<p class="error">' +
+      'Access denied. ' +
+      'You are not a platform administrator.' +
+      '</p>';
+
+    return;
+
+  }
+
+
+  /*
+    Load all commission records.
+  */
+
+  const {
+    data: commissions,
+    error: commissionError
+  } =
+    await supabaseClient
+      .from("platform_commissions")
+      .select(
+        "order_id, order_amount, commission_amount, seller_amount, created_at"
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+
+  if (commissionError) {
+
+    loading.innerHTML =
+      '<p class="error">' +
+      'Unable to load commission records: ' +
+      commissionError.message +
+      '</p>';
+
+    return;
+
+  }
+
+
+  let totalSales = 0;
+  let totalCommission = 0;
+  let totalSellerEarnings = 0;
+
+
+  if (commissions) {
+
+    commissions.forEach(
+      function(record) {
+
+        totalSales +=
+          Number(
+            record.order_amount
+          ) || 0;
+
+        totalCommission +=
+          Number(
+            record.commission_amount
+          ) || 0;
+
+        totalSellerEarnings +=
+          Number(
+            record.seller_amount
+          ) || 0;
+
+      }
+    );
+
+  }
+
+
+  document.getElementById(
+    "totalSales"
+  ).textContent =
+    formatNaira(
+      totalSales
+    );
+
+
+  document.getElementById(
+    "totalCommission"
+  ).textContent =
+    formatNaira(
+      totalCommission
+    );
+
+
+  document.getElementById(
+    "sellerEarnings"
+  ).textContent =
+    formatNaira(
+      totalSellerEarnings
+    );
+
+
+  document.getElementById(
+    "completedOrders"
+  ).textContent =
+    commissions
+      ? commissions.length
+      : 0;
+
+
+  const records =
+    document.getElementById(
+      "records"
+    );
+
+
+  if (
+    !commissions ||
+    commissions.length === 0
+  ) {
+
+    records.innerHTML =
+      "<p>No commission records yet.</p>";
+
+  } else {
+
+    commissions.forEach(
+      function(record) {
+
+        const item =
+          document.createElement(
+            "div"
+          );
+
+
+        item.className =
+          "record";
+
+
+        item.innerHTML = `
+
+          <strong>
+            Order #${record.order_id}
+          </strong>
+
+          <p>
+            Order Amount:
+            ${formatNaira(
+              record.order_amount
+            )}
+          </p>
+
+          <p>
+            Edesvino Commission:
+            ${formatNaira(
+              record.commission_amount
+            )}
+          </p>
+
+          <p>
+            Seller Earnings:
+            ${formatNaira(
+              record.seller_amount
+            )}
+          </p>
+
+          <p>
+            Date:
+            ${
+              record.created_at
+                ? new Date(
+                    record.created_at
+                  ).toLocaleString(
+                    "en-NG"
+                  )
+                : "Unknown"
+            }
+          </p>
+
+        `;
+
+
+        records.appendChild(
+          item
+        );
+
+      }
+    );
+
+  }
+
+
+  loading.style.display =
+    "none";
+
+
+  content.style.display =
+    "block";
+
+}
+
+
+loadAdminDashboard();
+
+</script>
+
+</body>
+</html>
