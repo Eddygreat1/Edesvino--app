@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,6 +84,12 @@ body {
   font-weight: bold;
 }
 
+.note {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 </style>
 
 </head>
@@ -129,15 +134,19 @@ body {
 
       <div class="stat">
 
-        <h2>Total Orders</h2>
+        <h2>Edesvino Commission</h2>
 
         <div
           class="amount"
-          id="totalOrders">
+          id="commission">
 
-          0
+          ₦0
 
         </div>
+
+        <p class="note">
+          Edesvino receives 5% of delivered sales.
+        </p>
 
       </div>
 
@@ -153,9 +162,27 @@ body {
 
         </div>
 
+        <p class="note">
+          Seller receives 95% of delivered sales.
+        </p>
+
       </div>
 
-      <p>
+      <div class="stat">
+
+        <h2>Total Orders</h2>
+
+        <div
+          class="amount"
+          id="totalOrders">
+
+          0
+
+        </div>
+
+      </div>
+
+      <p class="note">
         Sales and earnings are based only on
         delivered customer orders.
       </p>
@@ -198,163 +225,260 @@ window.supabase.createClient(
   SUPABASE_KEY
 );
 
+
+/*
+  Edesvino marketplace commission.
+
+  5% goes to Edesvino.
+  95% goes to the seller.
+*/
+
+const COMMISSION_RATE = 0.05;
+
+
+function formatNaira(amount) {
+
+  return "₦" +
+    Number(amount || 0).toLocaleString(
+      "en-NG"
+    );
+
+}
+
+
 async function loadSales() {
 
   const loading =
-  document.getElementById("loading");
+    document.getElementById("loading");
 
   const content =
-  document.getElementById("salesContent");
+    document.getElementById("salesContent");
+
 
   const {
     data: userData,
     error: userError
   } =
-  await supabaseClient.auth.getUser();
+    await supabaseClient.auth.getUser();
+
 
   if (userError || !userData.user) {
 
-    window.location.replace("login.html");
+    window.location.replace(
+      "login.html"
+    );
 
     return;
 
   }
 
+
   const user =
-  userData.user;
+    userData.user;
+
 
   const {
     data: orders,
     error
   } =
-  await supabaseClient
-    .from("orders")
-    .select("*")
-    .eq("seller_id", user.id)
-    .order(
-      "created_at",
-      { ascending: false }
-    );
+    await supabaseClient
+      .from("orders")
+      .select("*")
+      .eq("seller_id", user.id)
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
 
   if (error) {
 
     loading.textContent =
-    "Unable to load sales: " +
-    error.message;
+      "Unable to load sales: " +
+      error.message;
 
     return;
 
   }
 
+
   let completedSales = 0;
+
 
   if (orders) {
 
-    orders.forEach(function(order) {
+    orders.forEach(
+      function(order) {
 
-      const status =
-      String(order.status || "")
-      .toLowerCase()
-      .trim();
+        const status =
+          String(
+            order.status || ""
+          )
+          .toLowerCase()
+          .trim();
 
-      if (status === "delivered") {
 
-        completedSales +=
-        Number(order.price) || 0;
+        if (
+          status === "delivered"
+        ) {
+
+          completedSales +=
+            Number(order.price) || 0;
+
+        }
 
       }
-
-    });
+    );
 
   }
+
+
+  /*
+    Calculate Edesvino's 5% commission.
+  */
+
+  const commission =
+    completedSales *
+    COMMISSION_RATE;
+
+
+  /*
+    Seller receives the remaining 95%.
+  */
+
+  const sellerEarnings =
+    completedSales -
+    commission;
+
 
   document.getElementById(
     "totalSales"
   ).textContent =
-  "₦" +
-  completedSales.toLocaleString();
+    formatNaira(
+      completedSales
+    );
+
 
   document.getElementById(
-    "totalOrders"
+    "commission"
   ).textContent =
-  orders ? orders.length : 0;
+    formatNaira(
+      commission
+    );
+
 
   document.getElementById(
     "sellerEarnings"
   ).textContent =
-  "₦" +
-  completedSales.toLocaleString();
+    formatNaira(
+      sellerEarnings
+    );
+
+
+  document.getElementById(
+    "totalOrders"
+  ).textContent =
+    orders
+      ? orders.length
+      : 0;
+
 
   const recentOrders =
-  document.getElementById(
-    "recentOrders"
-  );
+    document.getElementById(
+      "recentOrders"
+    );
 
-  if (!orders || orders.length === 0) {
+
+  if (
+    !orders ||
+    orders.length === 0
+  ) {
 
     recentOrders.innerHTML =
-    "<p>No orders yet.</p>";
+      "<p>No orders yet.</p>";
 
   } else {
 
-    orders.forEach(function(order) {
+    orders.forEach(
+      function(order) {
 
-      const item =
-      document.createElement("div");
+        const item =
+          document.createElement(
+            "div"
+          );
 
-      item.className =
-      "order";
 
-      const status =
-      String(order.status || "Pending");
+        item.className =
+          "order";
 
-      item.innerHTML = `
 
-        <strong>
-          ${order.product_name || "Product"}
-        </strong>
+        const status =
+          String(
+            order.status ||
+            "Pending"
+          );
 
-        <p>
-          Amount:
-          ₦${Number(
-            order.price || 0
-          ).toLocaleString()}
-        </p>
 
-        <p>
-          Customer:
-          ${order.customer_name || "Customer"}
-        </p>
+        item.innerHTML = `
 
-        <p>
-          Date:
-          ${order.created_at
-            ? new Date(
-                order.created_at
-              ).toLocaleString()
-            : "Unknown"}
-        </p>
+          <strong>
+            ${order.product_name || "Product"}
+          </strong>
 
-        <p class="status">
-          Status:
-          ${status}
-        </p>
+          <p>
+            Amount:
+            ${formatNaira(
+              order.price || 0
+            )}
+          </p>
 
-      `;
+          <p>
+            Customer:
+            ${order.customer_name || "Customer"}
+          </p>
 
-      recentOrders.appendChild(item);
+          <p>
+            Date:
+            ${
+              order.created_at
+                ? new Date(
+                    order.created_at
+                  ).toLocaleString(
+                    "en-NG"
+                  )
+                : "Unknown"
+            }
+          </p>
 
-    });
+          <p class="status">
+            Status:
+            ${status}
+          </p>
+
+        `;
+
+
+        recentOrders.appendChild(
+          item
+        );
+
+      }
+    );
 
   }
 
+
   loading.style.display =
-  "none";
+    "none";
+
 
   content.style.display =
-  "block";
+    "block";
 
 }
+
 
 loadSales();
 
@@ -362,4 +486,3 @@ loadSales();
 
 </body>
 </html>
-
