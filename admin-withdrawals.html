@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Edesvino - Admin Withdrawals</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  color: #222;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.withdrawal {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 15px;
+}
+
+.amount {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0a7a35;
+}
+
+.pending {
+  display: inline-block;
+  background: #fff3cd;
+  color: #856404;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.error {
+  color: #b00020;
+  font-weight: bold;
+}
+
+.loading {
+  color: #555;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: #0066cc;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Edesvino</h1>
+
+<div class="card">
+
+<h2>Admin Withdrawals</h2>
+
+<p>
+Review seller withdrawal requests.
+</p>
+
+<div id="message" class="loading">
+Loading withdrawal requests...
+</div>
+
+<div id="withdrawals"></div>
+
+<a
+class="back"
+href="dashboard.html">
+← Back to Seller Dashboard
+</a>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+async function loadWithdrawals() {
+
+  const message =
+    document.getElementById("message");
+
+  const withdrawalsDiv =
+    document.getElementById("withdrawals");
+
+
+  try {
+
+    const {
+      data: userData,
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+
+    if (userError || !userData.user) {
+
+      message.className = "error";
+
+      message.textContent =
+        "Please log in first.";
+
+      return;
+    }
+
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("withdrawals")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
+
+
+    if (error) {
+
+      console.error(error);
+
+      message.className = "error";
+
+      message.textContent =
+        "Error loading withdrawals: " +
+        error.message;
+
+      return;
+    }
+
+
+    message.textContent = "";
+
+
+    if (!data || data.length === 0) {
+
+      message.textContent =
+        "No withdrawal requests found.";
+
+      return;
+    }
+
+
+    data.forEach(function(item) {
+
+      const div =
+        document.createElement("div");
+
+      div.className = "withdrawal";
+
+
+      const date =
+        new Date(item.created_at)
+          .toLocaleString("en-NG");
+
+
+      div.innerHTML = `
+
+        <div class="amount">
+          ₦${Number(item.amount).toLocaleString()}
+        </div>
+
+        <p>
+          <strong>Bank:</strong>
+          ${item.bank_name || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Account Name:</strong>
+          ${item.account_name || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Account Number:</strong>
+          ${item.account_number || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Seller ID:</strong>
+          ${item.seller_id}
+        </p>
+
+        <p>
+          <strong>Date:</strong>
+          ${date}
+        </p>
+
+        <p>
+          <span class="pending">
+            ${item.status}
+          </span>
+        </p>
+
+      `;
+
+
+      withdrawalsDiv.appendChild(div);
+
+    });
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    message.className = "error";
+
+    message.textContent =
+      "Something went wrong while loading withdrawals.";
+
+  }
+
+}
+
+
+loadWithdrawals();
+
+</script>
+
+</body>
+</html>
