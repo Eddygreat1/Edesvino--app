@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Edesvino - Seller Withdrawals</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Edesvino - Seller Withdrawals</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 * {
   box-sizing: border-box;
 }
@@ -157,6 +150,28 @@ button:disabled {
   color: #8a5a00;
 }
 
+/* NEW: status change notification */
+.status-alert {
+  display: none;
+  margin-bottom: 18px;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  line-height: 1.5;
+}
+
+.status-alert.paid-alert {
+  background: #e7f7ed;
+  color: #176b36;
+  border: 1px solid #b7e4c7;
+}
+
+.status-alert.rejected-alert {
+  background: #fdeaea;
+  color: #a40000;
+  border: 1px solid #f1b8b8;
+}
+
 .back {
   display: block;
   text-align: center;
@@ -170,51 +185,20 @@ button:disabled {
   color: #666;
   font-size: 14px;
 }
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>Edesvino</h1>
-
-<div class="card">
-
-<h2>Seller Withdrawals</h2>
-
-<p>Available for Withdrawal</p>
-<div class="amount green" id="availableBalance">₦0</div>
-
-<hr>
-
-<p>Total Delivered Sales</p>
-<div class="amount" id="totalSales">₦0</div>
-
-<p>Edesvino Commission (5%)</p>
-<div class="amount" id="commission">₦0</div>
-
-<p>Seller Earnings (95%)</p>
-<div class="amount" id="sellerEarnings">₦0</div>
-
-<p>Previous Withdrawals</p>
-<div class="amount" id="previousWithdrawals">₦0</div>
-
-</div>
-
-
-<div class="card">
-
-<h2>Request Withdrawal</h2>
-
-<label>Amount</label>
+</style></head><body><div class="container"><h1>Edesvino</h1><!-- NEW: automatic status notification --><div id="statusAlert" class="status-alert"></div><div class="card"><h2>Seller Withdrawals</h2><p>Available for Withdrawal</p>
+<div class="amount green" id="availableBalance">₦0</div><hr><p>Total Delivered Sales</p>
+<div class="amount" id="totalSales">₦0</div><p>Edesvino Commission (5%)</p>
+<div class="amount" id="commission">₦0</div><p>Seller Earnings (95%)</p>
+<div class="amount" id="sellerEarnings">₦0</div><p>Previous Withdrawals</p>
+<div class="amount" id="previousWithdrawals">₦0</div></div><div class="card"><h2>Request Withdrawal</h2><label>Amount</label>
 
 <input
 type="number"
 id="amount"
 placeholder="Enter withdrawal amount"
 min="100"
->
+
+«»
 
 <label>Bank Name</label>
 
@@ -222,7 +206,8 @@ min="100"
 type="text"
 id="bankName"
 placeholder="Enter bank name"
->
+
+«»
 
 <label>Account Name</label>
 
@@ -230,7 +215,8 @@ placeholder="Enter bank name"
 type="text"
 id="accountName"
 placeholder="Enter account name"
->
+
+«»
 
 <label>Account Number</label>
 
@@ -239,40 +225,18 @@ type="text"
 id="accountNumber"
 placeholder="Enter account number"
 inputmode="numeric"
->
+
+«»
 
 <button id="withdrawButton">
 Request Withdrawal
-</button>
-
-<div id="message" class="message"></div>
-
-<p class="small">
+</button><div id="message" class="message"></div><p class="small">
 Minimum withdrawal amount is ₦100.
-</p>
-
-</div>
-
-
-<div class="card">
-
-<h2>Withdrawal History</h2>
-
-<div id="history">
+</p></div><div class="card"><h2>Withdrawal History</h2><div id="history">
 Loading withdrawal history...
-</div>
-
-</div>
-
-
-<a class="back" href="dashboard.html">
+</div></div><a class="back" href="dashboard.html">
 ← Back to Seller Dashboard
-</a>
-
-</div>
-
-
-<script>
+</a></div><script>
 
 /* =========================================
    SUPABASE CONNECTION
@@ -297,6 +261,15 @@ window.supabase.createClient(
 
 const SELLER_ID =
 "b860b02d-0bf3-4b8d-87f8-965753f22f72";
+
+
+/* =========================================
+   KEEP TRACK OF PREVIOUS STATUSES
+   ========================================= */
+
+let previousStatuses = {};
+
+let firstLoad = true;
 
 
 /* =========================================
@@ -327,6 +300,27 @@ box.className =
 "message " + type;
 
 box.style.display = "block";
+
+}
+
+
+/* =========================================
+   STATUS ALERT
+   ========================================= */
+
+function showStatusAlert(message, type) {
+
+const alertBox =
+document.getElementById("statusAlert");
+
+alertBox.textContent =
+message;
+
+alertBox.className =
+"status-alert " + type;
+
+alertBox.style.display =
+"block";
 
 }
 
@@ -371,6 +365,88 @@ return {
   message:
     "This withdrawal is waiting for admin review."
 };
+
+}
+
+
+/* =========================================
+   CHECK FOR STATUS CHANGES
+   ========================================= */
+
+function checkForStatusChanges(withdrawals) {
+
+if (firstLoad) {
+
+withdrawals.forEach(
+function(withdrawal) {
+
+previousStatuses[withdrawal.id] =
+String(
+withdrawal.status || "Pending"
+).toLowerCase();
+
+}
+);
+
+firstLoad = false;
+
+return;
+
+}
+
+
+withdrawals.forEach(
+function(withdrawal) {
+
+const id =
+withdrawal.id;
+
+const currentStatus =
+String(
+withdrawal.status || "Pending"
+).toLowerCase();
+
+const oldStatus =
+previousStatuses[id];
+
+
+if (
+oldStatus &&
+oldStatus !== currentStatus
+) {
+
+if (currentStatus === "paid") {
+
+showStatusAlert(
+"✓ Good news! Your withdrawal of " +
+formatNaira(withdrawal.amount) +
+" has been marked as Paid.",
+"paid-alert"
+);
+
+}
+
+else if (
+currentStatus === "rejected"
+) {
+
+showStatusAlert(
+"Your withdrawal of " +
+formatNaira(withdrawal.amount) +
+" was rejected. The amount has been returned to your available balance.",
+"rejected-alert"
+);
+
+}
+
+}
+
+
+previousStatuses[id] =
+currentStatus;
+
+}
+);
 
 }
 
@@ -487,6 +563,15 @@ withdrawalsError.message
 );
 
 }
+
+
+/* =========================================
+   CHECK FOR STATUS CHANGES
+   ========================================= */
+
+checkForStatusChanges(
+withdrawals || []
+);
 
 
 /* =========================================
@@ -679,7 +764,6 @@ ${statusDetails.message}
 </div>
 
 `;
-
 
 history.appendChild(
 item
@@ -925,6 +1009,11 @@ document.getElementById(
 ).value = "";
 
 
+/* Reset status tracking so the new request
+   does not create a false notification. */
+
+firstLoad = true;
+
 await loadWithdrawals();
 
 
@@ -956,7 +1045,21 @@ button.textContent =
 
 loadWithdrawals();
 
-</script>
 
-</body>
+/* =========================================
+   AUTOMATIC STATUS CHECK
+   Checks every 15 seconds while this
+   page is open.
+   ========================================= */
+
+setInterval(
+function() {
+
+loadWithdrawals();
+
+},
+15000
+);
+
+</script></body>
 </html>
