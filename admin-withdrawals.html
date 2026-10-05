@@ -50,17 +50,50 @@ h1 {
   color: #0a7a35;
 }
 
-.pending {
+.status {
   display: inline-block;
-  background: #fff3cd;
-  color: #856404;
   padding: 6px 10px;
   border-radius: 5px;
   font-weight: bold;
+  background: #fff3cd;
+  color: #856404;
+}
+
+.buttons {
+  margin-top: 15px;
+}
+
+button {
+  border: none;
+  padding: 10px 16px;
+  margin-right: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.paid {
+  background: #198754;
+  color: white;
+}
+
+.rejected {
+  background: #dc3545;
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .error {
   color: #b00020;
+  font-weight: bold;
+}
+
+.success {
+  color: #0a7a35;
   font-weight: bold;
 }
 
@@ -90,7 +123,7 @@ h1 {
 <h2>Admin Withdrawals</h2>
 
 <p>
-Review seller withdrawal requests.
+Review and manage seller withdrawal requests.
 </p>
 
 <div id="message" class="loading">
@@ -131,7 +164,6 @@ async function loadWithdrawals() {
 
   const withdrawalsDiv =
     document.getElementById("withdrawals");
-
 
   try {
 
@@ -202,6 +234,34 @@ async function loadWithdrawals() {
           .toLocaleString("en-NG");
 
 
+      let buttons = "";
+
+
+      if (item.status === "Pending") {
+
+        buttons = `
+
+          <div class="buttons">
+
+            <button
+              class="paid"
+              onclick="updateStatus(${item.id}, 'Paid')">
+              Mark as Paid
+            </button>
+
+            <button
+              class="rejected"
+              onclick="updateStatus(${item.id}, 'Rejected')">
+              Reject
+            </button>
+
+          </div>
+
+        `;
+
+      }
+
+
       div.innerHTML = `
 
         <div class="amount">
@@ -234,10 +294,13 @@ async function loadWithdrawals() {
         </p>
 
         <p>
-          <span class="pending">
+          <strong>Status:</strong>
+          <span class="status">
             ${item.status}
           </span>
         </p>
+
+        ${buttons}
 
       `;
 
@@ -257,6 +320,52 @@ async function loadWithdrawals() {
       "Something went wrong while loading withdrawals.";
 
   }
+
+}
+
+
+async function updateStatus(id, newStatus) {
+
+  const confirmed =
+    confirm(
+      "Are you sure you want to mark this withdrawal as " +
+      newStatus + "?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const {
+    error
+  } = await supabaseClient
+    .from("withdrawals")
+    .update({
+      status: newStatus
+    })
+    .eq("id", id);
+
+
+  if (error) {
+
+    alert(
+      "Error updating withdrawal: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  alert(
+    "Withdrawal status updated to " +
+    newStatus + "."
+  );
+
+
+  loadWithdrawals();
 
 }
 
