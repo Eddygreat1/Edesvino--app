@@ -156,7 +156,6 @@
 
   </div>
 
-
   <div class="card">
 
     <h2>Request Withdrawal</h2>
@@ -207,7 +206,6 @@
 
   </div>
 
-
   <div class="card">
 
     <h2>Withdrawal History</h2>
@@ -218,13 +216,11 @@
 
   </div>
 
-
   <a class="back" href="dashboard.html">
     ← Back to Seller Dashboard
   </a>
 
 </div>
-
 
 <script>
 
@@ -235,17 +231,14 @@
 const SUPABASE_URL =
   "https://lxszilqypuglxyfyukdg.supabase.co";
 
-
 /*
    IMPORTANT:
-   Put the SAME Supabase anon key that is
-   already being used by your working
-   sales.html file between the quotation marks.
+   Replace ONLY the value below with the
+   SAME anon key used by sales.html.
 */
 
 const SUPABASE_ANON_KEY =
-  "PASTE_THE_SAME_ANON_KEY_FROM_SALES_HTML_HERE";
-
+  "YOUR_ACTUAL_SUPABASE_ANON_KEY";
 
 const supabaseClient =
   supabase.createClient(
@@ -255,7 +248,7 @@ const supabaseClient =
 
 
 /* =========================================
-   YOUR SELLER ID
+   SELLER ID
    ========================================= */
 
 const SELLER_ID =
@@ -267,11 +260,9 @@ const SELLER_ID =
    ========================================= */
 
 function formatNaira(amount) {
-
   return "₦" +
     Number(amount || 0)
       .toLocaleString("en-NG");
-
 }
 
 
@@ -290,28 +281,22 @@ function showMessage(message, type) {
     "message " + type;
 
   box.style.display = "block";
-
 }
 
 
 /* =========================================
-   LOAD SELLER WITHDRAWAL DATA
+   LOAD DATA
    ========================================= */
 
 async function loadWithdrawals() {
 
   try {
 
-    /*
-      Check login.
-    */
-
     const {
       data: userData,
       error: userError
     } =
       await supabaseClient.auth.getUser();
-
 
     if (
       userError ||
@@ -323,14 +308,10 @@ async function loadWithdrawals() {
         "login.html";
 
       return;
-
     }
 
 
-    /*
-      Get delivered orders belonging
-      to the seller.
-    */
+    /* Get delivered seller orders */
 
     const {
       data: orders,
@@ -338,70 +319,41 @@ async function loadWithdrawals() {
     } =
       await supabaseClient
         .from("orders")
-        .select(
-          "price,status,seller_id"
-        )
-        .eq(
-          "seller_id",
-          SELLER_ID
-        )
-        .eq(
-          "status",
-          "Delivered"
-        );
+        .select("price,status,seller_id")
+        .eq("seller_id", SELLER_ID)
+        .eq("status", "Delivered");
 
 
     if (ordersError) {
-
-      console.error(
-        ordersError
-      );
-
-      throw new Error(
-        ordersError.message
-      );
-
+      throw new Error(ordersError.message);
     }
 
 
-    /*
-      Calculate delivered sales.
-    */
+    /* Calculate delivered sales */
 
     let totalSales = 0;
 
+    (orders || []).forEach(order => {
 
-    (orders || []).forEach(
-      order => {
+      totalSales +=
+        Number(order.price || 0);
 
-        totalSales +=
-          Number(
-            order.price || 0
-          );
-
-      }
-    );
+    });
 
 
-    /*
-      Calculate commission.
-    */
+    /* Commission */
 
     const commission =
       totalSales * 0.05;
 
 
-    /*
-      Calculate seller earnings.
-    */
+    /* Seller earnings */
 
     const sellerEarnings =
       totalSales - commission;
 
 
-    /*
-      Load withdrawal records.
-    */
+    /* Load withdrawals */
 
     const {
       data: withdrawals,
@@ -410,128 +362,85 @@ async function loadWithdrawals() {
       await supabaseClient
         .from("withdrawals")
         .select("*")
-        .eq(
-          "seller_id",
-          SELLER_ID
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false
-          }
-        );
+        .eq("seller_id", SELLER_ID)
+        .order("created_at", {
+          ascending: false
+        });
 
 
     if (withdrawalsError) {
-
-      console.error(
-        withdrawalsError
-      );
-
-      throw new Error(
-        withdrawalsError.message
-      );
-
+      throw new Error(withdrawalsError.message);
     }
 
 
-    /*
-      Count Pending and Paid
-      withdrawals.
-    */
+    /* Calculate previous withdrawals */
 
     let previousWithdrawals = 0;
 
+    (withdrawals || []).forEach(withdrawal => {
 
-    (withdrawals || []).forEach(
-      withdrawal => {
+      const status =
+        String(withdrawal.status || "")
+          .toLowerCase();
 
-        const status =
-          String(
-            withdrawal.status || ""
-          ).toLowerCase();
+      if (
+        status === "pending" ||
+        status === "paid"
+      ) {
 
-
-        if (
-          status === "pending" ||
-          status === "paid"
-        ) {
-
-          previousWithdrawals +=
-            Number(
-              withdrawal.amount || 0
-            );
-
-        }
+        previousWithdrawals +=
+          Number(withdrawal.amount || 0);
 
       }
-    );
+
+    });
 
 
-    /*
-      Calculate available balance.
-    */
+    /* Available balance */
 
     const availableBalance =
       sellerEarnings -
       previousWithdrawals;
 
 
-    /*
-      Display figures.
-    */
+    /* Display figures */
 
     document.getElementById(
       "totalSales"
     ).textContent =
-      formatNaira(
-        totalSales
-      );
+      formatNaira(totalSales);
 
 
     document.getElementById(
       "commission"
     ).textContent =
-      formatNaira(
-        commission
-      );
+      formatNaira(commission);
 
 
     document.getElementById(
       "sellerEarnings"
     ).textContent =
-      formatNaira(
-        sellerEarnings
-      );
+      formatNaira(sellerEarnings);
 
 
     document.getElementById(
       "previousWithdrawals"
     ).textContent =
-      formatNaira(
-        previousWithdrawals
-      );
+      formatNaira(previousWithdrawals);
 
 
     document.getElementById(
       "availableBalance"
     ).textContent =
       formatNaira(
-        Math.max(
-          0,
-          availableBalance
-        )
+        Math.max(0, availableBalance)
       );
 
 
-    /*
-      Withdrawal history.
-    */
+    /* Withdrawal history */
 
     const history =
-      document.getElementById(
-        "history"
-      );
+      document.getElementById("history");
 
 
     if (
@@ -543,95 +452,83 @@ async function loadWithdrawals() {
         "No withdrawal requests yet.";
 
       return;
-
     }
 
 
     history.innerHTML = "";
 
 
-    withdrawals.forEach(
-      withdrawal => {
+    withdrawals.forEach(withdrawal => {
 
-        const item =
-          document.createElement(
-            "div"
-          );
+      const item =
+        document.createElement("div");
 
-
-        item.className =
-          "withdrawal";
+      item.className =
+        "withdrawal";
 
 
-        const accountNumber =
-          String(
-            withdrawal.account_number || ""
-          );
+      const accountNumber =
+        String(
+          withdrawal.account_number || ""
+        );
 
 
-        let maskedAccount =
-          accountNumber;
+      let maskedAccount =
+        accountNumber;
 
 
-        if (
-          accountNumber.length > 4
-        ) {
+      if (accountNumber.length > 4) {
 
-          maskedAccount =
-            "******" +
-            accountNumber.slice(-4);
+        maskedAccount =
+          "******" +
+          accountNumber.slice(-4);
 
-        }
+      }
 
 
-        item.innerHTML = `
+      item.innerHTML = `
 
-          <strong>
-            ${formatNaira(
-              withdrawal.amount
-            )}
-          </strong>
+        <strong>
+          ${formatNaira(withdrawal.amount)}
+        </strong>
 
-          <div>
-            Bank:
-            ${withdrawal.bank_name || "-"}
-          </div>
+        <div>
+          Bank:
+          ${withdrawal.bank_name || "-"}
+        </div>
 
-          <div>
-            Account:
-            ${withdrawal.account_name || "-"}
-          </div>
+        <div>
+          Account:
+          ${withdrawal.account_name || "-"}
+        </div>
 
-          <div>
-            Account Number:
-            ${maskedAccount || "-"}
-          </div>
+        <div>
+          Account Number:
+          ${maskedAccount || "-"}
+        </div>
 
-          <div>
-            Date:
-            ${
-              withdrawal.created_at
+        <div>
+          Date:
+          ${
+            withdrawal.created_at
               ? new Date(
                   withdrawal.created_at
                 ).toLocaleString("en-NG")
               : "-"
-            }
-          </div>
+          }
+        </div>
 
-          <div class="status">
-            Status:
-            ${withdrawal.status || "Pending"}
-          </div>
+        <div class="status">
+          Status:
+          ${withdrawal.status || "Pending"}
+        </div>
 
-        `;
+      `;
 
 
-        history.appendChild(
-          item
-        );
+      history.appendChild(item);
 
-      }
-    );
+    });
 
 
   } catch (error) {
@@ -650,257 +547,214 @@ async function loadWithdrawals() {
 
 
 /* =========================================
-   WITHDRAWAL REQUEST
+   REQUEST WITHDRAWAL
    ========================================= */
 
 document
-  .getElementById(
-    "withdrawButton"
-  )
-  .addEventListener(
-    "click",
-    async function() {
+  .getElementById("withdrawButton")
+  .addEventListener("click", async function() {
 
-      const button =
-        this;
+    const button = this;
 
 
-      const amount =
-        Number(
-          document.getElementById(
-            "amount"
-          ).value
-        );
+    const amount =
+      Number(
+        document.getElementById("amount").value
+      );
 
 
-      const bankName =
-        document.getElementById(
-          "bankName"
-        ).value.trim();
+    const bankName =
+      document.getElementById("bankName")
+        .value.trim();
 
 
-      const accountName =
-        document.getElementById(
-          "accountName"
-        ).value.trim();
+    const accountName =
+      document.getElementById("accountName")
+        .value.trim();
 
 
-      const accountNumber =
-        document.getElementById(
-          "accountNumber"
-        ).value.trim();
+    const accountNumber =
+      document.getElementById("accountNumber")
+        .value.trim();
 
 
-      const balanceText =
-        document.getElementById(
-          "availableBalance"
-        ).textContent
-          .replace(
-            /[₦,]/g,
-            ""
-          );
+    const balanceText =
+      document.getElementById(
+        "availableBalance"
+      ).textContent
+        .replace(/[₦,]/g, "");
 
 
-      const availableBalance =
-        Number(
-          balanceText
-        );
+    const availableBalance =
+      Number(balanceText);
+
+
+    if (!amount || amount < 100) {
+
+      showMessage(
+        "Minimum withdrawal amount is ₦100.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (amount > availableBalance) {
+
+      showMessage(
+        "Withdrawal amount is greater than your available balance.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!bankName) {
+
+      showMessage(
+        "Please enter your bank name.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!accountName) {
+
+      showMessage(
+        "Please enter the account name.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!accountNumber) {
+
+      showMessage(
+        "Please enter the account number.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    button.disabled = true;
+
+    button.textContent =
+      "Submitting...";
+
+
+    try {
+
+      const {
+        data: userData,
+        error: userError
+      } =
+        await supabaseClient.auth.getUser();
 
 
       if (
-        !amount ||
-        amount < 100
+        userError ||
+        !userData ||
+        !userData.user
       ) {
 
-        showMessage(
-          "Minimum withdrawal amount is ₦100.",
-          "error"
-        );
+        window.location.href =
+          "login.html";
 
         return;
-
       }
 
 
-      if (
-        amount >
-        availableBalance
-      ) {
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("withdrawals")
+          .insert([
 
-        showMessage(
-          "Withdrawal amount is greater than your available balance.",
-          "error"
-        );
+            {
+              seller_id:
+                SELLER_ID,
 
-        return;
+              amount:
+                amount,
 
+              status:
+                "Pending",
+
+              bank_name:
+                bankName,
+
+              account_name:
+                accountName,
+
+              account_number:
+                accountNumber
+            }
+
+          ]);
+
+
+      if (error) {
+        throw new Error(error.message);
       }
 
 
-      if (!bankName) {
-
-        showMessage(
-          "Please enter your bank name.",
-          "error"
-        );
-
-        return;
-
-      }
+      showMessage(
+        "Withdrawal request submitted successfully.",
+        "success"
+      );
 
 
-      if (!accountName) {
-
-        showMessage(
-          "Please enter the account name.",
-          "error"
-        );
-
-        return;
-
-      }
+      document.getElementById(
+        "amount"
+      ).value = "";
 
 
-      if (!accountNumber) {
-
-        showMessage(
-          "Please enter the account number.",
-          "error"
-        );
-
-        return;
-
-      }
+      document.getElementById(
+        "bankName"
+      ).value = "";
 
 
-      button.disabled =
-        true;
-
-      button.textContent =
-        "Submitting...";
+      document.getElementById(
+        "accountName"
+      ).value = "";
 
 
-      try {
-
-        const {
-          data: userData,
-          error: userError
-        } =
-          await supabaseClient
-            .auth.getUser();
+      document.getElementById(
+        "accountNumber"
+      ).value = "";
 
 
-        if (
-          userError ||
-          !userData ||
-          !userData.user
-        ) {
-
-          window.location.href =
-            "login.html";
-
-          return;
-
-        }
+      await loadWithdrawals();
 
 
-        /*
-          Create withdrawal request.
-        */
+    } catch (error) {
 
-        const {
-          error
-        } =
-          await supabaseClient
-            .from("withdrawals")
-            .insert([
-              {
-                seller_id:
-                  SELLER_ID,
+      console.error(error);
 
-                amount:
-                  amount,
-
-                status:
-                  "Pending",
-
-                bank_name:
-                  bankName,
-
-                account_name:
-                  accountName,
-
-                account_number:
-                  accountNumber
-              }
-            ]);
-
-
-        if (error) {
-
-          console.error(
-            error
-          );
-
-          throw new Error(
-            error.message
-          );
-
-        }
-
-
-        showMessage(
-          "Withdrawal request submitted successfully.",
-          "success"
-        );
-
-
-        document.getElementById(
-          "amount"
-        ).value = "";
-
-
-        document.getElementById(
-          "bankName"
-        ).value = "";
-
-
-        document.getElementById(
-          "accountName"
-        ).value = "";
-
-
-        document.getElementById(
-          "accountNumber"
-        ).value = "";
-
-
-        await loadWithdrawals();
-
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-        showMessage(
-          error.message ||
-          "Unable to submit withdrawal request.",
-          "error"
-        );
-
-      }
-
-
-      button.disabled =
-        false;
-
-      button.textContent =
-        "Request Withdrawal";
+      showMessage(
+        error.message ||
+        "Unable to submit withdrawal request.",
+        "error"
+      );
 
     }
-  );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "Request Withdrawal";
+
+  });
 
 
 /* =========================================
