@@ -82,18 +82,8 @@ button {
   color: white;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .error {
   color: #b00020;
-  font-weight: bold;
-}
-
-.success {
-  color: #0a7a35;
   font-weight: bold;
 }
 
@@ -164,6 +154,14 @@ async function loadWithdrawals() {
 
   const withdrawalsDiv =
     document.getElementById("withdrawals");
+
+  // Clear old records before loading fresh data
+  withdrawalsDiv.innerHTML = "";
+
+  message.className = "loading";
+  message.textContent =
+    "Loading withdrawal requests...";
+
 
   try {
 
@@ -365,7 +363,8 @@ async function updateStatus(id, newStatus) {
   );
 
 
-  loadWithdrawals();
+  // Reload the list cleanly
+  await loadWithdrawals();
 
 }
 
