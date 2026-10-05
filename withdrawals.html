@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Edesvino - Withdrawals</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      opacity: 0.85;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .balance-card {
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+    }
+
+    .balance-label {
+      font-size: 15px;
+      color: #166534;
+    }
+
+    .balance {
+      font-size: 32px;
+      font-weight: bold;
+      color: #15803d;
+      margin-top: 8px;
+    }
+
+    .summary {
+      margin-top: 15px;
+      line-height: 1.8;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 21px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 8px;
+      background: #16a34a;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      margin-top: 15px;
+      padding: 14px;
+      border-radius: 8px;
+      line-height: 1.5;
+    }
+
+    .success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .loading {
+      display: block;
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .withdrawal {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 12px;
+    }
+
+    .withdrawal strong {
+      font-size: 18px;
+    }
+
+    .withdrawal p {
+      margin: 7px 0;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .empty {
+      color: #666;
+      text-align: center;
+      padding: 15px;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      padding: 14px;
+      background: #111827;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+
+    .note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>Edesvino</h1>
+    <p>Seller Withdrawals</p>
+  </header>
+
+
+  <!-- AVAILABLE BALANCE -->
+
+  <div class="card balance-card">
+
+    <div class="balance-label">
+      Available for Withdrawal
+    </div>
+
+    <div
+      id="availableBalance"
+      class="balance"
+    >
+      ₦0
+    </div>
+
+    <div class="summary">
+
+      <div class="summary-row">
+        <span>Total Delivered Sales</span>
+        <strong id="deliveredSales">
+          ₦0
+        </strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Edesvino Commission (5%)</span>
+        <strong id="commission">
+          ₦0
+        </strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Seller Earnings (95%)</span>
+        <strong id="sellerEarnings">
+          ₦0
+        </strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Previous Withdrawals</span>
+        <strong id="
