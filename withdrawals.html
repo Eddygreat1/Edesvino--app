@@ -97,9 +97,14 @@ button:disabled {
   color: #a40000;
 }
 
+.info {
+  background: #eef4ff;
+  color: #1d4ed8;
+}
+
 .withdrawal {
   border-top: 1px solid #ddd;
-  padding: 15px 0;
+  padding: 18px 0;
 }
 
 .withdrawal:first-child {
@@ -108,7 +113,48 @@ button:disabled {
 
 .status {
   font-weight: bold;
-  margin-top: 5px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.status-pending {
+  background: #fff4cc;
+  color: #8a5a00;
+}
+
+.status-paid {
+  background: #e7f7ed;
+  color: #176b36;
+}
+
+.status-rejected {
+  background: #fdeaea;
+  color: #a40000;
+}
+
+.status-message {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.paid-message {
+  background: #e7f7ed;
+  color: #176b36;
+}
+
+.rejected-message {
+  background: #fdeaea;
+  color: #a40000;
+}
+
+.pending-message {
+  background: #fff8df;
+  color: #8a5a00;
 }
 
 .back {
@@ -281,6 +327,50 @@ box.className =
 "message " + type;
 
 box.style.display = "block";
+
+}
+
+
+/* =========================================
+   GET STATUS DETAILS
+   ========================================= */
+
+function getStatusDetails(status) {
+
+const currentStatus =
+String(status || "Pending").toLowerCase();
+
+if (currentStatus === "paid") {
+
+return {
+  label: "Paid",
+  className: "status-paid",
+  messageClass: "paid-message",
+  message:
+    "✓ This withdrawal has been paid successfully."
+};
+
+}
+
+if (currentStatus === "rejected") {
+
+return {
+  label: "Rejected",
+  className: "status-rejected",
+  messageClass: "rejected-message",
+  message:
+    "This withdrawal was rejected. The amount has been returned to your available balance."
+};
+
+}
+
+return {
+  label: "Pending",
+  className: "status-pending",
+  messageClass: "pending-message",
+  message:
+    "This withdrawal is waiting for admin review."
+};
 
 }
 
@@ -537,6 +627,12 @@ accountNumber.slice(-4);
 }
 
 
+const statusDetails =
+getStatusDetails(
+withdrawal.status
+);
+
+
 item.innerHTML = `
 
 <strong>
@@ -573,9 +669,13 @@ withdrawal.created_at
 }
 </div>
 
-<div class="status">
+<div class="status ${statusDetails.className}">
 Status:
-${withdrawal.status || "Pending"}
+${statusDetails.label}
+</div>
+
+<div class="status-message ${statusDetails.messageClass}">
+${statusDetails.message}
 </div>
 
 `;
