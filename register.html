@@ -154,72 +154,107 @@
 </div>
 
 <script>
-  const SUPABASE_URL = "https://lxszilqypuglxyfyukdg.supabase.co";
-  
-const SUPABASE_ANON_KEY = "your-real-key-here";
-  
-  const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+  const SUPABASE_URL =
+    "https://lxszilqypuglxyfyukdg.supabase.co";
 
-  const form = document.getElementById("sellerForm");
-  const message = document.getElementById("message");
+  const SUPABASE_ANON_KEY =
+    "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-  form.addEventListener("submit", async function(event) {
-    event.preventDefault();
+  const supabaseClient =
+    supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
 
-    const fullName = document.getElementById("fullName").value.trim();
-    const storeName = document.getElementById("storeName").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
+  const form =
+    document.getElementById("sellerForm");
 
-    message.textContent = "Creating account...";
+  const message =
+    document.getElementById("message");
 
-    try {
-      const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            full_name: fullName,
-            store_name: storeName,
-            phone: phone,
-            role: "seller"
-          }
-        }
-      });
+  form.addEventListener(
+    "submit",
+    async function(event) {
 
-      if (error) {
-        message.textContent = error.message;
-        return;
-      }
+      event.preventDefault();
 
-      if (data.user) {
-        localStorage.setItem(
-          "edesvinoSeller",
-          JSON.stringify({
-            id: data.user.id,
-            name: fullName,
-            email: email,
-            phone: phone,
-            storeName: storeName
-          })
-        );
-      }
+      const fullName =
+        document.getElementById("fullName")
+          .value.trim();
+
+      const storeName =
+        document.getElementById("storeName")
+          .value.trim();
+
+      const email =
+        document.getElementById("email")
+          .value.trim();
+
+      const phone =
+        document.getElementById("phone")
+          .value.trim();
+
+      const password =
+        document.getElementById("password")
+          .value;
 
       message.textContent =
-        "Seller account created successfully. You can now log in.";
+        "Creating account...";
 
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 1500);
+      try {
 
-    } catch (error) {
-      message.textContent = "Something went wrong. Please try again.";
+        const { data, error } =
+          await supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              data: {
+                full_name: fullName,
+                store_name: storeName,
+                phone: phone,
+                role: "seller"
+              }
+            }
+          });
+
+        if (error) {
+          message.textContent =
+            error.message;
+          return;
+        }
+
+        if (data.user) {
+
+          localStorage.setItem(
+            "edesvinoSeller",
+            JSON.stringify({
+              id: data.user.id,
+              name: fullName,
+              email: email,
+              phone: phone,
+              storeName: storeName
+            })
+          );
+        }
+
+        message.textContent =
+          "Seller account created successfully. You can now log in.";
+
+        setTimeout(() => {
+          window.location.href =
+            "login.html";
+        }, 1500);
+
+      } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+          "Something went wrong. Please try again.";
+
+      }
     }
-  });
+  );
 </script>
 
 </body>
