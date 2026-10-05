@@ -9,8 +9,6 @@ content="width=device-width, initial-scale=1.0">
 
 <title>Edesvino - Admin Withdrawals</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 
 body {
@@ -21,81 +19,110 @@ body {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 800px;
   margin: auto;
 }
 
-h1 {
-  color: #222;
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
 }
 
 .card {
   background: white;
+  margin-top: 15px;
   padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
 .withdrawal {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 15px;
+  border-bottom: 1px solid #ddd;
+  padding: 15px 0;
+}
+
+.withdrawal:last-child {
+  border-bottom: none;
 }
 
 .amount {
   font-size: 24px;
   font-weight: bold;
-  color: #0a7a35;
 }
 
 .status {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 5px;
   font-weight: bold;
-  background: #fff3cd;
-  color: #856404;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-top: 5px;
 }
 
-.buttons {
-  margin-top: 15px;
+.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.rejected {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 button {
   border: none;
-  padding: 10px 16px;
-  margin-right: 8px;
+  padding: 10px 15px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  margin-top: 10px;
+  margin-right: 8px;
 }
 
-.paid {
-  background: #198754;
+.pay-button {
+  background: #047857;
   color: white;
 }
 
-.rejected {
-  background: #dc3545;
+.reject-button {
+  background: #b91c1c;
   color: white;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.message {
+  text-align: center;
+  padding: 20px;
 }
 
 .error {
-  color: #b00020;
+  color: #b91c1c;
   font-weight: bold;
 }
 
-.loading {
-  color: #555;
+.back {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: #111827;
+  font-weight: bold;
+  text-decoration: none;
 }
 
-.back {
-  display: inline-block;
-  margin-top: 20px;
-  text-decoration: none;
-  color: #0066cc;
+.note {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 </style>
@@ -106,31 +133,48 @@ button {
 
 <div class="container">
 
-<h1>Edesvino</h1>
+  <div class="header">
 
-<div class="card">
+    <h1>Edesvino</h1>
 
-<h2>Admin Withdrawals</h2>
+    <p>Admin Withdrawals</p>
 
-<p>
-Review and manage seller withdrawal requests.
-</p>
+  </div>
 
-<div id="message" class="loading">
-Loading withdrawal requests...
+
+  <div class="card">
+
+    <h2>Review Seller Withdrawals</h2>
+
+    <p class="note">
+      Review withdrawal requests and mark them as Paid or Rejected.
+    </p>
+
+    <div id="message"
+         class="message">
+
+      Loading withdrawal requests...
+
+    </div>
+
+    <div id="withdrawals"></div>
+
+  </div>
+
+
+  <a
+    class="back"
+    href="admin.html">
+
+    ← Back to Admin Dashboard
+
+  </a>
+
 </div>
 
-<div id="withdrawals"></div>
 
-<a
-class="back"
-href="dashboard.html">
-← Back to Seller Dashboard
-</a>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-</div>
-
-</div>
 
 <script>
 
@@ -140,6 +184,7 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
+
 const supabaseClient =
 window.supabase.createClient(
   SUPABASE_URL,
@@ -147,224 +192,450 @@ window.supabase.createClient(
 );
 
 
+/*
+  Format Naira
+*/
+
+function formatNaira(amount) {
+
+  return "₦" +
+    Number(amount || 0).toLocaleString(
+      "en-NG"
+    );
+
+}
+
+
+/*
+  Mask bank account number.
+
+  Only the last 4 digits are displayed.
+*/
+
+function maskAccountNumber(accountNumber) {
+
+  const number =
+    String(accountNumber || "");
+
+  if (number.length <= 4) {
+
+    return number;
+
+  }
+
+  const lastFour =
+    number.slice(-4);
+
+  return "******" + lastFour;
+
+}
+
+
+/*
+  Load withdrawals
+*/
+
 async function loadWithdrawals() {
 
-  const message =
-    document.getElementById("message");
-
   const withdrawalsDiv =
-    document.getElementById("withdrawals");
+    document.getElementById(
+      "withdrawals"
+    );
 
-  // Clear old records before loading fresh data
+  const message =
+    document.getElementById(
+      "message"
+    );
+
+
+  /*
+    Clear previous results.
+
+    This prevents duplicate records
+    after an admin updates a withdrawal.
+  */
+
   withdrawalsDiv.innerHTML = "";
 
-  message.className = "loading";
+  message.className = "message";
+
   message.textContent =
     "Loading withdrawal requests...";
 
 
   try {
 
+    /*
+      Check logged-in user.
+    */
+
     const {
       data: userData,
       error: userError
-    } = await supabaseClient.auth.getUser();
+    } =
+      await supabaseClient.auth.getUser();
 
 
-    if (userError || !userData.user) {
+    if (
+      userError ||
+      !userData.user
+    ) {
 
-      message.className = "error";
-
-      message.textContent =
-        "Please log in first.";
+      message.innerHTML =
+        '<p class="error">' +
+        'Please log in first.' +
+        '</p>';
 
       return;
+
     }
 
 
+    const user =
+      userData.user;
+
+
+    /*
+      Load withdrawals.
+
+      The database RLS policy ensures
+      only the platform administrator
+      can see all withdrawal records.
+    */
+
     const {
-      data,
+      data: withdrawals,
       error
-    } = await supabaseClient
-      .from("withdrawals")
-      .select("*")
-      .order("created_at", {
-        ascending: false
-      });
+    } =
+      await supabaseClient
+        .from("withdrawals")
+        .select(
+          "id, seller_id, amount, status, bank_name, account_name, account_number, created_at"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
 
 
     if (error) {
 
-      console.error(error);
-
-      message.className = "error";
-
-      message.textContent =
-        "Error loading withdrawals: " +
-        error.message;
+      message.innerHTML =
+        '<p class="error">' +
+        'Unable to load withdrawals: ' +
+        error.message +
+        '</p>';
 
       return;
+
     }
 
 
-    message.textContent = "";
-
-
-    if (!data || data.length === 0) {
+    if (
+      !withdrawals ||
+      withdrawals.length === 0
+    ) {
 
       message.textContent =
-        "No withdrawal requests found.";
+        "No withdrawal requests yet.";
 
       return;
+
     }
 
 
-    data.forEach(function(item) {
-
-      const div =
-        document.createElement("div");
-
-      div.className = "withdrawal";
+    message.style.display =
+      "none";
 
 
-      const date =
-        new Date(item.created_at)
-          .toLocaleString("en-NG");
+    withdrawals.forEach(
+      function(withdrawal) {
+
+        const item =
+          document.createElement(
+            "div"
+          );
 
 
-      let buttons = "";
+        item.className =
+          "withdrawal";
 
 
-      if (item.status === "Pending") {
+        let statusClass =
+          "pending";
 
-        buttons = `
 
-          <div class="buttons">
+        if (
+          withdrawal.status === "Paid"
+        ) {
 
-            <button
-              class="paid"
-              onclick="updateStatus(${item.id}, 'Paid')">
-              Mark as Paid
-            </button>
+          statusClass =
+            "paid";
 
-            <button
-              class="rejected"
-              onclick="updateStatus(${item.id}, 'Rejected')">
-              Reject
-            </button>
+        }
 
+
+        if (
+          withdrawal.status === "Rejected"
+        ) {
+
+          statusClass =
+            "rejected";
+
+        }
+
+
+        const accountNumber =
+          maskAccountNumber(
+            withdrawal.account_number
+          );
+
+
+        item.innerHTML = `
+
+          <div class="amount">
+            ${formatNaira(
+              withdrawal.amount
+            )}
           </div>
+
+          <p>
+            <strong>Bank:</strong>
+            ${withdrawal.bank_name || "Not provided"}
+          </p>
+
+          <p>
+            <strong>Account Name:</strong>
+            ${withdrawal.account_name || "Not provided"}
+          </p>
+
+          <p>
+            <strong>Account Number:</strong>
+            ${accountNumber}
+          </p>
+
+          <p>
+            <strong>Seller ID:</strong>
+            ${withdrawal.seller_id}
+          </p>
+
+          <p>
+            <strong>Date:</strong>
+            ${
+              withdrawal.created_at
+                ? new Date(
+                    withdrawal.created_at
+                  ).toLocaleString(
+                    "en-NG"
+                  )
+                : "Unknown"
+            }
+          </p>
+
+          <p>
+            <strong>Status:</strong>
+            <span class="status ${statusClass}">
+              ${withdrawal.status}
+            </span>
+          </p>
 
         `;
 
+
+        /*
+          Only Pending withdrawals
+          can be changed.
+        */
+
+        if (
+          withdrawal.status === "Pending"
+        ) {
+
+          const payButton =
+            document.createElement(
+              "button"
+            );
+
+
+          payButton.className =
+            "pay-button";
+
+
+          payButton.textContent =
+            "Mark as Paid";
+
+
+          payButton.onclick =
+            async function() {
+
+              const confirmed =
+                confirm(
+                  "Mark this withdrawal as Paid?"
+                );
+
+
+              if (!confirmed) {
+
+                return;
+
+              }
+
+
+              await updateWithdrawalStatus(
+                withdrawal.id,
+                "Paid"
+              );
+
+            };
+
+
+          item.appendChild(
+            payButton
+          );
+
+
+          const rejectButton =
+            document.createElement(
+              "button"
+            );
+
+
+          rejectButton.className =
+            "reject-button";
+
+
+          rejectButton.textContent =
+            "Reject";
+
+
+          rejectButton.onclick =
+            async function() {
+
+              const confirmed =
+                confirm(
+                  "Reject this withdrawal request?"
+                );
+
+
+              if (!confirmed) {
+
+                return;
+
+              }
+
+
+              await updateWithdrawalStatus(
+                withdrawal.id,
+                "Rejected"
+              );
+
+            };
+
+
+          item.appendChild(
+            rejectButton
+          );
+
+        }
+
+
+        withdrawalsDiv.appendChild(
+          item
+        );
+
       }
-
-
-      div.innerHTML = `
-
-        <div class="amount">
-          ₦${Number(item.amount).toLocaleString()}
-        </div>
-
-        <p>
-          <strong>Bank:</strong>
-          ${item.bank_name || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Account Name:</strong>
-          ${item.account_name || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Account Number:</strong>
-          ${item.account_number || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Seller ID:</strong>
-          ${item.seller_id}
-        </p>
-
-        <p>
-          <strong>Date:</strong>
-          ${date}
-        </p>
-
-        <p>
-          <strong>Status:</strong>
-          <span class="status">
-            ${item.status}
-          </span>
-        </p>
-
-        ${buttons}
-
-      `;
-
-
-      withdrawalsDiv.appendChild(div);
-
-    });
+    );
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Admin withdrawals error:",
+      error
+    );
 
-    message.className = "error";
 
-    message.textContent =
-      "Something went wrong while loading withdrawals.";
+    message.innerHTML =
+      '<p class="error">' +
+      'Something went wrong: ' +
+      error.message +
+      '</p>';
 
   }
 
 }
 
 
-async function updateStatus(id, newStatus) {
+/*
+  Update withdrawal status
+*/
 
-  const confirmed =
-    confirm(
-      "Are you sure you want to mark this withdrawal as " +
-      newStatus + "?"
+async function updateWithdrawalStatus(
+  withdrawalId,
+  newStatus
+) {
+
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("withdrawals")
+        .update({
+          status: newStatus
+        })
+        .eq(
+          "id",
+          withdrawalId
+        );
+
+
+    if (error) {
+
+      alert(
+        "Unable to update withdrawal: " +
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    alert(
+      "Withdrawal status updated to " +
+      newStatus +
+      "."
     );
 
 
-  if (!confirmed) {
-    return;
-  }
+    /*
+      Reload the list.
+
+      This also prevents duplicate
+      withdrawal records from appearing.
+    */
+
+    await loadWithdrawals();
 
 
-  const {
-    error
-  } = await supabaseClient
-    .from("withdrawals")
-    .update({
-      status: newStatus
-    })
-    .eq("id", id);
+  } catch (error) {
 
+    console.error(
+      "Update withdrawal error:",
+      error
+    );
 
-  if (error) {
 
     alert(
-      "Error updating withdrawal: " +
+      "Something went wrong: " +
       error.message
     );
 
-    return;
   }
-
-
-  alert(
-    "Withdrawal status updated to " +
-    newStatus + "."
-  );
-
-
-  // Reload the list cleanly
-  await loadWithdrawals();
 
 }
 
