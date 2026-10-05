@@ -1,260 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Become a Seller - Edesvino</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Edesvino - Become a Seller</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #222;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    header {
-      background: #111;
-      color: white;
-      padding: 18px;
-      text-align: center;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  color: #111827;
+}
 
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-      padding: 20px;
-    }
+.container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+}
 
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
 
-    h1 {
-      margin-top: 0;
-      text-align: center;
-    }
+h1 {
+  text-align: center;
+  margin-bottom: 10px;
+}
 
-    p {
-      text-align: center;
-      color: #666;
-    }
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 25px;
+}
 
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
+label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
 
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+}
 
-    button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 8px;
-      background: #111;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 22px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
 
-    .login-box {
-      margin-top: 25px;
-      padding-top: 20px;
-      border-top: 1px solid #ddd;
-      text-align: center;
-    }
+button:disabled {
+  opacity: 0.6;
+}
 
-    .login-link {
-      display: inline-block;
-      margin-top: 10px;
-      text-decoration: none;
-      font-weight: bold;
-      color: #0066cc;
-    }
+.message {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  display: none;
+}
 
-    .back {
-      display: block;
-      text-align: center;
-      margin-top: 20px;
-      text-decoration: none;
-      color: #555;
-    }
+.success {
+  display: block;
+  background: #dcfce7;
+  color: #166534;
+}
 
-    #message {
-      margin-top: 15px;
-      text-align: center;
-      font-weight: bold;
-    }
-  </style>
+.error {
+  display: block;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.login {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.login a,
+.back a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.back {
+  text-align: center;
+  margin-top: 20px;
+}
+</style>
 </head>
 
 <body>
 
-<header>
-  <h2>Edesvino</h2>
-</header>
-
 <div class="container">
+
   <div class="card">
 
     <h1>Become a Seller</h1>
-    <p>Create your seller account and start selling on Edesvino.</p>
 
-    <form id="sellerForm">
+    <div class="subtitle">
+      Create your seller account and start selling on Edesvino.
+    </div>
+
+    <form id="registerForm">
 
       <label for="fullName">Full Name</label>
-      <input type="text" id="fullName" required>
+      <input
+        type="text"
+        id="fullName"
+        required
+      >
 
       <label for="storeName">Store / Business Name</label>
-      <input type="text" id="storeName" required>
+      <input
+        type="text"
+        id="storeName"
+        required
+      >
 
       <label for="email">Email Address</label>
-      <input type="email" id="email" required>
+      <input
+        type="email"
+        id="email"
+        required
+      >
 
       <label for="phone">Phone Number</label>
-      <input type="tel" id="phone" required>
+      <input
+        type="tel"
+        id="phone"
+        required
+      >
 
       <label for="password">Password</label>
-      <input type="password" id="password" required minlength="6">
+      <input
+        type="password"
+        id="password"
+        minlength="6"
+        required
+      >
 
-      <button type="submit">Create Seller Account</button>
+      <button type="submit" id="registerButton">
+        Create Seller Account
+      </button>
 
     </form>
 
-    <div id="message"></div>
+    <div id="message" class="message"></div>
 
-    <div class="login-box">
-      <strong>Already have a seller account?</strong>
-      <br>
-      <a class="login-link" href="login.html">Seller Login</a>
+    <div class="login">
+      <strong>Already have a seller account?</strong><br><br>
+      <a href="login.html">Seller Login</a>
     </div>
 
-    <a class="back" href="index.html">← Back to Marketplace</a>
-
   </div>
+
+  <div class="back">
+    <a href="index.html">← Back to Marketplace</a>
+  </div>
+
 </div>
 
 <script>
-  const SUPABASE_URL =
-    "https://lxszilqypuglxyfyukdg.supabase.co";
 
-  const SUPABASE_ANON_KEY =
-    "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
 
-  const supabaseClient =
-    supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
+const SUPABASE_ANON_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+const form =
+  document.getElementById("registerForm");
+
+const button =
+  document.getElementById("registerButton");
+
+const message =
+  document.getElementById("message");
+
+form.addEventListener("submit", async function(event) {
+
+  event.preventDefault();
+
+  message.className = "message";
+  message.style.display = "none";
+  message.textContent = "";
+
+  button.disabled = true;
+  button.textContent = "Creating Account...";
+
+  const fullName =
+    document.getElementById("fullName").value.trim();
+
+  const storeName =
+    document.getElementById("storeName").value.trim();
+
+  const email =
+    document.getElementById("email").value.trim();
+
+  const phone =
+    document.getElementById("phone").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+  try {
+
+    const { data, error } =
+      await supabaseClient.auth.signUp({
+
+        email: email,
+
+        password: password,
+
+        options: {
+          data: {
+            full_name: fullName,
+            store_name: storeName,
+            phone: phone,
+            role: "seller"
+          }
+        }
+
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    localStorage.setItem(
+      "edesvinoSeller",
+      JSON.stringify({
+        id: data.user ? data.user.id : null,
+        full_name: fullName,
+        store_name: storeName,
+        phone: phone,
+        email: email,
+        role: "seller"
+      })
     );
 
-  const form =
-    document.getElementById("sellerForm");
+    message.className = "message success";
+    message.style.display = "block";
 
-  const message =
-    document.getElementById("message");
-
-  form.addEventListener(
-    "submit",
-    async function(event) {
-
-      event.preventDefault();
-
-      const fullName =
-        document.getElementById("fullName")
-          .value.trim();
-
-      const storeName =
-        document.getElementById("storeName")
-          .value.trim();
-
-      const email =
-        document.getElementById("email")
-          .value.trim();
-
-      const phone =
-        document.getElementById("phone")
-          .value.trim();
-
-      const password =
-        document.getElementById("password")
-          .value;
+    if (data.session) {
 
       message.textContent =
-        "Creating account...";
+        "Seller account created successfully. Redirecting to login...";
 
-      try {
+      setTimeout(function() {
+        window.location.href = "login.html";
+      }, 1500);
 
-        const { data, error } =
-          await supabaseClient.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-              data: {
-                full_name: fullName,
-                store_name: storeName,
-                phone: phone,
-                role: "seller"
-              }
-            }
-          });
+    } else {
 
-        if (error) {
-          message.textContent =
-            error.message;
-          return;
-        }
+      message.textContent =
+        "Seller account created successfully. Please check your email to confirm your account.";
 
-        if (data.user) {
-
-          localStorage.setItem(
-            "edesvinoSeller",
-            JSON.stringify({
-              id: data.user.id,
-              name: fullName,
-              email: email,
-              phone: phone,
-              storeName: storeName
-            })
-          );
-        }
-
-        message.textContent =
-          "Seller account created successfully. You can now log in.";
-
-        setTimeout(() => {
-          window.location.href =
-            "login.html";
-        }, 1500);
-
-      } catch (error) {
-
-        console.error(error);
-
-        message.textContent =
-          "Something went wrong. Please try again.";
-
-      }
+      button.disabled = false;
+      button.textContent = "Create Seller Account";
     }
-  );
+
+  } catch (error) {
+
+    console.error(error);
+
+    message.className = "message error";
+    message.style.display = "block";
+    message.textContent =
+      error.message || "Unable to create seller account.";
+
+    button.disabled = false;
+    button.textContent = "Create Seller Account";
+  }
+
+});
+
 </script>
 
 </body>
