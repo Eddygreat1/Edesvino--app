@@ -73,6 +73,17 @@ input {
   margin: 8px 0;
 }
 
+.view-details {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #0066cc;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
 .message {
   background: white;
   padding: 20px;
@@ -364,6 +375,15 @@ function renderCustomers() {
             ).toLocaleString()
           : "N/A";
 
+      const customerName =
+        String(
+          customer.customer_name || ""
+        );
+
+      const detailsUrl =
+        "admin-customer-details.html?customer=" +
+        encodeURIComponent(customerName);
+
       return `
         <div class="customer">
 
@@ -390,6 +410,13 @@ function renderCustomers() {
             <strong>Last Order:</strong>
             ${lastOrder}
           </p>
+
+          <a
+            class="view-details"
+            href="${detailsUrl}"
+          >
+            View Details
+          </a>
 
         </div>
       `;
