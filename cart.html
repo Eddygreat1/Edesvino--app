@@ -266,6 +266,7 @@
     <nav>
       <a href="index.html">Home</a>
       <a href="index.html#products-section">Shop</a>
+      <a id="cartNav" href="cart.html">Cart</a>
       <a href="register.html">Sell</a>
       <a href="track-order.html">Track Order</a>
     </nav>
@@ -300,6 +301,9 @@
   const cartContent =
     document.getElementById("cartContent");
 
+  const cartNav =
+    document.getElementById("cartNav");
+
   function getCart() {
     try {
       return JSON.parse(
@@ -318,6 +322,21 @@
     );
   }
 
+  function updateCartCounter() {
+    const cart = getCart();
+
+    const totalQuantity = cart.reduce(
+      (total, item) =>
+        total + Math.max(1, Number(item.quantity || 1)),
+      0
+    );
+
+    cartNav.textContent =
+      totalQuantity > 0
+        ? "Cart (" + totalQuantity + ")"
+        : "Cart";
+  }
+
   function formatPrice(price) {
     return "₦" + Number(price || 0).toLocaleString();
   }
@@ -334,10 +353,13 @@
   function renderCart() {
     const cart = getCart();
 
+    updateCartCounter();
+
     if (!cart.length) {
       cartContent.innerHTML = `
         <div class="empty-cart">
           <h2>Your cart is empty</h2>
+
           <p>
             Add products to your cart and they will
             appear here.
@@ -361,27 +383,35 @@
 
     cart.forEach((item, index) => {
 
-      const price = Number(item.price || 0);
+      const price =
+        Number(item.price || 0);
 
       const quantity =
-        Math.max(1, Number(item.quantity || 1));
+        Math.max(
+          1,
+          Number(item.quantity || 1)
+        );
 
-      const itemTotal = price * quantity;
+      const itemTotal =
+        price * quantity;
 
       subtotal += itemTotal;
 
-      const imageHTML = item.image_url
-        ? `
-          <img
-            class="item-image"
-            src="${escapeHTML(item.image_url)}"
-            alt="${escapeHTML(item.name || "Product")}"
-            onerror="this.style.display='none';"
-          >
-        `
-        : `
-          <div class="item-image"></div>
-        `;
+      const imageHTML =
+        item.image_url
+          ? `
+            <img
+              class="item-image"
+              src="${escapeHTML(item.image_url)}"
+              alt="${escapeHTML(
+                item.name || "Product"
+              )}"
+              onerror="this.style.display='none';"
+            >
+          `
+          : `
+            <div class="item-image"></div>
+          `;
 
       itemsHTML += `
         <div class="cart-item">
@@ -393,11 +423,14 @@
             <div class="item-info">
 
               <div class="item-name">
-                ${escapeHTML(item.name || "Product")}
+                ${escapeHTML(
+                  item.name || "Product"
+                )}
               </div>
 
               <div class="item-store">
-                Store: ${escapeHTML(
+                Store:
+                ${escapeHTML(
                   item.store || "Eddy Digital Hub"
                 )}
               </div>
@@ -454,17 +487,23 @@
 
         <div class="summary-row">
           <span>Subtotal</span>
-          <strong>${formatPrice(subtotal)}</strong>
+          <strong>
+            ${formatPrice(subtotal)}
+          </strong>
         </div>
 
         <div class="summary-row">
           <span>Delivery</span>
-          <span>Calculated at checkout</span>
+          <span>
+            Calculated at checkout
+          </span>
         </div>
 
         <div class="summary-row summary-total">
           <span>Total</span>
-          <span>${formatPrice(subtotal)}</span>
+          <span>
+            ${formatPrice(subtotal)}
+          </span>
         </div>
 
         <button
@@ -486,6 +525,7 @@
   }
 
   function changeQuantity(index, amount) {
+
     const cart = getCart();
 
     if (!cart[index]) {
@@ -493,22 +533,31 @@
     }
 
     const currentQuantity =
-      Number(cart[index].quantity || 1);
+      Number(
+        cart[index].quantity || 1
+      );
 
     const newQuantity =
       currentQuantity + amount;
 
     if (newQuantity <= 0) {
+
       cart.splice(index, 1);
+
     } else {
-      cart[index].quantity = newQuantity;
+
+      cart[index].quantity =
+        newQuantity;
+
     }
 
     saveCart(cart);
+
     renderCart();
   }
 
   function removeItem(index) {
+
     const cart = getCart();
 
     if (!cart[index]) {
@@ -518,14 +567,18 @@
     cart.splice(index, 1);
 
     saveCart(cart);
+
     renderCart();
   }
 
   function proceedToCheckout() {
+
     const cart = getCart();
 
     if (!cart.length) {
+
       alert("Your cart is empty.");
+
       return;
     }
 
@@ -533,21 +586,25 @@
       The current checkout page accepts a product name
       through the product query parameter.
 
-      For this first cart-to-checkout connection,
-      we send the first cart item into the existing
-      checkout flow without changing checkout.html.
+      We keep the existing checkout connection unchanged.
     */
 
     const firstItem = cart[0];
 
     if (!firstItem.name) {
-      alert("Unable to continue with this product.");
+
+      alert(
+        "Unable to continue with this product."
+      );
+
       return;
     }
 
     window.location.href =
       "checkout.html?product=" +
-      encodeURIComponent(firstItem.name);
+      encodeURIComponent(
+        firstItem.name
+      );
   }
 
   renderCart();
