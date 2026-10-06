@@ -16,18 +16,18 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #222;
+      background: #f5f7fa;
+      color: #111827;
     }
 
     header {
-      background: #111;
-      color: white;
-      padding: 18px 20px;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px 20px;
     }
 
-    .header-content {
-      max-width: 1000px;
+    .header-inner {
+      max-width: 1100px;
       margin: auto;
       display: flex;
       align-items: center;
@@ -36,141 +36,172 @@
     }
 
     .logo {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: bold;
+      color: #111827;
+      text-decoration: none;
+    }
+
+    nav {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
     }
 
     nav a {
-      color: white;
+      color: #374151;
       text-decoration: none;
-      margin-left: 15px;
       font-size: 14px;
     }
 
-    .container {
-      max-width: 900px;
-      margin: 35px auto;
-      padding: 0 20px;
+    nav a:hover {
+      color: #111827;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 18px;
+      color: #374151;
+      text-decoration: none;
+      font-size: 14px;
     }
 
     .product-card {
-      background: white;
+      background: #ffffff;
       border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     }
 
-    .product-image {
-      width: 100%;
-      max-height: 450px;
-      object-fit: contain;
-      display: block;
-      background: #eee;
+    .product-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      align-items: start;
     }
 
-    .no-image {
+    .image-box {
       width: 100%;
-      height: 350px;
-      background: #eee;
+      min-height: 330px;
+      background: #f3f4f6;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #777;
+      overflow: hidden;
     }
 
-    .content {
-      padding: 25px;
+    .image-box img {
+      width: 100%;
+      height: 330px;
+      object-fit: contain;
+      display: block;
+      background: #ffffff;
     }
 
-    h1 {
-      margin-top: 0;
-      margin-bottom: 12px;
+    .no-image {
+      color: #6b7280;
+      font-size: 15px;
+    }
+
+    .product-info h1 {
+      margin: 0 0 10px;
       font-size: 30px;
+      color: #111827;
     }
 
     .description {
-      color: #666;
+      color: #4b5563;
       line-height: 1.6;
-      margin-bottom: 20px;
+      margin: 16px 0;
+      white-space: pre-wrap;
     }
 
     .price {
       font-size: 28px;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin: 18px 0;
+      color: #111827;
     }
 
     .store {
-      color: #555;
-      margin-bottom: 25px;
+      display: inline-block;
+      background: #f3f4f6;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #374151;
+      margin-bottom: 22px;
+      font-size: 14px;
     }
 
-    .buy-button {
+    .buy-btn {
       display: block;
       width: 100%;
-      text-align: center;
-      background: #111;
-      color: white;
       padding: 15px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 12px;
-    }
-
-    .back-button {
-      display: block;
-      width: 100%;
+      background: #111827;
+      color: #ffffff;
       text-align: center;
-      background: #e8e8e8;
-      color: #111;
-      padding: 15px;
-      border-radius: 8px;
       text-decoration: none;
+      border-radius: 9px;
+      font-size: 17px;
       font-weight: bold;
     }
 
-    .loading,
-    .error {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
+    .buy-btn:hover {
+      opacity: 0.92;
+    }
+
+    .status {
       text-align: center;
+      padding: 40px 20px;
+      background: #ffffff;
+      border-radius: 14px;
+    }
+
+    .status h2 {
+      margin-top: 0;
     }
 
     footer {
-      margin-top: 40px;
-      background: #111;
-      color: white;
       text-align: center;
-      padding: 25px 20px;
+      padding: 30px 15px;
+      color: #6b7280;
+      font-size: 13px;
     }
 
-    footer p {
-      margin: 5px 0;
-    }
-
-    @media (max-width: 600px) {
-
-      .header-content {
+    @media (max-width: 700px) {
+      .header-inner {
+        align-items: flex-start;
         flex-direction: column;
       }
 
-      nav a {
-        margin: 0 7px;
+      nav {
+        gap: 10px;
       }
 
-      h1 {
+      .product-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .image-box,
+      .image-box img {
+        height: 280px;
+        min-height: 280px;
+      }
+
+      .product-info h1 {
         font-size: 25px;
       }
 
-      .product-image {
-        max-height: 300px;
-      }
-
-      .no-image {
-        height: 250px;
+      .price {
+        font-size: 25px;
       }
     }
   </style>
@@ -179,307 +210,194 @@
 <body>
 
 <header>
-  <div class="header-content">
-
-    <div class="logo">
-      Edesvino
-    </div>
+  <div class="header-inner">
+    <a class="logo" href="index.html">Edesvino</a>
 
     <nav>
       <a href="index.html">Home</a>
+      <a href="index.html#products-section">Shop</a>
       <a href="register.html">Sell</a>
       <a href="track-order.html">Track Order</a>
     </nav>
-
   </div>
 </header>
 
+<main>
 
-<div class="container">
+  <a class="back-link" href="index.html">
+    ← Back to Marketplace
+  </a>
 
-  <div id="product">
-
-    <div class="loading">
-      Loading product...
+  <div id="content">
+    <div class="status">
+      <h2>Loading product...</h2>
+      <p>Please wait.</p>
     </div>
-
   </div>
 
-</div>
-
+</main>
 
 <footer>
-
-  <p>
-    <strong>Edesvino Marketplace</strong>
-  </p>
-
-  <p>
-    Buy. Sell. Grow.
-  </p>
-
+  <strong>Edesvino Marketplace</strong><br>
+  Buy. Sell. Grow.
 </footer>
 
-
 <script>
+  const SUPABASE_URL =
+    "https://lxszilqypuglxyfyukdg.supabase.co";
 
-const SUPABASE_URL =
-  "https://lxszilqypuglxyfyukdg.supabase.co";
+  const SUPABASE_KEY =
+    "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-const SUPABASE_KEY =
-  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+  const supabaseClient =
+    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  const content = document.getElementById("content");
 
-const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  async function loadProduct() {
+    try {
+      const params = new URLSearchParams(window.location.search);
 
+      const productId = params.get("id");
+      const productName = params.get("product");
 
-const productContainer =
-  document.getElementById("product");
+      if (!productId && !productName) {
+        showUnavailable("No product was selected.");
+        return;
+      }
 
-
-const params =
-  new URLSearchParams(
-    window.location.search
-  );
-
-
-const productId =
-  params.get("id");
-
-
-const productName =
-  params.get("product");
-
-
-function naira(amount) {
-
-  return "₦" +
-    Number(amount || 0)
-      .toLocaleString("en-NG");
-
-}
-
-
-function showError(message) {
-
-  productContainer.innerHTML =
-    `
-    <div class="error">
-
-      <h2>Product unavailable</h2>
-
-      <p>
-        ${message}
-      </p>
-
-      <br>
-
-      <a
-        class="back-button"
-        href="index.html"
-      >
-        Back to Marketplace
-      </a>
-
-    </div>
-    `;
-
-}
-
-
-async function loadProduct() {
-
-  try {
-
-    let query =
-      supabaseClient
+      let query = supabaseClient
         .from("products")
-        .select(
-          "id,name,price,description,store,image_url"
-        );
+        .select(`
+          id,
+          name,
+          price,
+          description,
+          store,
+          image_url
+        `);
 
+      if (productId) {
+        query = query.eq("id", productId);
+      } else {
+        query = query.eq("name", productName);
+      }
 
-    if (productId) {
+      const { data, error } = await query.maybeSingle();
 
-      query =
-        query.eq(
-          "id",
-          productId
-        );
+      if (error) {
+        console.error(error);
+        showUnavailable("Unable to load this product.");
+        return;
+      }
 
-    } else if (productName) {
+      if (!data) {
+        showUnavailable("Product unavailable.");
+        return;
+      }
 
-      query =
-        query.eq(
-          "name",
-          productName
-        );
+      const storeName =
+        data.store === "Edesvino"
+          ? "Eddy Digital Hub"
+          : (
+              data.store ||
+              data.store_name ||
+              data.seller_name ||
+              "Eddy Digital Hub"
+            );
 
-    } else {
-
-      showError(
-        "No product was selected."
-      );
-
-      return;
-    }
-
-
-    const {
-      data,
-      error
-    } =
-      await query.maybeSingle();
-
-
-    if (error) {
-
-      console.error(error);
-
-      showError(
-        "Unable to load this product."
-      );
-
-      return;
-    }
-
-
-    if (!data) {
-
-      showError(
-        "This product could not be found."
-      );
-
-      return;
-    }
-
-
-    const name =
-      data.name ||
-      "Unnamed Product";
-
-
-    const description =
-      data.description ||
-      "No description available.";
-
-
-    const store =
-       data.store === "Edesvino"
-      ? "Eddy Digital Hub"
-      : (
-        data.store ||
-        "Eddy Digital Hub"
-      );
-
-
-    const image =
-      data.image_url ||
-      "";
-
-
-    const checkoutLink =
-      "checkout.html?product=" +
-      encodeURIComponent(name);
-
-
-    let imageHTML;
-
-
-    if (image.trim() !== "") {
-
-      imageHTML =
+      const imageHTML = data.image_url
+        ? `
+          <img
+            src="${escapeAttribute(data.image_url)}"
+            alt="${escapeAttribute(data.name || "Product")}"
+            onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;no-image&quot;>No image available</div>';"
+          >
         `
-        <img
-          class="product-image"
-          src="${image}"
-          alt="${name}"
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-        >
-
-        <div
-          class="no-image"
-          style="display:none;"
-        >
-          Image unavailable
-        </div>
+        : `
+          <div class="no-image">
+            No image available
+          </div>
         `;
 
-    } else {
+      const description =
+        data.description ||
+        "No description available for this product.";
 
-      imageHTML =
-        `
-        <div class="no-image">
-          No image available
-        </div>
-        `;
+      const price = Number(data.price || 0);
 
-    }
+      content.innerHTML = `
+        <div class="product-card">
 
+          <div class="product-layout">
 
-    productContainer.innerHTML =
-      `
-      <div class="product-card">
+            <div class="image-box">
+              ${imageHTML}
+            </div>
 
-        ${imageHTML}
+            <div class="product-info">
 
-        <div class="content">
+              <h1>${escapeHTML(data.name || "Product")}</h1>
 
-          <h1>
-            ${name}
-          </h1>
+              <div class="price">
+                ₦${price.toLocaleString()}
+              </div>
 
-          <div class="price">
-            ${naira(data.price)}
+              <div class="store">
+                Store: ${escapeHTML(storeName)}
+              </div>
+
+              <div class="description">
+                ${escapeHTML(description)}
+              </div>
+
+              <a
+                class="buy-btn"
+                href="checkout.html?product=${encodeURIComponent(data.name)}"
+              >
+                Buy Now
+              </a>
+
+            </div>
+
           </div>
 
-          <div class="store">
-            Store: ${store}
-          </div>
-
-          <p class="description">
-            ${description}
-          </p>
-
-          <a
-            class="buy-button"
-            href="${checkoutLink}"
-          >
-            Buy Now
-          </a>
-
-          <a
-            class="back-button"
-            href="index.html"
-          >
-            ← Back to Marketplace
-          </a>
-
         </div>
-
-      </div>
       `;
 
-
-  } catch (error) {
-
-    console.error(error);
-
-    showError(
-      "Something went wrong. Please try again."
-    );
-
+    } catch (error) {
+      console.error(error);
+      showUnavailable("Something went wrong while loading the product.");
+    }
   }
 
-}
+  function showUnavailable(message) {
+    content.innerHTML = `
+      <div class="status">
+        <h2>Product unavailable</h2>
+        <p>${escapeHTML(message)}</p>
+        <br>
+        <a class="back-link" href="index.html">
+          ← Back to Marketplace
+        </a>
+      </div>
+    `;
+  }
 
+  function escapeHTML(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-loadProduct();
+  function escapeAttribute(value) {
+    return escapeHTML(value);
+  }
 
+  loadProduct();
 </script>
 
 </body>
