@@ -67,12 +67,10 @@ input {
 
 .customer h2 {
   margin-top: 0;
-  color: #222;
 }
 
 .customer p {
   margin: 8px 0;
-  line-height: 1.4;
 }
 
 .message {
@@ -86,6 +84,14 @@ input {
   margin-top: 20px;
   text-decoration: none;
   color: #0066cc;
+}
+
+.error {
+  background: #fff0f0;
+  color: #b00020;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
 }
 
 </style>
@@ -111,13 +117,13 @@ placeholder="Search customer name or customer ID..."
 >
 
 <div class="summary" id="summary">
-Loading customers...
+Starting...
 </div>
 
 </div>
 
 <div id="customers">
-Loading customers...
+Connecting to Supabase...
 </div>
 
 <a class="back" href="admin.html">
@@ -144,48 +150,264 @@ let customers = [];
 
 async function loadCustomers() {
 
-  const {
-    data: { user },
-    error: userError
-  } = await supabaseClient.auth.getUser();
+  const box =
+    document.getElementById("customers");
 
-  if (userError || !user) {
+  const summary =
+    document.getElementById("summary");
+
+  try {
+
+    box.textContent =
+      "Checking admin login...";
+
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError) {
+      throw new Error(
+        "Login check failed: " +
+        userError.message
+      );
+    }
+
+    if (!user) {
+
+      box.innerHTML =
+        '<div class="message">Please log in as an admin.</div>';
+
+      summary.textContent = "";
+
+      return;
+    }
+
+    box.textContent =
+      "Checking admin permission...";
+
+    const {
+      data: admin,
+      error: adminError
+    } = await supabaseClient
+      .from("platform_admins")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (adminError) {
+      throw new Error(
+        "Admin check failed: " +
+        adminError.message
+      );
+    }
+
+    if (!admin) {
+
+      box.innerHTML =
+        '<div class="message">Access denied. Admin account required.</div>';
+
+      summary.textContent = "";
+
+      return;
+    }
+
+    box.textContent =
+      "Loading marketplace orders...";
+
+    const {
+      data: orders,
+      error: ordersError
+    } = await supabaseClient
+      .from("orders")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
+
+    if (ordersError) {
+      throw new Error(
+        "Orders request failed: " +
+        ordersError.message
+      );
+    }
+
+    const customerMap = {};
+
+    (orders || []).forEach(order => {
+
+      const customerId =
+        order.customer_id ||
+        "unknown-" +
+        (order.customer_name || "unknown");
+
+      if (!customerMap[customerId]) {
+
+        customerMap[customerId] = {
+          customer_id:
+            order.customer_id || "N/A",
+
+          customer_name:
+            order.customer_name || "N/A",
+
+          order_count: 0,
+
+          total_spent: 0,
+
+          last_order:
+            order.created_at || null
+        };
+
+      }
+
+      customerMap[customerId].order_count += 1;
+
+      customerMap[customerId].total_spent +=
+        Number(order.price || 0);
+
+      if (
+        order.created_at &&
+        (
+          !customerMap[customerId].last_order ||
+          new Date(order.created_at) >
+          new Date(
+            customerMap[customerId].last_order
+          )
+        )
+      ) {
+
+        customerMap[customerId].last_order =
+          order.created_at;
+
+      }
+
+    });
+
+    customers =
+      Object.values(customerMap);
+
+    customers.sort((a, b) =>
+      new Date(b.last_order || 0) -
+      new Date(a.last_order || 0)
+    );
+
+    renderCustomers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    box.innerHTML =
+      '<div class="error">' +
+      '<strong>Error:</strong><br>' +
+      error.message +
+      '</div>';
+
+    summary.textContent =
+      "Customer loading failed.";
+
+  }
+
+}
+
+function renderCustomers() {
+
+  const search =
+    document.getElementById("searchInput")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const filtered =
+    customers.filter(customer => {
+
+      const name =
+        String(
+          customer.customer_name || ""
+        ).toLowerCase();
+
+      const id =
+        String(
+          customer.customer_id || ""
+        ).toLowerCase();
+
+      return (
+        !search ||
+        name.includes(search) ||
+        id.includes(search)
+      );
+
+    });
+
+  document.getElementById("summary").textContent =
+    "Showing " +
+    filtered.length +
+    " of " +
+    customers.length +
+    " customers";
+
+  if (filtered.length === 0) {
 
     document.getElementById("customers").innerHTML =
-      '<div class="message">Please log in as an admin.</div>';
-
-    document.getElementById("summary").textContent = "";
+      '<div class="message">No customers found.</div>';
 
     return;
   }
 
-  const {
-    data: admin,
-    error: adminError
-  } = await supabaseClient
-    .from("platform_admins")
-    .select("user_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  document.getElementById("customers").innerHTML =
+    filtered.map(customer => {
 
-  if (adminError || !admin) {
+      const lastOrder =
+        customer.last_order
+          ? new Date(
+              customer.last_order
+            ).toLocaleString()
+          : "N/A";
 
-    document.getElementById("customers").innerHTML =
-      '<div class="message">Access denied. Admin account required.</div>';
+      return `
+        <div class="customer">
 
-    document.getElementById("summary").textContent = "";
+          <h2>
+            ${customer.customer_name}
+          </h2>
 
-    return;
-  }
+          <p>
+            <strong>Customer ID:</strong>
+            ${customer.customer_id}
+          </p>
 
-  const {
-    data: orders,
-    error: ordersError
-  } = await supabaseClient
-    .from("orders")
-    .select("*")
-    .order("created_at", { ascending: false });
+          <p>
+            <strong>Total Orders:</strong>
+            ${customer.order_count}
+          </p>
 
-  if (ordersError) {
+          <p>
+            <strong>Total Order Value:</strong>
+            ₦${customer.total_spent.toLocaleString()}
+          </p>
 
-    document.getElementBy
+          <p>
+            <strong>Last Order:</strong>
+            ${lastOrder}
+          </p>
+
+        </div>
+      `;
+
+    }).join("");
+
+}
+
+document
+  .getElementById("searchInput")
+  .addEventListener(
+    "input",
+    renderCustomers
+  );
+
+loadCustomers();
+
+</script>
+
+</body>
+</html>
