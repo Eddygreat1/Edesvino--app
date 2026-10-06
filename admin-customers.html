@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Edesvino - Admin Customers</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.controls {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.summary {
+  margin-top: 10px;
+  color: #555;
+  font-size: 14px;
+}
+
+.customer {
+  background: white;
+  padding: 18px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.customer h2 {
+  margin-top: 0;
+  color: #222;
+}
+
+.customer p {
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.message {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: #0066cc;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Platform Admin</h1>
+
+<div class="subtitle">
+Marketplace Customers
+</div>
+
+<div class="controls">
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search customer name or customer ID..."
+>
+
+<div class="summary" id="summary">
+Loading customers...
+</div>
+
+</div>
+
+<div id="customers">
+Loading customers...
+</div>
+
+<a class="back" href="admin.html">
+← Back to Admin Dashboard
+</a>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let customers = [];
+
+async function loadCustomers() {
+
+  const {
+    data: { user },
+    error: userError
+  } = await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+
+    document.getElementById("customers").innerHTML =
+      '<div class="message">Please log in as an admin.</div>';
+
+    document.getElementById("summary").textContent = "";
+
+    return;
+  }
+
+  const {
+    data: admin,
+    error: adminError
+  } = await supabaseClient
+    .from("platform_admins")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (adminError || !admin) {
+
+    document.getElementById("customers").innerHTML =
+      '<div class="message">Access denied. Admin account required.</div>';
+
+    document.getElementById("summary").textContent = "";
+
+    return;
+  }
+
+  const {
+    data: orders,
+    error: ordersError
+  } = await supabaseClient
+    .from("orders")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (ordersError) {
+
+    document.getElementBy
