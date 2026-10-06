@@ -194,6 +194,7 @@
 
   <div class="box">
     <h2>Checkout</h2>
+
     <div id="productBox">
       <div class="loading">Loading order...</div>
     </div>
@@ -204,13 +205,24 @@
     <h2>Delivery Details</h2>
 
     <label for="customerName">Full Name</label>
-    <input type="text" id="customerName" placeholder="Enter your full name">
+    <input
+      type="text"
+      id="customerName"
+      placeholder="Enter your full name"
+    >
 
     <label for="customerPhone">Phone Number</label>
-    <input type="tel" id="customerPhone" placeholder="Enter your phone number">
+    <input
+      type="tel"
+      id="customerPhone"
+      placeholder="Enter your phone number"
+    >
 
     <label for="deliveryAddress">Delivery Address</label>
-    <textarea id="deliveryAddress" placeholder="Enter your delivery address"></textarea>
+    <textarea
+      id="deliveryAddress"
+      placeholder="Enter your delivery address"
+    ></textarea>
 
     <button id="payButton">Pay with Paystack</button>
 
@@ -274,13 +286,17 @@ function getCart() {
     );
 
     return Array.isArray(cart) ? cart : [];
+
   } catch (error) {
+
     return [];
   }
 }
 
 function showMessage(message, type = "error") {
-  const box = document.getElementById("message");
+
+  const box =
+    document.getElementById("message");
 
   box.textContent = message;
   box.className = type;
@@ -295,7 +311,9 @@ function showMessage(message, type = "error") {
 async function loadCheckout() {
 
   const params =
-    new URLSearchParams(window.location.search);
+    new URLSearchParams(
+      window.location.search
+    );
 
   const productName =
     params.get("product");
@@ -303,11 +321,10 @@ async function loadCheckout() {
   const cart =
     getCart();
 
+
   /*
-    IMPORTANT:
-    If the cart contains items, use the cart directly.
-    This avoids the failed product lookup that caused
-    the previous cart -> checkout problem.
+    If cart contains products,
+    use cart directly.
   */
 
   if (cart.length > 0) {
@@ -330,20 +347,27 @@ async function loadCheckout() {
           store:
             item.store === "Edesvino"
               ? "Eddy Digital Hub"
-              : (item.store || "Eddy Digital Hub"),
+              : (
+                  item.store ||
+                  "Eddy Digital Hub"
+                ),
           image: item.image || ""
         }));
+
 
   } else if (productName) {
 
     /*
       Buy Now:
-      load the single product from Supabase.
+      load single product from Supabase.
     */
 
     isCartCheckout = false;
 
-    const { data, error } =
+    const {
+      data,
+      error
+    } =
       await supabaseClient
         .from("products")
         .select("*")
@@ -351,15 +375,21 @@ async function loadCheckout() {
         .limit(1)
         .maybeSingle();
 
+
     if (error || !data) {
 
-      document.getElementById("productBox").innerHTML =
+      document.getElementById(
+        "productBox"
+      ).innerHTML =
         "<p>Product unavailable.</p>";
 
-      document.getElementById("payButton").disabled = true;
+      document.getElementById(
+        "payButton"
+      ).disabled = true;
 
       return;
     }
+
 
     checkoutItems = [
       {
@@ -372,17 +402,25 @@ async function loadCheckout() {
         store:
           data.store === "Edesvino"
             ? "Eddy Digital Hub"
-            : (data.store || "Eddy Digital Hub"),
+            : (
+                data.store ||
+                "Eddy Digital Hub"
+              ),
         image: data.image || ""
       }
     ];
 
+
   } else {
 
-    document.getElementById("productBox").innerHTML =
+    document.getElementById(
+      "productBox"
+    ).innerHTML =
       "<p>Your cart is empty.</p>";
 
-    document.getElementById("payButton").disabled = true;
+    document.getElementById(
+      "payButton"
+    ).disabled = true;
 
     return;
   }
@@ -390,10 +428,14 @@ async function loadCheckout() {
 
   if (!checkoutItems.length) {
 
-    document.getElementById("productBox").innerHTML =
+    document.getElementById(
+      "productBox"
+    ).innerHTML =
       "<p>No products available for checkout.</p>";
 
-    document.getElementById("payButton").disabled = true;
+    document.getElementById(
+      "payButton"
+    ).disabled = true;
 
     return;
   }
@@ -410,11 +452,14 @@ async function loadCheckout() {
 function renderCheckout() {
 
   const box =
-    document.getElementById("productBox");
+    document.getElementById(
+      "productBox"
+    );
 
   checkoutTotal = 0;
 
   let html = "";
+
 
   checkoutItems.forEach(item => {
 
@@ -422,6 +467,7 @@ function renderCheckout() {
       item.price * item.quantity;
 
     checkoutTotal += itemTotal;
+
 
     html += `
       <div class="item">
@@ -445,7 +491,9 @@ function renderCheckout() {
 
         <div class="summary-row">
           <span>Item total</span>
-          <strong>${formatPrice(itemTotal)}</strong>
+          <strong>
+            ${formatPrice(itemTotal)}
+          </strong>
         </div>
 
       </div>
@@ -456,7 +504,9 @@ function renderCheckout() {
   html += `
     <div class="summary-row">
       <span>Subtotal</span>
-      <strong>${formatPrice(checkoutTotal)}</strong>
+      <strong>
+        ${formatPrice(checkoutTotal)}
+      </strong>
     </div>
 
     <div class="summary-row">
@@ -466,9 +516,12 @@ function renderCheckout() {
 
     <div class="summary-row total">
       <span>Total</span>
-      <span>${formatPrice(checkoutTotal)}</span>
+      <span>
+        ${formatPrice(checkoutTotal)}
+      </span>
     </div>
   `;
+
 
   box.innerHTML = html;
 }
@@ -487,28 +540,37 @@ async function createOrder(paymentResult) {
     "edesvinoPayment_" + reference;
 
   const existingOrderId =
-    sessionStorage.getItem(idempotencyKey);
+    sessionStorage.getItem(
+      idempotencyKey
+    );
+
 
   if (existingOrderId) {
     return existingOrderId;
   }
 
+
   if (!checkoutItems.length) {
-    throw new Error("No checkout items found.");
+    throw new Error(
+      "No checkout items found."
+    );
   }
 
 
   const customerName =
-    document.getElementById("customerName")
-      .value.trim();
+    document.getElementById(
+      "customerName"
+    ).value.trim();
 
   const customerPhone =
-    document.getElementById("customerPhone")
-      .value.trim();
+    document.getElementById(
+      "customerPhone"
+    ).value.trim();
 
   const deliveryAddress =
-    document.getElementById("deliveryAddress")
-      .value.trim();
+    document.getElementById(
+      "deliveryAddress"
+    ).value.trim();
 
 
   const productSummary =
@@ -516,7 +578,12 @@ async function createOrder(paymentResult) {
       .map(item => {
 
         if (item.quantity > 1) {
-          return item.name + " x" + item.quantity;
+
+          return (
+            item.name +
+            " x" +
+            item.quantity
+          );
         }
 
         return item.name;
@@ -526,21 +593,40 @@ async function createOrder(paymentResult) {
 
 
   const mainSellerId =
-    checkoutItems[0].seller_id || null;
+    checkoutItems[0].seller_id ||
+    null;
 
 
-  const { data: order, error: orderError } =
+  const {
+    data: order,
+    error: orderError
+  } =
     await supabaseClient
       .from("orders")
       .insert({
-        product_name: productSummary,
-        price: checkoutTotal,
-        customer_name: customerName,
-        customer_phone: customerPhone,
-        delivery_address: deliveryAddress,
-        seller_id: mainSellerId,
-        customer_id: currentUser.id,
-        status: "Pending"
+        product_name:
+          productSummary,
+
+        price:
+          checkoutTotal,
+
+        customer_name:
+          customerName,
+
+        customer_phone:
+          customerPhone,
+
+        delivery_address:
+          deliveryAddress,
+
+        seller_id:
+          mainSellerId,
+
+        customer_id:
+          currentUser.id,
+
+        status:
+          "Pending"
       })
       .select("id")
       .single();
@@ -553,15 +639,26 @@ async function createOrder(paymentResult) {
 
   const orderItems =
     checkoutItems.map(item => ({
-      order_id: order.id,
-      product_name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      seller_id: item.seller_id || null
+      order_id:
+        order.id,
+
+      product_name:
+        item.name,
+
+      price:
+        item.price,
+
+      quantity:
+        item.quantity,
+
+      seller_id:
+        item.seller_id || null
     }));
 
 
-  const { error: itemError } =
+  const {
+    error: itemError
+  } =
     await supabaseClient
       .from("order_items")
       .insert(orderItems);
@@ -579,7 +676,10 @@ async function createOrder(paymentResult) {
 
 
   if (isCartCheckout) {
-    localStorage.removeItem("edesvinoCart");
+
+    localStorage.removeItem(
+      "edesvinoCart"
+    );
   }
 
 
@@ -595,27 +695,45 @@ async function startPayment() {
 
   try {
 
-    document.getElementById("payButton")
-      .disabled = true;
+    document.getElementById(
+      "payButton"
+    ).disabled = true;
 
+
+    /*
+      Get the current Supabase session.
+
+      The access token is required by the
+      smart-task Edge Function.
+    */
 
     const {
-      data: {
-        user
-      },
+      data: sessionData,
       error: authError
     } =
-      await supabaseClient.auth.getUser();
+      await supabaseClient.auth.getSession();
 
 
-    if (authError || !user) {
+    const session =
+      sessionData?.session;
+
+    const user =
+      session?.user;
+
+
+    if (
+      authError ||
+      !session ||
+      !user
+    ) {
 
       showMessage(
         "Please log in before making a payment."
       );
 
-      document.getElementById("payButton")
-        .disabled = false;
+      document.getElementById(
+        "payButton"
+      ).disabled = false;
 
       return;
     }
@@ -625,33 +743,59 @@ async function startPayment() {
 
 
     const customerName =
-      document.getElementById("customerName")
-        .value.trim();
+      document.getElementById(
+        "customerName"
+      ).value.trim();
 
     const customerPhone =
-      document.getElementById("customerPhone")
-        .value.trim();
+      document.getElementById(
+        "customerPhone"
+      ).value.trim();
 
     const deliveryAddress =
-      document.getElementById("deliveryAddress")
-        .value.trim();
+      document.getElementById(
+        "deliveryAddress"
+      ).value.trim();
 
 
     if (!customerName) {
-      showMessage("Please enter your full name.");
-      document.getElementById("payButton").disabled = false;
+
+      showMessage(
+        "Please enter your full name."
+      );
+
+      document.getElementById(
+        "payButton"
+      ).disabled = false;
+
       return;
     }
+
 
     if (!customerPhone) {
-      showMessage("Please enter your phone number.");
-      document.getElementById("payButton").disabled = false;
+
+      showMessage(
+        "Please enter your phone number."
+      );
+
+      document.getElementById(
+        "payButton"
+      ).disabled = false;
+
       return;
     }
 
+
     if (!deliveryAddress) {
-      showMessage("Please enter your delivery address.");
-      document.getElementById("payButton").disabled = false;
+
+      showMessage(
+        "Please enter your delivery address."
+      );
+
+      document.getElementById(
+        "payButton"
+      ).disabled = false;
+
       return;
     }
 
@@ -667,7 +811,8 @@ async function startPayment() {
         checkoutTotal,
 
       seller_id:
-        checkoutItems[0].seller_id || null,
+        checkoutItems[0].seller_id ||
+        null,
 
       customer_id:
         user.id,
@@ -683,11 +828,20 @@ async function startPayment() {
 
       items:
         checkoutItems.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          seller_id: item.seller_id || null
+          id:
+            item.id,
+
+          name:
+            item.name,
+
+          price:
+            item.price,
+
+          quantity:
+            item.quantity,
+
+          seller_id:
+            item.seller_id || null
         }))
     };
 
@@ -698,6 +852,14 @@ async function startPayment() {
     );
 
 
+    /*
+      IMPORTANT:
+      Send the Supabase access token.
+
+      This fixes:
+      "Missing authorization header"
+    */
+
     const response =
       await fetch(
         EDGE_FUNCTION_URL,
@@ -705,12 +867,21 @@ async function startPayment() {
           method: "POST",
 
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type":
+              "application/json",
+
+            "Authorization":
+              "Bearer " +
+              session.access_token,
+
+            "apikey":
+              SUPABASE_KEY
           },
 
           body: JSON.stringify({
 
-            action: "initialize_payment",
+            action:
+              "initialize_payment",
 
             amount:
               checkoutTotal,
@@ -789,8 +960,9 @@ async function startPayment() {
       "Unable to start payment."
     );
 
-    document.getElementById("payButton")
-      .disabled = false;
+    document.getElementById(
+      "payButton"
+    ).disabled = false;
   }
 }
 
@@ -824,6 +996,34 @@ async function verifyPayment() {
     );
 
 
+    /*
+      Get the current Supabase session
+      so quick-function also receives
+      the required authorization header.
+    */
+
+    const {
+      data: verifySessionData,
+      error: verifyAuthError
+    } =
+      await supabaseClient.auth.getSession();
+
+
+    const verifySession =
+      verifySessionData?.session;
+
+
+    if (
+      verifyAuthError ||
+      !verifySession
+    ) {
+
+      throw new Error(
+        "Your login session has expired. Please log in again."
+      );
+    }
+
+
     const response =
       await fetch(
         VERIFY_FUNCTION_URL,
@@ -831,11 +1031,20 @@ async function verifyPayment() {
           method: "POST",
 
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type":
+              "application/json",
+
+            "Authorization":
+              "Bearer " +
+              verifySession.access_token,
+
+            "apikey":
+              SUPABASE_KEY
           },
 
           body: JSON.stringify({
-            reference: reference
+            reference:
+              reference
           })
         }
       );
@@ -855,7 +1064,10 @@ async function verifyPayment() {
     }
 
 
-    if (!result.success || !result.paid) {
+    if (
+      !result.success ||
+      !result.paid
+    ) {
 
       throw new Error(
         "Payment could not be confirmed."
@@ -878,25 +1090,43 @@ async function verifyPayment() {
 
 
     const checkoutData =
-      JSON.parse(savedCheckout);
+      JSON.parse(
+        savedCheckout
+      );
 
 
     checkoutItems =
-      (checkoutData.items || []).map(item => ({
-        id: item.id || null,
-        name: item.name,
-        price: Number(item.price || 0),
-        quantity: Math.max(
-          1,
-          Number(item.quantity || 1)
-        ),
-        seller_id: item.seller_id || null,
-        store: "Eddy Digital Hub"
+      (
+        checkoutData.items ||
+        []
+      ).map(item => ({
+        id:
+          item.id || null,
+
+        name:
+          item.name,
+
+        price:
+          Number(item.price || 0),
+
+        quantity:
+          Math.max(
+            1,
+            Number(item.quantity || 1)
+          ),
+
+        seller_id:
+          item.seller_id || null,
+
+        store:
+          "Eddy Digital Hub"
       }));
 
 
     checkoutTotal =
-      Number(checkoutData.price || 0);
+      Number(
+        checkoutData.price || 0
+      );
 
 
     const {
@@ -908,6 +1138,7 @@ async function verifyPayment() {
 
 
     if (!user) {
+
       throw new Error(
         "Your login session has expired."
       );
@@ -917,17 +1148,23 @@ async function verifyPayment() {
     currentUser = user;
 
 
-    document.getElementById("customerName")
-      .value =
-      checkoutData.customer_name || "";
+    document.getElementById(
+      "customerName"
+    ).value =
+      checkoutData.customer_name ||
+      "";
 
-    document.getElementById("customerPhone")
-      .value =
-      checkoutData.customer_phone || "";
+    document.getElementById(
+      "customerPhone"
+    ).value =
+      checkoutData.customer_phone ||
+      "";
 
-    document.getElementById("deliveryAddress")
-      .value =
-      checkoutData.delivery_address || "";
+    document.getElementById(
+      "deliveryAddress"
+    ).value =
+      checkoutData.delivery_address ||
+      "";
 
 
     const paymentResult = {
@@ -942,7 +1179,8 @@ async function verifyPayment() {
         ),
 
       status:
-        result.status || "success"
+        result.status ||
+        "success"
     };
 
 
@@ -952,20 +1190,31 @@ async function verifyPayment() {
       );
 
 
-    document.getElementById("productBox")
-      .innerHTML = `
-        <div class="success">
-          <strong>Payment successful!</strong>
-          <br><br>
-          Order #${escapeHTML(orderId)}
-          <br>
-          Total: ${formatPrice(checkoutTotal)}
-        </div>
-      `;
+    document.getElementById(
+      "productBox"
+    ).innerHTML = `
+      <div class="success">
+
+        <strong>
+          Payment successful!
+        </strong>
+
+        <br><br>
+
+        Order #${escapeHTML(orderId)}
+
+        <br>
+
+        Total:
+        ${formatPrice(checkoutTotal)}
+
+      </div>
+    `;
 
 
-    document.getElementById("payButton")
-      .style.display = "none";
+    document.getElementById(
+      "payButton"
+    ).style.display = "none";
 
 
     showMessage(
@@ -974,8 +1223,9 @@ async function verifyPayment() {
     );
 
 
-    document.getElementById("trackLink")
-      .style.display = "block";
+    document.getElementById(
+      "trackLink"
+    ).style.display = "block";
 
 
     window.history.replaceState(
@@ -999,8 +1249,9 @@ async function verifyPayment() {
       "There was a problem confirming your payment."
     );
 
-    document.getElementById("payButton")
-      .disabled = false;
+    document.getElementById(
+      "payButton"
+    ).disabled = false;
   }
 }
 
@@ -1009,11 +1260,12 @@ async function verifyPayment() {
    BUTTON
 ========================= */
 
-document.getElementById("payButton")
-  .addEventListener(
-    "click",
-    startPayment
-  );
+document.getElementById(
+  "payButton"
+).addEventListener(
+  "click",
+  startPayment
+);
 
 
 /* =========================
