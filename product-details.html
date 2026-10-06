@@ -307,7 +307,8 @@
           price,
           description,
           store,
-          image_url
+          image_url,
+          seller_id
         `);
 
       if (productId) {
@@ -393,7 +394,8 @@
                     name: data.name,
                     price: price,
                     store: storeName,
-                    image_url: data.image_url || ""
+                    image_url: data.image_url || "",
+                    seller_id: data.seller_id || null
                   })})'
                 >
                   🛒 Add to Cart
@@ -439,6 +441,11 @@
       if (existingIndex >= 0) {
         cart[existingIndex].quantity =
           Number(cart[existingIndex].quantity || 1) + 1;
+
+        if (!cart[existingIndex].seller_id && product.seller_id) {
+          cart[existingIndex].seller_id = product.seller_id;
+        }
+
       } else {
         cart.push({
           ...product,
@@ -495,3 +502,15 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
