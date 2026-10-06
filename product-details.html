@@ -369,8 +369,12 @@ async function loadProduct() {
 
 
     const store =
-      data.store ||
-      "Edesvino Seller";
+       data.store === "Edesvino"
+      ? "Eddy Digital Hub"
+      : (
+        data.store ||
+        "Eddy Digital Hub"
+      );
 
 
     const image =
