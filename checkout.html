@@ -88,6 +88,7 @@
     .summary-row {
       display: flex;
       justify-content: space-between;
+      gap: 15px;
       padding: 7px 0;
     }
 
@@ -193,7 +194,6 @@
 
   <div class="box">
     <h2>Checkout</h2>
-
     <div id="productBox">
       <div class="loading">Loading order...</div>
     </div>
@@ -204,35 +204,20 @@
     <h2>Delivery Details</h2>
 
     <label for="customerName">Full Name</label>
-    <input
-      type="text"
-      id="customerName"
-      placeholder="Enter your full name"
-    >
+    <input type="text" id="customerName" placeholder="Enter your full name">
 
     <label for="customerPhone">Phone Number</label>
-    <input
-      type="tel"
-      id="customerPhone"
-      placeholder="Enter your phone number"
-    >
+    <input type="tel" id="customerPhone" placeholder="Enter your phone number">
 
     <label for="deliveryAddress">Delivery Address</label>
-    <textarea
-      id="deliveryAddress"
-      placeholder="Enter your delivery address"
-    ></textarea>
+    <textarea id="deliveryAddress" placeholder="Enter your delivery address"></textarea>
 
-    <button id="payButton">
-      Pay with Paystack
-    </button>
+    <button id="payButton">Pay with Paystack</button>
 
     <div id="message"></div>
 
     <div id="trackLink">
-      <a href="track-order.html">
-        Track Your Order
-      </a>
+      <a href="track-order.html">Track Your Order</a>
     </div>
 
   </div>
@@ -262,6 +247,7 @@ const supabaseClient =
 let checkoutItems = [];
 let checkoutTotal = 0;
 let currentUser = null;
+let isCartCheckout = false;
 
 
 /* =========================
@@ -294,44 +280,68 @@ function getCart() {
 }
 
 function showMessage(message, type = "error") {
-
   const box = document.getElementById("message");
 
   box.textContent = message;
-
   box.className = type;
-
   box.style.display = "block";
 }
 
 
 /* =========================
-   GET CHECKOUT SOURCE
+   LOAD CHECKOUT
 ========================= */
 
-function getRequestedProductName() {
+async function loadCheckout() {
 
   const params =
     new URLSearchParams(window.location.search);
 
-  return params.get("product");
-}
-
-
-/*
-  If checkout was opened from Buy Now,
-  use the requested product.
-
-  If no product parameter exists,
-  use the cart.
-*/
-
-async function loadCheckout() {
-
   const productName =
-    getRequestedProductName();
+    params.get("product");
 
-  if (productName) {
+  const cart =
+    getCart();
+
+  /*
+    IMPORTANT:
+    If the cart contains items, use the cart directly.
+    This avoids the failed product lookup that caused
+    the previous cart -> checkout problem.
+  */
+
+  if (cart.length > 0) {
+
+    isCartCheckout = true;
+
+    checkoutItems =
+      cart
+        .filter(item => item && item.name)
+        .map(item => ({
+          id: item.id || null,
+          name: item.name,
+          description: item.description || "",
+          price: Number(item.price || 0),
+          quantity: Math.max(
+            1,
+            Number(item.quantity || 1)
+          ),
+          seller_id: item.seller_id || null,
+          store:
+            item.store === "Edesvino"
+              ? "Eddy Digital Hub"
+              : (item.store || "Eddy Digital Hub"),
+          image: item.image || ""
+        }));
+
+  } else if (productName) {
+
+    /*
+      Buy Now:
+      load the single product from Supabase.
+    */
+
+    isCartCheckout = false;
 
     const { data, error } =
       await supabaseClient
@@ -345,6 +355,8 @@ async function loadCheckout() {
 
       document.getElementById("productBox").innerHTML =
         "<p>Product unavailable.</p>";
+
+      document.getElementById("payButton").disabled = true;
 
       return;
     }
@@ -367,74 +379,32 @@ async function loadCheckout() {
 
   } else {
 
-    const cart = getCart();
+    document.getElementById("productBox").innerHTML =
+      "<p>Your cart is empty.</p>";
 
-    if (!cart.length) {
+    document.getElementById("payButton").disabled = true;
 
-      document.getElementById("productBox").innerHTML =
-        "<p>Your cart is empty.</p>";
-
-      document.getElementById("payButton").disabled = true;
-
-      return;
-    }
-
-    checkoutItems = [];
-
-    for (const cartItem of cart) {
-
-      if (!cartItem.name) {
-        continue;
-      }
-
-      const { data, error } =
-        await supabaseClient
-          .from("products")
-          .select("*")
-          .eq("name", cartItem.name)
-          .limit(1)
-          .maybeSingle();
-
-      if (error || !data) {
-        continue;
-      }
-
-      checkoutItems.push({
-        id: data.id,
-        name: data.name,
-        description: data.description || "",
-        price: Number(data.price || 0),
-        quantity:
-          Math.max(
-            1,
-            Number(cartItem.quantity || 1)
-          ),
-        seller_id: data.seller_id || null,
-        store:
-          data.store === "Edesvino"
-            ? "Eddy Digital Hub"
-            : (data.store || "Eddy Digital Hub"),
-        image: data.image || ""
-      });
-    }
-
-    if (!checkoutItems.length) {
-
-      document.getElementById("productBox").innerHTML =
-        "<p>Unable to load the products in your cart.</p>";
-
-      document.getElementById("payButton").disabled = true;
-
-      return;
-    }
+    return;
   }
+
+
+  if (!checkoutItems.length) {
+
+    document.getElementById("productBox").innerHTML =
+      "<p>No products available for checkout.</p>";
+
+    document.getElementById("payButton").disabled = true;
+
+    return;
+  }
+
 
   renderCheckout();
 }
 
 
 /* =========================
-   DISPLAY CHECKOUT
+   RENDER CHECKOUT
 ========================= */
 
 function renderCheckout() {
@@ -482,6 +452,7 @@ function renderCheckout() {
     `;
   });
 
+
   html += `
     <div class="summary-row">
       <span>Subtotal</span>
@@ -526,6 +497,7 @@ async function createOrder(paymentResult) {
     throw new Error("No checkout items found.");
   }
 
+
   const customerName =
     document.getElementById("customerName")
       .value.trim();
@@ -539,21 +511,12 @@ async function createOrder(paymentResult) {
       .value.trim();
 
 
-  /*
-    Keep the existing orders table compatible.
-
-    For a multi-product checkout, product_name
-    contains a readable summary of the items.
-  */
-
   const productSummary =
     checkoutItems
       .map(item => {
 
         if (item.quantity > 1) {
-          return item.name +
-            " x" +
-            item.quantity;
+          return item.name + " x" + item.quantity;
         }
 
         return item.name;
@@ -561,13 +524,6 @@ async function createOrder(paymentResult) {
       })
       .join(", ");
 
-
-  /*
-    The existing orders table has one seller_id.
-
-    Use the seller of the first item when available.
-    Individual seller IDs remain stored in order_items.
-  */
 
   const mainSellerId =
     checkoutItems[0].seller_id || null;
@@ -589,14 +545,11 @@ async function createOrder(paymentResult) {
       .select("id")
       .single();
 
+
   if (orderError) {
     throw orderError;
   }
 
-
-  /*
-    Insert every cart item into order_items.
-  */
 
   const orderItems =
     checkoutItems.map(item => ({
@@ -613,19 +566,8 @@ async function createOrder(paymentResult) {
       .from("order_items")
       .insert(orderItems);
 
+
   if (itemError) {
-
-    /*
-      If item creation fails, remove the
-      parent order so we don't leave a
-      half-created order behind.
-    */
-
-    await supabaseClient
-      .from("orders")
-      .delete()
-      .eq("id", order.id);
-
     throw itemError;
   }
 
@@ -636,12 +578,10 @@ async function createOrder(paymentResult) {
   );
 
 
-  /*
-    The cart is cleared only after the
-    order and order_items were created.
-  */
+  if (isCartCheckout) {
+    localStorage.removeItem("edesvinoCart");
+  }
 
-  localStorage.removeItem("edesvinoCart");
 
   return order.id;
 }
@@ -658,6 +598,7 @@ async function startPayment() {
     document.getElementById("payButton")
       .disabled = true;
 
+
     const {
       data: {
         user
@@ -665,6 +606,7 @@ async function startPayment() {
       error: authError
     } =
       await supabaseClient.auth.getUser();
+
 
     if (authError || !user) {
 
@@ -677,6 +619,7 @@ async function startPayment() {
 
       return;
     }
+
 
     currentUser = user;
 
@@ -695,40 +638,23 @@ async function startPayment() {
 
 
     if (!customerName) {
-
       showMessage("Please enter your full name.");
-
-      document.getElementById("payButton")
-        .disabled = false;
-
+      document.getElementById("payButton").disabled = false;
       return;
     }
 
     if (!customerPhone) {
-
       showMessage("Please enter your phone number.");
-
-      document.getElementById("payButton")
-        .disabled = false;
-
+      document.getElementById("payButton").disabled = false;
       return;
     }
 
     if (!deliveryAddress) {
-
       showMessage("Please enter your delivery address.");
-
-      document.getElementById("payButton")
-        .disabled = false;
-
+      document.getElementById("payButton").disabled = false;
       return;
     }
 
-
-    /*
-      Save checkout information so it survives
-      the Paystack redirect.
-    */
 
     const checkoutData = {
 
@@ -737,7 +663,8 @@ async function startPayment() {
           .map(item => item.name)
           .join(", "),
 
-      price: checkoutTotal,
+      price:
+        checkoutTotal,
 
       seller_id:
         checkoutItems[0].seller_id || null,
@@ -770,11 +697,6 @@ async function startPayment() {
       JSON.stringify(checkoutData)
     );
 
-
-    /*
-      Keep the existing smart-task Paystack
-      initialization flow.
-    */
 
     const response =
       await fetch(
@@ -818,9 +740,7 @@ async function startPayment() {
 
               items:
                 checkoutData.items
-
             }
-
           })
         }
       );
@@ -858,6 +778,7 @@ async function startPayment() {
     window.location.assign(
       authorizationUrl
     );
+
 
   } catch (error) {
 
@@ -942,11 +863,6 @@ async function verifyPayment() {
     }
 
 
-    /*
-      Reload the checkout data after the
-      Paystack redirect.
-    */
-
     const savedCheckout =
       sessionStorage.getItem(
         "edesvinoCheckout"
@@ -966,31 +882,40 @@ async function verifyPayment() {
 
 
     checkoutItems =
-      checkoutData.items || [];
+      (checkoutData.items || []).map(item => ({
+        id: item.id || null,
+        name: item.name,
+        price: Number(item.price || 0),
+        quantity: Math.max(
+          1,
+          Number(item.quantity || 1)
+        ),
+        seller_id: item.seller_id || null,
+        store: "Eddy Digital Hub"
+      }));
 
 
     checkoutTotal =
       Number(checkoutData.price || 0);
 
 
-    currentUser =
-      (
-        await supabaseClient.auth.getUser()
-      ).data.user;
+    const {
+      data: {
+        user
+      }
+    } =
+      await supabaseClient.auth.getUser();
 
 
-    if (!currentUser) {
-
+    if (!user) {
       throw new Error(
         "Your login session has expired."
       );
     }
 
 
-    /*
-      Restore customer details into the form
-      so createOrder can use them.
-    */
+    currentUser = user;
+
 
     document.getElementById("customerName")
       .value =
@@ -1007,7 +932,8 @@ async function verifyPayment() {
 
     const paymentResult = {
 
-      reference: reference,
+      reference:
+        reference,
 
       amount:
         Number(
@@ -1017,7 +943,6 @@ async function verifyPayment() {
 
       status:
         result.status || "success"
-
     };
 
 
@@ -1052,11 +977,6 @@ async function verifyPayment() {
     document.getElementById("trackLink")
       .style.display = "block";
 
-
-    /*
-      Clean the Paystack reference from
-      the browser URL.
-    */
 
     window.history.replaceState(
       {},
