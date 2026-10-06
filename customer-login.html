@@ -1,192 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edesvino Customer Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }
+<title>Edesvino - Customer Login</title>
 
-    .container {
-      max-width: 420px;
-      margin: 50px auto;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 0;
+}
 
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
+.container {
+  max-width: 420px;
+  margin: 60px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 5px;
-    }
+h1 {
+  text-align: center;
+  margin-bottom: 25px;
+}
 
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 25px;
-    }
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
 
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 7px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
 
-    input {
-      width: 100%;
-      padding: 12px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
+button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 20px;
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
 
-    button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 6px;
-      background: #111;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+button:disabled {
+  opacity: 0.6;
+}
 
-    button:disabled {
-      opacity: 0.6;
-    }
+.message {
+  margin-top: 15px;
+  text-align: center;
+  font-weight: bold;
+}
 
-    .message {
-      margin-top: 15px;
-      text-align: center;
-    }
+.register {
+  text-align: center;
+  margin-top: 20px;
+}
 
-    .links {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .links a {
-      text-decoration: none;
-    }
-  </style>
+.register a {
+  text-decoration: none;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="container">
-    <div class="card">
+<div class="container">
 
-      <h1>Edesvino</h1>
-      <p class="subtitle">Customer Login</p>
+  <h1>Edesvino</h1>
 
-      <form id="loginForm">
+  <h2>Customer Login</h2>
 
-        <label for="email">Email Address</label>
-        <input
-          type="email"
-          id="email"
-          placeholder="Enter your email"
-          required
-        >
+  <form id="loginForm">
 
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Enter your password"
-          required
-        >
+    <label for="email">Email</label>
+    <input
+      type="email"
+      id="email"
+      required
+      autocomplete="email"
+    >
 
-        <button type="submit" id="loginButton">
-          Login
-        </button>
+    <label for="password">Password</label>
+    <input
+      type="password"
+      id="password"
+      required
+      autocomplete="current-password"
+    >
 
-      </form>
+    <button type="submit" id="loginButton">
+      Login
+    </button>
 
-      <div id="message" class="message"></div>
+    <div class="message" id="message"></div>
 
-      <div class="links">
-        <p>
-          Don't have a customer account?
-          <a href="customer-register.html">Register</a>
-        </p>
+  </form>
 
-        <p>
-          <a href="index.html">← Back to Marketplace</a>
-        </p>
-      </div>
-
-    </div>
+  <div class="register">
+    Don't have an account?
+    <a href="customer-register.html">Create account</a>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</div>
 
-  <script>
-    const SUPABASE_URL = "https://lxszilqypuglxyfyukdg.supabase.co";
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    const SUPABASE_KEY = "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+<script>
 
-    const supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+const loginForm =
+  document.getElementById("loginForm");
+
+const loginButton =
+  document.getElementById("loginButton");
+
+const message =
+  document.getElementById("message");
+
+
+loginForm.addEventListener("submit", async function(event) {
+
+  event.preventDefault();
+
+  message.textContent = "";
+  loginButton.disabled = true;
+  loginButton.textContent = "Logging in...";
+
+  const email =
+    document.getElementById("email").value.trim();
+
+  const password =
+    document.getElementById("password").value;
+
+
+  try {
+
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    if (!data || !data.user) {
+      throw new Error("Login was not completed.");
+    }
+
+
+    /*
+      If the customer originally came from Checkout,
+      return them to Checkout after login.
+    */
+
+    const returnToCheckout =
+      sessionStorage.getItem(
+        "edesvinoReturnToCheckout"
       );
 
-    document
-      .getElementById("loginForm")
-      .addEventListener("submit", async function(event) {
 
-        event.preventDefault();
+    if (returnToCheckout) {
 
-        const email =
-          document.getElementById("email").value.trim();
+      sessionStorage.removeItem(
+        "edesvinoReturnToCheckout"
+      );
 
-        const password =
-          document.getElementById("password").value;
+      message.textContent =
+        "Login successful. Returning to checkout...";
 
-        const button =
-          document.getElementById("loginButton");
+      setTimeout(function() {
 
-        const message =
-          document.getElementById("message");
+        window.location.href =
+          returnToCheckout;
 
-        button.disabled = true;
-        button.textContent = "Logging in...";
-        message.textContent = "";
+      }, 700);
 
-        const { data, error } =
-          await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
+      return;
+    }
 
-        if (error) {
-          message.textContent = error.message;
-          button.disabled = false;
-          button.textContent = "Login";
-          return;
-        }
 
-        message.textContent = "Login successful!";
+    /*
+      Normal login continues to Customer Dashboard.
+    */
 
-        setTimeout(function() {
-        window.location.href = "customer-dashboard.html";
-        }, 1000);
+    message.textContent =
+      "Login successful. Opening dashboard...";
 
-      });
-  </script>
+    setTimeout(function() {
+
+      window.location.href =
+        "customer-dashboard.html";
+
+    }, 700);
+
+
+  } catch (error) {
+
+    console.error("Login error:", error);
+
+    message.textContent =
+      error.message ||
+      "Unable to log in.";
+
+    loginButton.disabled = false;
+    loginButton.textContent = "Login";
+  }
+
+});
+
+</script>
 
 </body>
 </html>
