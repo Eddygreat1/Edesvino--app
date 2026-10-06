@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Edesvino Platform Admin Customer Details">
+  <title>Platform Admin - Customer Details</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .status,
+    .summary,
+    .order {
+      background: #fff;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .error {
+      background: #ffe5e5;
+      color: #b00020;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .summary h2 {
+      margin-top: 0;
+    }
+
+    .summary p {
+      margin: 8px 0;
+    }
+
+    .order h2 {
+      margin-top: 0;
+    }
+
+    .order p {
+      margin: 7px 0;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 15px;
+      background: #eee;
+      font-weight: bold;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>Platform Admin</h1>
+
+    <div class="subtitle">Customer Details</div>
+
+    <div id="status" class="status">
+      Connecting to Supabase...
+    </div>
+
+    <div id="error" class="error" style="display:none;"></div>
+
+    <div id="customerSummary" class="summary" style="display:none;"></div>
+
+    <div id="orders"></div>
+
+    <a class="back" href="admin-customers.html">
+      ← Back to Marketplace Customers
+    </a>
+
+  </div>
+
+
+  <script>
+
+    const SUPABASE_URL =
+      "https://lxszilqypuglxyfyukdg.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    const statusBox =
+      document.getElementById("status");
+
+    const errorBox =
+      document.getElementById("error");
+
+    const customerSummary =
+      document.getElementById("customerSummary");
+
+    const ordersBox =
+      document.getElementById("orders");
+
+
+    function showError(message) {
+
+      statusBox.style.display = "none";
+
+      errorBox.textContent = message;
+
+      errorBox.style.display = "block";
+
+    }
+
+
+    async function loadCustomerDetails() {
+
+      try {
+
+        statusBox.textContent =
+          "Checking admin login...";
+
+
+        const {
+          data: { user },
+          error: userError
+        } = await supabaseClient.auth.getUser();
+
+
+        if (userError) {
+
+          throw new Error(
+            "Unable to check login: " +
+            userError.message
+          );
+
+        }
+
+
+        if (!user) {
+
+          throw new Error(
+            "You are not logged in."
+          );
+
+        }
+
+
+        statusBox.textContent =
+          "Checking admin permission...";
+
+
+        const {
+          data: adminRecord,
+          error: adminError
+        } = await supabaseClient
+          .from("platform_admins")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+
+        if (adminError) {
+
+          throw new Error(
+            "Unable to check admin permission: " +
+            adminError.message
+          );
+
+        }
+
+
+        if (!adminRecord) {
+
+          throw new Error(
+            "You do not have platform admin permission."
+          );
+
+        }
+
+
+        statusBox.textContent =
+          "Loading marketplace orders...";
+
+
+        const {
+          data: orders,
+          error: ordersError
+        } = await supabaseClient
+          .from("orders")
+          .select("*")
+          .order("id", { ascending: false });
+
+
+        if (ordersError) {
+
+          throw new Error(
+            "Unable to load orders: " +
+            ordersError.message
+          );
+
+        }
+
+
+        /*
+          This page uses the customer name from the URL.
+
+          Example:
+          admin-customer-details.html?customer=Endurance%20Jackson
+        */
+
+        const params =
+          new URLSearchParams(
+            window.location.search
+          );
+
+
+        const customerName =
+          params.get("customer");
+
+
+        if (!customerName) {
+
+          throw new Error(
+            "No customer was selected."
+          );
+
+        }
+
+
+        const customerOrders =
+          orders.filter(order => {
+
+            return (
+              String(order.customer_name || "")
+                .trim()
+                .toLowerCase() ===
+              customerName
+                .trim()
+                .toLowerCase()
+            );
+
+          });
+
+
+        if (!customerOrders.length) {
+
+          throw new Error(
+            "No orders found for this customer."
+          );
+
+        }
+
+
+        const totalValue =
+          customerOrders.reduce(
+            (total, order) =>
+              total +
+              Number(order.price || 0),
+            0
+          );
+
+
+        statusBox.style.display = "none";
+
+
+        customerSummary.innerHTML = `
+          <h2>${customerName}</h2>
+
+          <p>
+            <strong>Total Orders:</strong>
+            ${customerOrders.length}
+          </p>
+
+          <p>
+            <strong>Total Order Value:</strong>
+            ₦${totalValue.toLocaleString("en-NG")}
+          </p>
+        `;
+
+
+        customerSummary.style.display =
+          "block";
+
+
+        ordersBox.innerHTML =
+          customerOrders.map(order => {
+
+            const product =
+              order.product_name ||
+              "Unknown Product";
+
+
+            const amount =
+              Number(order.price || 0)
+                .toLocaleString("en-NG");
+
+
+            const status =
+              order.status ||
+              "Pending";
+
+
+            const date =
+              order.created_at
+                ? new Date(
+                    order.created_at
+                  ).toLocaleString()
+                : "N/A";
+
+
+            return `
+              <div class="order">
+
+                <h2>
+                  Order #${order.id}
+                </h2>
+
+                <p>
+                  <strong>Product:</strong>
+                  ${product}
+                </p>
+
+                <p>
+                  <strong>Amount:</strong>
+                  ₦${amount}
+                </p>
+
+                <p>
+                  <strong>Status:</strong>
+                  <span class="status-badge">
+                    ${status}
+                  </span>
+                </p>
+
+                <p>
+                  <strong>Order Date:</strong>
+                  ${date}
+                </p>
+
+              </div>
+            `;
+
+          }).join("");
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showError(error.message);
+
+      }
+
+    }
+
+
+    loadCustomerDetails();
+
+  </script>
+
+</body>
+</html>
