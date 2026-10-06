@@ -348,16 +348,23 @@ async function loadProduct() {
         ₦${Number(
           data.price || 0
         ).toLocaleString()}
-      </div>
+      </div
 
-      <div class="store">
-        Store:
-        ${
+
+<div class="store">
+  Store:
+  ${
+    data.store === "Edesvino"
+      ? "Eddy Digital Hub"
+      : (
+          data.store ||
           data.store_name ||
           data.seller_name ||
-          "Edesvino"
-        }
-      </div>
+          "Eddy Digital Hub"
+        )
+  }
+</div>
+
 
     `;
 
