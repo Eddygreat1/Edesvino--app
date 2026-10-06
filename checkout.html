@@ -1422,6 +1422,16 @@ async function createOrder(
   }
 
 
+  /*
+    IMPORTANT:
+    The current order_items table does NOT
+    contain a quantity column.
+
+    Quantity is still used above for the
+    checkout display and order summary,
+    but it is NOT inserted into order_items.
+  */
+
   const orderItems =
     checkoutItems.map(item => ({
 
@@ -1434,14 +1444,6 @@ async function createOrder(
       price:
         Number(
           item.price || 0
-        ),
-
-      quantity:
-        Math.max(
-          1,
-          Number(
-            item.quantity || 1
-          )
         ),
 
       seller_id:
