@@ -358,6 +358,80 @@ let checkoutTotal = 0;
 let isCartCheckout = false;
 
 
+/*
+  Check customer authentication before
+  displaying checkout.
+
+  The current checkout URL is saved so
+  the customer can return here after login.
+*/
+async function checkCustomerLogin() {
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.getUser();
+
+
+    if (
+      !error &&
+      data &&
+      data.user
+    ) {
+
+      return true;
+
+    }
+
+
+    const currentUrl =
+      window.location.href;
+
+
+    sessionStorage.setItem(
+      "edesvinoReturnToCheckout",
+      currentUrl
+    );
+
+
+    window.location.href =
+      "customer-login.html";
+
+
+    return false;
+
+  } catch (error) {
+
+    console.error(
+      "Authentication check error:",
+      error
+    );
+
+
+    const currentUrl =
+      window.location.href;
+
+
+    sessionStorage.setItem(
+      "edesvinoReturnToCheckout",
+      currentUrl
+    );
+
+
+    window.location.href =
+      "customer-login.html";
+
+
+    return false;
+
+  }
+
+}
+
+
 function naira(amount) {
 
   return "₦" +
@@ -581,6 +655,22 @@ async function loadCheckout() {
   try {
 
     hideMessage();
+
+
+    /*
+      Customer must be logged in before
+      checkout can be used.
+    */
+
+    const loggedIn =
+      await checkCustomerLogin();
+
+
+    if (!loggedIn) {
+
+      return;
+
+    }
 
 
     const params =
@@ -885,6 +975,11 @@ async function startPayment() {
       "Preparing payment...";
 
 
+    /*
+      Confirm the authenticated customer
+      immediately before payment.
+    */
+
     const {
       data: {
         user
@@ -902,9 +997,15 @@ async function startPayment() {
         "Pay with Paystack";
 
 
-      showMessage(
-        "Please log in before making payment."
+      sessionStorage.setItem(
+        "edesvinoReturnToCheckout",
+        window.location.href
       );
+
+
+      window.location.href =
+        "customer-login.html";
+
 
       return;
 
@@ -1043,10 +1144,6 @@ async function startPayment() {
     }
 
 
-    /*
-      Accept common Paystack response formats.
-    */
-
     const authorizationUrl =
       result.authorization_url ||
       result.authorizationUrl ||
@@ -1173,7 +1270,7 @@ async function createOrder(
     },
     error: userError
   } =
-    await supabaseClient.auth.getUser();
+  await supabaseClient.auth.getUser();
 
 
   if (userError || !user) {
@@ -1226,11 +1323,6 @@ async function createOrder(
       .join(", ");
 
 
-  /*
-    Prevent duplicate orders if
-    Paystack callback is refreshed.
-  */
-
   const reference =
     paymentResult?.reference ||
     paymentResult?.data?.reference ||
@@ -1250,24 +1342,15 @@ async function createOrder(
       data: existingOrder,
       error: existingError
     } =
-      await supabaseClient
-        .from("orders")
-        .select("*")
-        .eq(
-          "idempotency_key",
-          idempotencyKey
-        )
-        .maybeSingle();
+    await supabaseClient
+      .from("orders")
+      .select("*")
+      .eq(
+        "idempotency_key",
+        idempotencyKey
+      )
+      .maybeSingle();
 
-
-    /*
-      Some existing versions of the
-      orders table may not have the
-      idempotency_key column.
-
-      If the query fails because the
-      column does not exist, continue.
-    */
 
     if (
       !existingError &&
@@ -1315,13 +1398,13 @@ async function createOrder(
     data: order,
     error: orderError
   } =
-    await supabaseClient
-      .from("orders")
-      .insert(
-        orderData
-      )
-      .select()
-      .single();
+  await supabaseClient
+    .from("orders")
+    .insert(
+      orderData
+    )
+    .select()
+    .single();
 
 
   if (orderError) {
@@ -1338,11 +1421,6 @@ async function createOrder(
 
   }
 
-
-  /*
-    Save individual cart products
-    into order_items.
-  */
 
   const orderItems =
     checkoutItems.map(item => ({
@@ -1376,11 +1454,11 @@ async function createOrder(
   const {
     error: itemsError
   } =
-    await supabaseClient
-      .from("order_items")
-      .insert(
-        orderItems
-      );
+  await supabaseClient
+    .from("order_items")
+    .insert(
+      orderItems
+    );
 
 
   if (itemsError) {
@@ -1390,22 +1468,12 @@ async function createOrder(
       itemsError
     );
 
-    /*
-      Do not delete the parent order.
-      The payment has already succeeded.
-    */
-
     throw new Error(
       "Order was created, but the individual order items could not be saved. Please contact support."
     );
 
   }
 
-
-  /*
-    Only clear the cart when this
-    checkout actually came from the cart.
-  */
 
   if (isCartCheckout) {
 
@@ -1495,9 +1563,7 @@ async function handlePaymentCallback() {
     if (checkoutDataRaw) {
 
       const savedData =
-        JSON.parse(
-          checkoutDataRaw
-        );
+        JSON.parse(checkoutDataRaw);
 
 
       if (
@@ -1628,6 +1694,12 @@ async function handlePaymentCallback() {
 }
 
 
+/*
+  Start checkout.
+
+  Authentication is checked before
+  loading the cart.
+*/
 loadCheckout();
 
 handlePaymentCallback();
