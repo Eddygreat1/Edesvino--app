@@ -92,4 +92,245 @@
   <div class="container">
 
     <h1>Platform Admin</h1>
-   
+
+    <div class="subtitle">Marketplace Products</div>
+
+    <div id="status" class="status">
+      Connecting to Supabase...
+    </div>
+
+    <div id="error" class="error" style="display:none;"></div>
+
+    <div id="summary" class="summary" style="display:none;"></div>
+
+    <div id="products"></div>
+
+    <a class="back" href="admin.html">
+      ← Back to Admin Dashboard
+    </a>
+
+  </div>
+
+  <script>
+    const SUPABASE_URL =
+      "https://lxszilqypuglxyfyukdg.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const statusBox =
+      document.getElementById("status");
+
+    const errorBox =
+      document.getElementById("error");
+
+    const summaryBox =
+      document.getElementById("summary");
+
+    const productsBox =
+      document.getElementById("products");
+
+
+    function showError(message) {
+
+      errorBox.textContent = message;
+
+      errorBox.style.display = "block";
+
+      statusBox.style.display = "none";
+    }
+
+
+    async function loadProducts() {
+
+      try {
+
+        statusBox.textContent =
+          "Checking admin login...";
+
+
+        const {
+          data: { user },
+          error: userError
+        } = await supabaseClient.auth.getUser();
+
+
+        if (userError) {
+
+          throw new Error(
+            "Unable to check login: " +
+            userError.message
+          );
+
+        }
+
+
+        if (!user) {
+
+          throw new Error(
+            "You are not logged in."
+          );
+
+        }
+
+
+        statusBox.textContent =
+          "Checking admin permission...";
+
+
+        const {
+          data: adminRecord,
+          error: adminError
+        } = await supabaseClient
+          .from("platform_admins")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+
+        if (adminError) {
+
+          throw new Error(
+            "Unable to check admin permission: " +
+            adminError.message
+          );
+
+        }
+
+
+        if (!adminRecord) {
+
+          throw new Error(
+            "You do not have platform admin permission."
+          );
+
+        }
+
+
+        statusBox.textContent =
+          "Loading marketplace products...";
+
+
+        const {
+          data: products,
+          error: productsError
+        } = await supabaseClient
+          .from("products")
+          .select("*")
+          .order("id", { ascending: false });
+
+
+        if (productsError) {
+
+          throw new Error(
+            "Unable to load products: " +
+            productsError.message
+          );
+
+        }
+
+
+        statusBox.style.display = "none";
+
+
+        summaryBox.textContent =
+          "Showing " +
+          products.length +
+          " of " +
+          products.length +
+          " products";
+
+
+        summaryBox.style.display =
+          "block";
+
+
+        if (!products.length) {
+
+          productsBox.innerHTML =
+            "<div class='status'>No products found.</div>";
+
+          return;
+
+        }
+
+
+        productsBox.innerHTML =
+          products.map(product => {
+
+            const name =
+              product.name ||
+              product.product_name ||
+              "Unnamed Product";
+
+
+            const description =
+              product.description ||
+              "No description";
+
+
+            const price =
+              Number(
+                product.price || 0
+              ).toLocaleString("en-NG");
+
+
+            const seller =
+              product.seller_name ||
+              product.store_name ||
+              "Edesvino Seller";
+
+
+            return `
+              <div class="product">
+
+                <h2>${name}</h2>
+
+                <p class="price">
+                  ₦${price}
+                </p>
+
+                <p>
+                  <strong>Description:</strong>
+                  ${description}
+                </p>
+
+                <p class="seller">
+                  <strong>Seller:</strong>
+                  ${seller}
+                </p>
+
+                <p>
+                  <strong>Product ID:</strong>
+                  ${product.id ?? "N/A"}
+                </p>
+
+              </div>
+            `;
+
+          }).join("");
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showError(error.message);
+
+      }
+
+    }
+
+
+    loadProducts();
+
+  </script>
+
+</body>
+</html>
