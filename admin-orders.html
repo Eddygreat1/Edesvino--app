@@ -1,8 +1,8 @@
 <!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edesvino - Admin Orders</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Edesvino - Admin Orders</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+
 body {
   font-family: Arial, sans-serif;
   background: #f5f7fa;
@@ -32,6 +32,27 @@ h1 {
   border-radius: 10px;
   margin-bottom: 15px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.controls {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+input,
+select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+.summary {
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
 .order {
@@ -81,6 +102,7 @@ h1 {
 }
 
 @media (max-width: 600px) {
+
   body {
     padding: 12px;
   }
@@ -88,12 +110,45 @@ h1 {
   .card {
     padding: 14px;
   }
+
 }
-</style></head><body><div class="container">  <h1>Platform Admin</h1>
-  <p class="subtitle">All Marketplace Orders</p>  <div class="card">
-    <div id="message" class="loading">Loading orders...</div>
-    <div id="orders"></div>
-  </div><a class="back" href="admin.html">← Back to Admin Dashboard</a>
+
+</style></head><body><div class="container"><h1>Platform Admin</h1><p class="subtitle">
+All Marketplace Orders
+</p><div class="card">  <div class="controls"><input
+  type="text"
+  id="searchInput"
+  placeholder="Search order number or product..."
+>
+
+<select id="statusFilter">
+
+  <option value="All">All Orders</option>
+
+  <option value="Pending">
+    Pending
+  </option>
+
+  <option value="Confirmed">
+    Confirmed
+  </option>
+
+  <option value="Delivered">
+    Delivered
+  </option>
+
+</select>
+
+  </div>  <div id="summary" class="summary">
+    Loading orders...
+  </div>  <div id="message"></div>  <div id="orders"></div></div><a
+class="back"
+href="admin.html"
+
+«»
+
+← Back to Admin Dashboard
+</a>
 
 </div><script>
 
@@ -104,13 +159,21 @@ const SUPABASE_KEY =
   "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
 const supabaseClient =
-  supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+let allOrders = [];
 
 
 async function loadAdminOrders() {
 
-  const message = document.getElementById("message");
-  const ordersContainer = document.getElementById("orders");
+  const message =
+    document.getElementById("message");
+
+  const summary =
+    document.getElementById("summary");
 
   try {
 
@@ -124,9 +187,13 @@ async function loadAdminOrders() {
     }
 
     if (!user) {
-      window.location.href = "login.html";
+
+      window.location.href =
+        "login.html";
+
       return;
     }
+
 
     const {
       data: adminRecord,
@@ -142,10 +209,17 @@ async function loadAdminOrders() {
     }
 
     if (!adminRecord) {
+
       message.className = "error";
-      message.textContent = "Access denied. Platform admin only.";
+
+      message.textContent =
+        "Access denied. Platform admin only.";
+
+      summary.textContent = "";
+
       return;
     }
+
 
     const {
       data: orders,
@@ -153,91 +227,213 @@ async function loadAdminOrders() {
     } = await supabaseClient
       .from("orders")
       .select("*")
-      .order("id", { ascending: false });
+      .order("id", {
+        ascending: false
+      });
 
     if (ordersError) {
       throw ordersError;
     }
 
-    message.style.display = "none";
 
-    if (!orders || orders.length === 0) {
-      ordersContainer.innerHTML =
-        '<div class="message">No orders found.</div>';
-      return;
-    }
+    allOrders = orders || [];
 
-    ordersContainer.innerHTML = orders.map(order => {
-
-      const amount =
-        Number(order.total_amount ?? order.amount ?? order.price ?? 0);
-
-      const createdAt =
-        order.created_at
-          ? new Date(order.created_at).toLocaleString()
-          : "Not available";
-
-      return `
-        <div class="order">
-
-          <div>
-            <span class="label">Order #</span>
-            ${order.id ?? "N/A"}
-          </div>
-
-          <div>
-            <span class="label">Customer ID:</span>
-            ${order.customer_id ?? "N/A"}
-          </div>
-
-          <div>
-            <span class="label">Customer Name:</span>
-            ${order.customer_name ?? "N/A"}
-          </div>
-
-          <div>
-            <span class="label">Product:</span>
-            ${order.product_name ?? "N/A"}
-          </div>
-
-          <div>
-            <span class="label">Amount:</span>
-            ₦${amount.toLocaleString()}
-          </div>
-
-          <div>
-            <span class="label">Status:</span>
-            <span class="status">
-              ${order.status ?? "Pending"}
-            </span>
-          </div>
-
-          <div>
-            <span class="label">Date:</span>
-            ${createdAt}
-          </div>
-
-          <div>
-            <span class="label">Seller ID:</span>
-            ${order.seller_id ?? "N/A"}
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
+    renderOrders();
 
   } catch (error) {
 
     console.error(error);
 
     message.className = "error";
+
     message.textContent =
       "Unable to load orders: " +
-      (error.message || "Unknown error");
+      (error.message ||
+       "Unknown error");
+
+    summary.textContent = "";
 
   }
+
 }
+
+
+function renderOrders() {
+
+  const ordersContainer =
+    document.getElementById("orders");
+
+  const summary =
+    document.getElementById("summary");
+
+  const message =
+    document.getElementById("message");
+
+  const search =
+    document
+      .getElementById("searchInput")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const selectedStatus =
+    document
+      .getElementById("statusFilter")
+      .value;
+
+
+  const filteredOrders =
+    allOrders.filter(order => {
+
+      const orderNumber =
+        String(order.id ?? "")
+          .toLowerCase();
+
+      const product =
+        String(order.product_name ?? "")
+          .toLowerCase();
+
+      const status =
+        String(order.status ?? "Pending");
+
+
+      const matchesSearch =
+        orderNumber.includes(search) ||
+        product.includes(search);
+
+      const matchesStatus =
+        selectedStatus === "All" ||
+        status === selectedStatus;
+
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
+
+    });
+
+
+  message.textContent = "";
+
+  summary.textContent =
+    `Showing ${filteredOrders.length} of ${allOrders.length} orders`;
+
+
+  if (filteredOrders.length === 0) {
+
+    ordersContainer.innerHTML =
+      '<div class="message">No matching orders found.</div>';
+
+    return;
+  }
+
+
+  ordersContainer.innerHTML =
+    filteredOrders.map(order => {
+
+      const amount =
+        Number(
+          order.total_amount ??
+          order.amount ??
+          order.price ??
+          0
+        );
+
+      const createdAt =
+        order.created_at
+          ? new Date(
+              order.created_at
+            ).toLocaleString()
+          : "Not available";
+
+
+      return `
+
+        <div class="order">
+
+          <div>
+            <span class="label">
+              Order #
+            </span>
+            ${order.id ?? "N/A"}
+          </div>
+
+          <div>
+            <span class="label">
+              Customer ID:
+            </span>
+            ${order.customer_id ?? "N/A"}
+          </div>
+
+          <div>
+            <span class="label">
+              Customer Name:
+            </span>
+            ${order.customer_name ?? "N/A"}
+          </div>
+
+          <div>
+            <span class="label">
+              Product:
+            </span>
+            ${order.product_name ?? "N/A"}
+          </div>
+
+          <div>
+            <span class="label">
+              Amount:
+            </span>
+            ₦${amount.toLocaleString()}
+          </div>
+
+          <div>
+            <span class="label">
+              Status:
+            </span>
+
+            <span class="status">
+              ${order.status ?? "Pending"}
+            </span>
+          </div>
+
+          <div>
+            <span class="label">
+              Date:
+            </span>
+            ${createdAt}
+          </div>
+
+          <div>
+            <span class="label">
+              Seller ID:
+            </span>
+            ${order.seller_id ?? "N/A"}
+          </div>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+
+document
+  .getElementById("searchInput")
+  .addEventListener(
+    "input",
+    renderOrders
+  );
+
+
+document
+  .getElementById("statusFilter")
+  .addEventListener(
+    "change",
+    renderOrders
+  );
+
 
 loadAdminOrders();
 
