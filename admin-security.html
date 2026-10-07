@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Edesvino - Security Center</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+.header {
+  background: #111827;
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.header h1 {
+  margin: 0 0 8px;
+}
+
+.header p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.status-box {
+  padding: 18px;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+
+.status-safe {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.check {
+  border-top: 1px solid #eee;
+  padding: 15px 0;
+}
+
+.check:first-child {
+  border-top: none;
+}
+
+.check-name {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.check-description {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.badge-info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.note {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.admin-navigation {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.admin-link {
+  display: block;
+  text-align: center;
+  padding: 13px 10px;
+  background: #111827;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.admin-link:hover {
+  opacity: 0.9;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+}
+
+.error {
+  color: #b00020;
+  background: #fff0f0;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 600px) {
+
+  body {
+    padding: 12px;
+  }
+
+  .admin-navigation {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 15px;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+
+    <h1>Edesvino</h1>
+
+    <p>Platform Security Center</p>
+
+  </div>
+
+
+  <div id="loading"
+       class="loading">
+
+    Checking administrator access...
+
+  </div>
+
+
+  <div id="securityContent"
+       class="hidden">
+
+
+    <div class="admin-navigation">
+
+      <a
+        class="admin-link"
+        href="admin.html">
+
+        ← Control Center
+
+      </a>
+
+
+      <a
+        class="admin-link"
+        href="admin-orders.html">
+
+        📦 Orders
+
+      </a>
+
+
+      <a
+        class="admin-link"
+        href="admin-products.html">
+
+        🛍️ Products
+
+      </a>
+
+
+      <a
+        class="admin-link"
+        href="index.html">
+
+        🏪 Marketplace
+
+      </a>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Security Status</h2>
+
+      <div
+        id="overallStatus"
+        class="status-box status-safe">
+
+        <div class="status-title">
+          Admin Access Verified
+        </div>
+
+        <div>
+          You are authenticated as a platform administrator.
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Security Checks</h2>
+
+
+      <div class="check">
+
+        <div class="check-name">
+
+          🔐 Administrator Access
+
+          <span class="badge badge-info">
+            Checked
+          </span>
+
+        </div>
+
+        <div class="check-description">
+
+          This page only opens after Supabase confirms that
+          the signed-in user exists in the platform_admins table.
+
+        </div>
+
+      </div>
+
+
+      <div class="check">
+
+        <div class="check-name">
+
+          💳 Payment Verification
+
+          <span class="badge badge-warning">
+            Backend Required
+          </span>
+
+        </div>
+
+        <div class="check-description">
+
+          Paystack payment verification must be performed
+          securely by the server-side Edge Function.
+          This page does not replace that verification.
+
+        </div>
+
+      </div>
+
+
+      <div class="check">
+
+        <div class="check-name">
+
+          🧾 Duplicate Orders
+
+          <span class="badge badge-warning">
+            Backend Required
+          </span>
+
+        </div>
+
+        <div class="check-description">
+
+          Duplicate payment references should be rejected
+          by the server before another order is created.
+
+        </div>
+
+      </div>
+
+
+      <div class="check">
+
+        <div class="check-name">
+
+          💰 Commission Protection
+
+          <span class="badge badge-warning">
+            Backend Required
+          </span>
+
+        </div>
+
+        <div class="check-description">
+
+          The 5% Edesvino commission should be calculated
+          and recorded by trusted server-side code rather
+          than relying on values supplied by the browser.
+
+        </div>
+
+      </div>
+
+
+      <div class="check">
+
+        <div class="check-name">
+
+          🛡️ Database Protection
+
+          <span class="badge badge-info">
+            Monitor
+          </span>
+
+        </div>
+
+        <div class="check-description">
+
+          Supabase Row Level Security policies should prevent
+          customers and unauthorized users from changing
+          administrative or financial records.
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Important</h2>
+
+      <p class="note">
+
+        This security page is a monitoring screen.
+        It does not change orders, payments, commissions,
+        products, customers, withdrawals, or database settings.
+
+      </p>
+
+      <p class="note">
+
+        The next security upgrade will be performed in the
+        server-side smart-task Edge Function so the existing
+        marketplace checkout can remain protected from
+        unnecessary changes.
+
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+  <div id="errorBox"
+       class="hidden">
+
+  </div>
+
+
+  <a
+    class="admin-link"
+    href="admin.html"
+    style="margin-top:15px;">
+
+    ← Back to Admin Control Center
+
+  </a>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+
+const supabaseClient =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+async function checkAdminAccess() {
+
+  const loading =
+    document.getElementById("loading");
+
+  const content =
+    document.getElementById("securityContent");
+
+  const errorBox =
+    document.getElementById("errorBox");
+
+
+  try {
+
+    const {
+      data: userData,
+      error: userError
+    } =
+      await supabaseClient.auth.getUser();
+
+
+    if (
+      userError ||
+      !userData.user
+    ) {
+
+      window.location.replace(
+        "login.html"
+      );
+
+      return;
+
+    }
+
+
+    const user =
+      userData.user;
+
+
+    const {
+      data: adminRecord,
+      error: adminError
+    } =
+      await supabaseClient
+        .from("platform_admins")
+        .select("user_id")
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
+
+
+    if (adminError) {
+
+      loading.style.display =
+        "none";
+
+      errorBox.className =
+        "error";
+
+      errorBox.textContent =
+        "Unable to verify admin access: " +
+        adminError.message;
+
+      return;
+
+    }
+
+
+    if (!adminRecord) {
+
+      loading.style.display =
+        "none";
+
+      errorBox.className =
+        "error";
+
+      errorBox.textContent =
+        "Access denied. You are not a platform administrator.";
+
+      return;
+
+    }
+
+
+    loading.style.display =
+      "none";
+
+    content.classList.remove(
+      "hidden"
+    );
+
+
+  } catch (error) {
+
+    loading.style.display =
+      "none";
+
+    errorBox.className =
+      "error";
+
+    errorBox.textContent =
+      "Something went wrong: " +
+      error.message;
+
+  }
+
+}
+
+
+checkAdminAccess();
+
+</script>
+
+</body>
+
+</html>
