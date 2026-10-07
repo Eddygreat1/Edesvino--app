@@ -143,7 +143,6 @@ const supabaseClient =
     SUPABASE_KEY
   );
 
-
 let checkoutItems = [];
 let currentUser = null;
 let isCartCheckout = false;
@@ -173,7 +172,6 @@ async function checkAuth() {
       error
     } = await supabaseClient.auth.getUser();
 
-
     if (error || !data || !data.user) {
 
       sessionStorage.setItem(
@@ -186,7 +184,6 @@ async function checkAuth() {
 
       return false;
     }
-
 
     currentUser =
       data.user;
@@ -247,59 +244,21 @@ async function loadCheckout() {
     const authenticated =
       await checkAuth();
 
-
     if (!authenticated) {
       return;
     }
 
 
-    const cart =
-      getCart();
-
-
     /*
-      CART CHECKOUT
+      IMPORTANT CHECKOUT PRIORITY
+
+      1. product_id = Buy Now
+      2. old product name = compatibility
+      3. cart = Cart checkout
+
+      This prevents an existing cart from
+      overriding a Buy Now product.
     */
-
-    if (cart.length > 0) {
-
-      isCartCheckout = true;
-
-      checkoutItems =
-        cart.map(item => ({
-
-          id:
-            item.id || null,
-
-          name:
-            item.name,
-
-          description:
-            item.description || "",
-
-          price:
-            Number(item.price) || 0,
-
-          quantity:
-            Number(item.quantity) || 1,
-
-          seller_id:
-            item.seller_id || null,
-
-          store:
-            item.store ||
-            "Eddy Digital Hub",
-
-          image_url:
-            item.image_url || ""
-
-        }));
-
-
-      renderCheckout();
-
-      return;
-    }
 
 
     /*
@@ -308,6 +267,8 @@ async function loadCheckout() {
     */
 
     if (productId) {
+
+      isCartCheckout = false;
 
       const {
         data,
@@ -405,6 +366,8 @@ async function loadCheckout() {
 
     if (oldProductName) {
 
+      isCartCheckout = false;
+
       const {
         data,
         error
@@ -483,6 +446,58 @@ async function loadCheckout() {
           data.image_url || ""
 
       }];
+
+
+      renderCheckout();
+
+      return;
+    }
+
+
+    /*
+      CART CHECKOUT
+
+      Only used when there is no
+      product_id or old product name.
+    */
+
+    const cart =
+      getCart();
+
+
+    if (cart.length > 0) {
+
+      isCartCheckout = true;
+
+      checkoutItems =
+        cart.map(item => ({
+
+          id:
+            item.id || null,
+
+          name:
+            item.name,
+
+          description:
+            item.description || "",
+
+          price:
+            Number(item.price) || 0,
+
+          quantity:
+            Number(item.quantity) || 1,
+
+          seller_id:
+            item.seller_id || null,
+
+          store:
+            item.store ||
+            "Eddy Digital Hub",
+
+          image_url:
+            item.image_url || ""
+
+        }));
 
 
       renderCheckout();
