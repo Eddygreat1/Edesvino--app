@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+to<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -490,9 +490,9 @@
 
 
       const productId =
-        params.get(
-          "product_id"
-        );
+  params.get("product_id") ||
+  params.get("product") ||
+  params.get("id");
 
 
       /*
