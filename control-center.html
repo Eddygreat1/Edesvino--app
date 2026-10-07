@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edesvino Control Center</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+    }
+
+    header p {
+      margin: 0;
+      color: #d1d5db;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 18px 14px 35px;
+    }
+
+    .section-title {
+      margin: 20px 0 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      overflow: hidden;
+    }
+
+    .card a {
+      display: block;
+      padding: 16px;
+      text-decoration: none;
+      color: #111827;
+      font-weight: bold;
+    }
+
+    .card a:hover {
+      background: #f3f4f6;
+    }
+
+    .icon {
+      display: inline-block;
+      width: 34px;
+      font-size: 21px;
+      vertical-align: middle;
+    }
+
+    .description {
+      display: block;
+      margin-left: 38px;
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: normal;
+      color: #6b7280;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 22px;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #6b7280;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Edesvino</h1>
+    <p>Control Center</p>
+  </header>
+
+  <div class="container">
+
+    <div class="section-title">🛍️ Marketplace</div>
+
+    <div class="card">
+      <a href="index.html">
+        <span class="icon">🏠</span>
+        Marketplace
+        <span class="description">Browse and shop products</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="cart.html">
+        <span class="icon">🛒</span>
+        Cart
+        <span class="description">View shopping cart</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="track-order.html">
+        <span class="icon">📦</span>
+        Track Order
+        <span class="description">Track customer orders</span>
+      </a>
+    </div>
+
+
+    <div class="section-title">👤 Customer</div>
+
+    <div class="card">
+      <a href="customer-login.html">
+        <span class="icon">🔐</span>
+        Customer Login
+        <span class="description">Sign in as a customer</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="customer-dashboard.html">
+        <span class="icon">👤</span>
+        Customer Dashboard
+        <span class="description">Customer account and shopping area</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="customer-orders.html">
+        <span class="icon">📋</span>
+        Customer Orders
+        <span class="description">View customer orders</span>
+      </a>
+    </div>
+
+
+    <div class="section-title">🏪 Seller</div>
+
+    <div class="card">
+      <a href="login.html">
+        <span class="icon">🔐</span>
+        Seller Login
+        <span class="description">Sign in to seller account</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="dashboard.html">
+        <span class="icon">📊</span>
+        Seller Dashboard
+        <span class="description">Manage your Edesvino store</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="add-product.html">
+        <span class="icon">➕</span>
+        Add Product
+        <span class="description">Add products to the marketplace</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="my-product.html">
+        <span class="icon">🛍️</span>
+        My Products
+        <span class="description">Manage your products</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="orders.html">
+        <span class="icon">📦</span>
+        Seller Orders
+        <span class="description">View customer orders</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="sales.html">
+        <span class="icon">💰</span>
+        Sales & Earnings
+        <span class="description">View sales and earnings</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="withdrawals.html">
+        <span class="icon">💳</span>
+        Withdrawals
+        <span class="description">Manage withdrawals</span>
+      </a>
+    </div>
+
+
+    <div class="section-title">⚙️ Admin</div>
+
+    <div class="card">
+      <a href="admin.html">
+        <span class="icon">📊</span>
+        Admin Dashboard
+        <span class="description">Edesvino administration</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="admin-orders.html">
+        <span class="icon">📦</span>
+        All Orders
+        <span class="description">View and manage marketplace orders</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="admin-customers.html">
+        <span class="icon">👥</span>
+        Customers
+        <span class="description">View marketplace customers</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="admin-products.html">
+        <span class="icon">🛍️</span>
+        Products
+        <span class="description">View marketplace products</span>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="admin-withdrawals.html">
+        <span class="icon">💳</span>
+        Admin Withdrawals
+        <span class="description">Manage withdrawal requests</span>
+      </a>
+    </div>
+
+    <a class="back" href="index.html">
+      ← Back to Marketplace
+    </a>
+
+  </div>
+
+  <footer>
+    Edesvino Marketplace<br>
+    Buy. Sell. Grow.
+  </footer>
+
+</body>
+</html>
