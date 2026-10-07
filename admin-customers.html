@@ -13,30 +13,66 @@ content="width=device-width, initial-scale=1.0">
 
 <style>
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial, sans-serif;
   background: #f5f7fa;
   margin: 0;
   padding: 20px;
+  color: #222;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 950px;
   margin: auto;
 }
 
-h1 {
-  margin-bottom: 5px;
+.header {
+  background: #111827;
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
 }
 
-.subtitle {
-  color: #666;
-  margin-bottom: 20px;
+.header h1 {
+  margin: 0 0 5px;
+  font-size: 24px;
+}
+
+.header p {
+  margin: 0;
+  color: #d1d5db;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.nav a {
+  display: inline-block;
+  padding: 9px 12px;
+  background: white;
+  color: #111827;
+  text-decoration: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.nav a:hover {
+  background: #e5e7eb;
 }
 
 .controls {
   background: white;
-  padding: 15px;
+  padding: 16px;
   border-radius: 10px;
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -44,10 +80,9 @@ h1 {
 
 input {
   width: 100%;
-  box-sizing: border-box;
-  padding: 12px;
+  padding: 13px;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 7px;
   font-size: 15px;
 }
 
@@ -66,35 +101,39 @@ input {
 }
 
 .customer h2 {
-  margin-top: 0;
+  margin: 0 0 15px;
+  font-size: 20px;
 }
 
 .customer p {
-  margin: 8px 0;
+  margin: 9px 0;
+  line-height: 1.45;
+}
+
+.customer-id {
+  word-break: break-all;
+  color: #555;
 }
 
 .view-details {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 12px;
   padding: 10px 14px;
   background: #0066cc;
   color: white;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 7px;
   font-weight: bold;
+}
+
+.view-details:hover {
+  background: #0052a3;
 }
 
 .message {
   background: white;
   padding: 20px;
   border-radius: 10px;
-}
-
-.back {
-  display: inline-block;
-  margin-top: 20px;
-  text-decoration: none;
-  color: #0066cc;
 }
 
 .error {
@@ -105,6 +144,39 @@ input {
   margin-top: 10px;
 }
 
+.back {
+  display: inline-block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: #0066cc;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+
+  body {
+    padding: 12px;
+  }
+
+  .header {
+    padding: 16px;
+  }
+
+  .header h1 {
+    font-size: 21px;
+  }
+
+  .nav a {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .customer {
+    padding: 15px;
+  }
+
+}
+
 </style>
 
 </head>
@@ -113,33 +185,59 @@ input {
 
 <div class="container">
 
-<h1>Platform Admin</h1>
+  <div class="header">
 
-<div class="subtitle">
-Marketplace Customers
-</div>
+    <h1>Edesvino</h1>
 
-<div class="controls">
+    <p>Platform Admin — Customers</p>
 
-<input
-type="text"
-id="searchInput"
-placeholder="Search customer name or customer ID..."
->
+    <div class="nav">
 
-<div class="summary" id="summary">
-Starting...
-</div>
+      <a href="admin.html">
+        ← Control Center
+      </a>
 
-</div>
+      <a href="admin-products.html">
+        📦 Products
+      </a>
 
-<div id="customers">
-Connecting to Supabase...
-</div>
+      <a href="admin-orders.html">
+        📋 Orders
+      </a>
 
-<a class="back" href="admin.html">
-← Back to Admin Dashboard
-</a>
+      <a href="admin-withdrawals.html">
+        💰 Withdrawals
+      </a>
+
+      <a href="index.html">
+        🛍️ Marketplace
+      </a>
+
+    </div>
+
+  </div>
+
+  <div class="controls">
+
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search customer name or customer ID..."
+    >
+
+    <div class="summary" id="summary">
+      Starting...
+    </div>
+
+  </div>
+
+  <div id="customers">
+    Connecting to Supabase...
+  </div>
+
+  <a class="back" href="admin.html">
+    ← Back to Admin Control Center
+  </a>
 
 </div>
 
@@ -158,6 +256,25 @@ supabase.createClient(
 );
 
 let customers = [];
+
+function getOrderAmount(order) {
+
+  return Number(
+    order.total_amount ??
+    order.amount ??
+    order.price ??
+    0
+  );
+
+}
+
+function formatNaira(amount) {
+
+  return "₦" +
+    Number(amount || 0)
+      .toLocaleString();
+
+}
 
 async function loadCustomers() {
 
@@ -178,20 +295,25 @@ async function loadCustomers() {
     } = await supabaseClient.auth.getUser();
 
     if (userError) {
+
       throw new Error(
         "Login check failed: " +
         userError.message
       );
+
     }
 
     if (!user) {
 
       box.innerHTML =
-        '<div class="message">Please log in as an admin.</div>';
+        '<div class="message">' +
+        'Please log in as an admin.' +
+        '</div>';
 
       summary.textContent = "";
 
       return;
+
     }
 
     box.textContent =
@@ -207,20 +329,25 @@ async function loadCustomers() {
       .maybeSingle();
 
     if (adminError) {
+
       throw new Error(
         "Admin check failed: " +
         adminError.message
       );
+
     }
 
     if (!admin) {
 
       box.innerHTML =
-        '<div class="message">Access denied. Admin account required.</div>';
+        '<div class="message">' +
+        'Access denied. Admin account required.' +
+        '</div>';
 
       summary.textContent = "";
 
       return;
+
     }
 
     box.textContent =
@@ -237,10 +364,12 @@ async function loadCustomers() {
       });
 
     if (ordersError) {
+
       throw new Error(
         "Orders request failed: " +
         ordersError.message
       );
+
     }
 
     const customerMap = {};
@@ -255,6 +384,7 @@ async function loadCustomers() {
       if (!customerMap[customerId]) {
 
         customerMap[customerId] = {
+
           customer_id:
             order.customer_id || "N/A",
 
@@ -267,6 +397,7 @@ async function loadCustomers() {
 
           last_order:
             order.created_at || null
+
         };
 
       }
@@ -274,7 +405,7 @@ async function loadCustomers() {
       customerMap[customerId].order_count += 1;
 
       customerMap[customerId].total_spent +=
-        Number(order.price || 0);
+        getOrderAmount(order);
 
       if (
         order.created_at &&
@@ -360,9 +491,12 @@ function renderCustomers() {
   if (filtered.length === 0) {
 
     document.getElementById("customers").innerHTML =
-      '<div class="message">No customers found.</div>';
+      '<div class="message">' +
+      'No customers found.' +
+      '</div>';
 
     return;
+
   }
 
   document.getElementById("customers").innerHTML =
@@ -385,14 +519,15 @@ function renderCustomers() {
         encodeURIComponent(customerName);
 
       return `
+
         <div class="customer">
 
           <h2>
             ${customer.customer_name}
           </h2>
 
-          <p>
-            <strong>Customer ID:</strong>
+          <p class="customer-id">
+            <strong>Customer ID:</strong><br>
             ${customer.customer_id}
           </p>
 
@@ -403,7 +538,7 @@ function renderCustomers() {
 
           <p>
             <strong>Total Order Value:</strong>
-            ₦${customer.total_spent.toLocaleString()}
+            ${formatNaira(customer.total_spent)}
           </p>
 
           <p>
@@ -419,6 +554,7 @@ function renderCustomers() {
           </a>
 
         </div>
+
       `;
 
     }).join("");
