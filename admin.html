@@ -7,7 +7,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>Edesvino - Admin Dashboard</title>
+<title>Edesvino - Control Center</title>
 
 <style>
 
@@ -19,7 +19,7 @@ body {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: auto;
 }
 
@@ -31,12 +31,24 @@ body {
   text-align: center;
 }
 
+.header h1 {
+  margin: 0 0 8px;
+}
+
+.header p {
+  margin: 0;
+}
+
 .card {
   background: white;
   margin-top: 15px;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+  margin-top: 0;
 }
 
 .stat {
@@ -71,20 +83,17 @@ body {
   padding: 20px;
 }
 
-.back {
-  display: block;
-  text-align: center;
-  margin-top: 20px;
-  color: #111827;
-  font-weight: bold;
-  text-decoration: none;
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 15px;
 }
 
 .admin-link {
   display: block;
   text-align: center;
-  margin-top: 20px;
-  padding: 15px;
+  padding: 17px 12px;
   background: #111827;
   color: white;
   font-weight: bold;
@@ -94,6 +103,22 @@ body {
 
 .admin-link:hover {
   opacity: 0.9;
+}
+
+.admin-link small {
+  display: block;
+  margin-top: 6px;
+  font-weight: normal;
+  opacity: 0.8;
+}
+
+.back {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: #111827;
+  font-weight: bold;
+  text-decoration: none;
 }
 
 .note {
@@ -111,6 +136,22 @@ body {
   color: #047857;
 }
 
+@media (max-width: 600px) {
+
+  body {
+    padding: 12px;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .amount {
+    font-size: 23px;
+  }
+
+}
+
 </style>
 
 </head>
@@ -123,7 +164,7 @@ body {
 
     <h1>Edesvino</h1>
 
-    <p>Platform Admin Dashboard</p>
+    <p>Platform Admin Control Center</p>
 
   </div>
 
@@ -140,7 +181,82 @@ body {
        style="display:none;">
 
 
+    <!-- ADMIN CONTROL CENTER -->
+
     <div class="card">
+
+      <h2>Marketplace Management</h2>
+
+      <p class="note">
+        Manage and monitor the main areas of the
+        Edesvino marketplace from one place.
+      </p>
+
+
+      <div class="admin-grid">
+
+        <a
+          class="admin-link"
+          href="admin-products.html">
+
+          📦 Manage Products
+
+          <small>
+            View marketplace products and details
+          </small>
+
+        </a>
+
+
+        <a
+          class="admin-link"
+          href="admin-withdrawals.html">
+
+          💰 Seller Withdrawals
+
+          <small>
+            Review and process withdrawals
+          </small>
+
+        </a>
+
+
+        <a
+          class="admin-link"
+          href="dashboard.html">
+
+          🏪 Seller Dashboard
+
+          <small>
+            Open seller management area
+          </small>
+
+        </a>
+
+
+        <a
+          class="admin-link"
+          href="index.html">
+
+          🛍️ Marketplace
+
+          <small>
+            Open the public Edesvino marketplace
+          </small>
+
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- FINANCIAL OVERVIEW -->
+
+    <div class="card">
+
+      <h2>Financial Overview</h2>
+
 
       <div class="stat">
 
@@ -240,24 +356,13 @@ body {
     </div>
 
 
+    <!-- COMMISSION RECORDS -->
+
     <div class="card">
 
       <h2>Commission Records</h2>
 
       <div id="records"></div>
-
-    </div>
-
-
-    <div class="card">
-
-      <a
-        class="admin-link"
-        href="admin-withdrawals.html">
-
-        Manage Seller Withdrawals
-
-      </a>
 
     </div>
 
