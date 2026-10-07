@@ -3,156 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Edesvino Checkout</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #222;
-    }
-
-    header {
-      background: #111;
-      color: white;
-      padding: 18px 20px;
-    }
-
-    .header-content {
-      max-width: 900px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin-left: 15px;
-      font-size: 14px;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
     }
 
     .container {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-
-    .card {
+      max-width: 700px;
+      margin: auto;
       background: white;
+      padding: 20px;
       border-radius: 12px;
-      padding: 22px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
-    h1,
-    h2 {
+    h1 {
       margin-top: 0;
+      color: #111827;
     }
 
-    .checkout-item {
-      border-bottom: 1px solid #eee;
-      padding: 15px 0;
-    }
-
-    .checkout-item:last-child {
-      border-bottom: none;
-    }
-
-    .item-name {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .item-store {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
-
-    .item-price {
-      font-size: 15px;
-      margin-bottom: 5px;
-    }
-
-    .item-quantity {
+    .store {
       color: #555;
-      font-size: 14px;
+      margin-bottom: 20px;
     }
 
-    .item-total {
+    .product {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .product h3 {
+      margin: 0 0 8px;
+    }
+
+    .price {
       font-weight: bold;
-      margin-top: 7px;
+      font-size: 18px;
     }
 
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 15px;
-      padding: 10px 0;
-    }
-
-    .summary-total {
-      border-top: 1px solid #ddd;
-      margin-top: 10px;
-      padding-top: 15px;
-      font-size: 20px;
+    .total {
+      font-size: 22px;
       font-weight: bold;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 7px;
-      font-weight: bold;
+      margin: 20px 0;
     }
 
     input,
     textarea {
       width: 100%;
-      padding: 13px;
+      box-sizing: border-box;
+      padding: 12px;
+      margin: 8px 0 15px;
       border: 1px solid #ccc;
-      border-radius: 7px;
-      font-size: 16px;
-      margin-bottom: 16px;
-      outline: none;
-    }
-
-    input:focus,
-    textarea:focus {
-      border-color: #111;
+      border-radius: 8px;
+      font-size: 15px;
     }
 
     textarea {
-      min-height: 100px;
+      min-height: 90px;
       resize: vertical;
     }
 
     button {
       width: 100%;
-      padding: 15px;
+      padding: 14px;
       border: none;
       border-radius: 8px;
-      background: #111;
+      background: #111827;
       color: white;
-      font-size: 17px;
-      font-weight: bold;
+      font-size: 16px;
       cursor: pointer;
     }
 
@@ -162,1508 +89,659 @@
     }
 
     .message {
-      padding: 15px;
+      margin-top: 15px;
+      padding: 12px;
       border-radius: 8px;
-      margin-bottom: 20px;
       display: none;
     }
 
     .error {
-      background: #ffe8e8;
-      color: #a00000;
+      background: #fee2e2;
+      color: #991b1b;
     }
 
     .success {
-      background: #e7f8e7;
-      color: #176b17;
+      background: #dcfce7;
+      color: #166534;
     }
 
     .loading {
       text-align: center;
-      padding: 30px;
-      background: white;
-      border-radius: 10px;
-    }
-
-    .empty {
-      text-align: center;
-      padding: 30px;
-      background: white;
-      border-radius: 10px;
-    }
-
-    .back-link {
-      display: inline-block;
-      margin-bottom: 20px;
-      color: #111;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    @media (max-width: 600px) {
-      .header-content {
-        flex-direction: column;
-      }
-
-      nav a {
-        margin: 0 6px;
-      }
-
-      .container {
-        margin-top: 20px;
-      }
+      padding: 20px;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <div class="header-content">
-
-    <div class="logo">
-      Edesvino
-    </div>
-
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="cart.html">Cart</a>
-      <a href="track-order.html">Track Order</a>
-    </nav>
-
-  </div>
-</header>
-
 <div class="container">
 
-  <a class="back-link" href="cart.html">
-    ← Back to Cart
-  </a>
+  <h1>Checkout</h1>
 
-  <div id="message" class="message"></div>
-
-  <div id="loading" class="loading">
-    Loading checkout...
+  <div class="store">
+    Store: <strong>Eddy Digital Hub</strong>
   </div>
 
-  <div id="checkoutContent" style="display:none;">
-
-    <div class="card">
-
-      <h1>Checkout</h1>
-
-      <div id="checkoutItems"></div>
-
-    </div>
-
-    <div class="card">
-
-      <h2>Order Summary</h2>
-
-      <div class="summary-row">
-        <span>Subtotal</span>
-        <strong id="subtotal">₦0</strong>
-      </div>
-
-      <div class="summary-row">
-        <span>Delivery</span>
-        <span>Calculated at checkout</span>
-      </div>
-
-      <div class="summary-row summary-total">
-        <span>Total</span>
-        <span id="total">₦0</span>
-      </div>
-
-    </div>
-
-    <div class="card">
-
-      <h2>Customer Details</h2>
-
-      <label for="customerName">
-        Full Name
-      </label>
-
-      <input
-        type="text"
-        id="customerName"
-        placeholder="Enter your full name"
-        autocomplete="name"
-      >
-
-      <label for="customerPhone">
-        Phone Number
-      </label>
-
-      <input
-        type="tel"
-        id="customerPhone"
-        placeholder="Enter your phone number"
-        autocomplete="tel"
-      >
-
-      <label for="deliveryAddress">
-        Delivery Address
-      </label>
-
-      <textarea
-        id="deliveryAddress"
-        placeholder="Enter your complete delivery address"
-        autocomplete="street-address"
-      ></textarea>
-
-      <button
-        id="payButton"
-        onclick="startPayment()"
-      >
-        Pay with Paystack
-      </button>
-
-    </div>
-
+  <div id="checkoutContent">
+    <div class="loading">Loading checkout...</div>
   </div>
 
 </div>
 
 <script>
+const SUPABASE_URL = "https://lxszilqypuglxyfyukdg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-const SUPABASE_URL =
-  "https://lxszilqypuglxyfyukdg.supabase.co";
-
-const SUPABASE_KEY =
-  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
-
-const supabaseClient =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
-
-const SUPABASE_FUNCTION_URL =
-  SUPABASE_URL +
-  "/functions/v1/smart-task";
-
-
-const QUICK_FUNCTION_URL =
-  SUPABASE_URL +
-  "/functions/v1/quick-function";
-
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 let checkoutItems = [];
-
-let checkoutTotal = 0;
-
+let currentUser = null;
 let isCartCheckout = false;
 
+const params = new URLSearchParams(window.location.search);
 
-/*
-  Check customer authentication before
-  displaying checkout.
-*/
-async function checkCustomerLogin() {
-
-  try {
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.getUser();
+const productId = params.get("product_id");
+const oldProductName = params.get("product");
 
 
-    if (
-      !error &&
-      data &&
-      data.user
-    ) {
+/* --------------------------------------------------
+   AUTH
+-------------------------------------------------- */
 
-      return true;
+async function checkAuth() {
 
-    }
+  const { data, error } = await supabaseClient.auth.getUser();
 
-
-    const currentUrl =
-      window.location.href;
-
+  if (error || !data.user) {
 
     sessionStorage.setItem(
       "edesvinoReturnToCheckout",
-      currentUrl
+      window.location.href
     );
 
-
-    window.location.href =
-      "customer-login.html";
-
-
+    window.location.href = "customer-login.html";
     return false;
-
-  } catch (error) {
-
-    console.error(
-      "Authentication check error:",
-      error
-    );
-
-
-    const currentUrl =
-      window.location.href;
-
-
-    sessionStorage.setItem(
-      "edesvinoReturnToCheckout",
-      currentUrl
-    );
-
-
-    window.location.href =
-      "customer-login.html";
-
-
-    return false;
-
   }
 
+  currentUser = data.user;
+  return true;
 }
 
 
-function naira(amount) {
-
-  return "₦" +
-    Number(amount || 0).toLocaleString("en-NG");
-
-}
-
-
-function showMessage(message, type = "error") {
-
-  const box =
-    document.getElementById("message");
-
-  box.textContent = message;
-
-  box.className =
-    "message " + type;
-
-  box.style.display = "block";
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-}
-
-
-function hideMessage() {
-
-  const box =
-    document.getElementById("message");
-
-  box.style.display = "none";
-
-}
-
+/* --------------------------------------------------
+   GET CART
+-------------------------------------------------- */
 
 function getCart() {
 
   try {
 
-    const saved =
-      localStorage.getItem("edesvinoCart");
+    const cart = JSON.parse(
+      localStorage.getItem("edesvinoCart") || "[]"
+    );
 
-    if (!saved) {
-      return [];
-    }
-
-    const cart =
-      JSON.parse(saved);
-
-    if (!Array.isArray(cart)) {
-      return [];
-    }
-
-    return cart;
+    return Array.isArray(cart) ? cart : [];
 
   } catch (error) {
 
-    console.error(error);
-
     return [];
-
   }
-
 }
 
 
-function saveCheckoutData() {
-
-  const data = {
-
-    items: checkoutItems,
-
-    total: checkoutTotal,
-
-    customerName:
-      document.getElementById("customerName").value.trim(),
-
-    customerPhone:
-      document.getElementById("customerPhone").value.trim(),
-
-    deliveryAddress:
-      document.getElementById("deliveryAddress").value.trim(),
-
-    isCartCheckout
-
-  };
-
-  sessionStorage.setItem(
-    "edesvinoCheckout",
-    JSON.stringify(data)
-  );
-
-}
-
-
-function renderCheckout() {
-
-  const container =
-    document.getElementById("checkoutItems");
-
-  if (
-    !checkoutItems ||
-    checkoutItems.length === 0
-  ) {
-
-    document.getElementById("loading").style.display =
-      "none";
-
-    document.getElementById("checkoutContent").style.display =
-      "none";
-
-    showMessage(
-      "Your cart is empty.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  container.innerHTML = "";
-
-  let subtotal = 0;
-
-
-  checkoutItems.forEach(item => {
-
-    const price =
-      Number(item.price || 0);
-
-    const quantity =
-      Math.max(
-        1,
-        Number(item.quantity || 1)
-      );
-
-    const itemTotal =
-      price * quantity;
-
-    subtotal += itemTotal;
-
-
-    const itemDiv =
-      document.createElement("div");
-
-    itemDiv.className =
-      "checkout-item";
-
-
-    itemDiv.innerHTML = `
-      <div class="item-name">
-        ${escapeHTML(item.name)}
-      </div>
-
-      <div class="item-store">
-        Store:
-        ${escapeHTML(
-          item.store ||
-          "Eddy Digital Hub"
-        )}
-      </div>
-
-      <div class="item-price">
-        Price:
-        ${naira(price)}
-      </div>
-
-      <div class="item-quantity">
-        Quantity:
-        ${quantity}
-      </div>
-
-      <div class="item-total">
-        Item total:
-        ${naira(itemTotal)}
-      </div>
-    `;
-
-
-    container.appendChild(itemDiv);
-
-  });
-
-
-  checkoutTotal = subtotal;
-
-
-  document.getElementById("subtotal").textContent =
-    naira(subtotal);
-
-  document.getElementById("total").textContent =
-    naira(subtotal);
-
-
-  document.getElementById("loading").style.display =
-    "none";
-
-  document.getElementById("checkoutContent").style.display =
-    "block";
-
-}
-
-
-function escapeHTML(value) {
-
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-}
-
+/* --------------------------------------------------
+   LOAD CHECKOUT
+-------------------------------------------------- */
 
 async function loadCheckout() {
 
-  try {
+  const authenticated = await checkAuth();
 
-    hideMessage();
+  if (!authenticated) return;
 
+  const cart = getCart();
 
-    /*
-      Customer must be logged in before
-      checkout can be used.
-    */
+  /*
+    If cart contains items, use the cart checkout.
+  */
 
-    const loggedIn =
-      await checkCustomerLogin();
+  if (cart.length > 0) {
 
+    isCartCheckout = true;
 
-    if (!loggedIn) {
+    checkoutItems = cart.map(item => ({
+      id: item.id || null,
+      name: item.name,
+      description: item.description || "",
+      price: Number(item.price) || 0,
+      quantity: Number(item.quantity) || 1,
+      seller_id: item.seller_id || null,
+      store: item.store || "Eddy Digital Hub",
+      image: item.image || item.image_url || ""
+    }));
 
-      return;
-
-    }
-
-
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const productName =
-      params.get("product");
-
-
-    const cart =
-      getCart();
-
-
-    /*
-      CART CHECKOUT
-      Use the products already stored
-      in localStorage.
-    */
-
-    if (cart.length > 0) {
-
-      isCartCheckout = true;
-
-
-      checkoutItems =
-        cart
-          .filter(
-            item =>
-              item &&
-              item.name
-          )
-          .map(item => ({
-
-            id:
-              item.id ||
-              null,
-
-            name:
-              item.name,
-
-            description:
-              item.description ||
-              "",
-
-            price:
-              Number(
-                item.price || 0
-              ),
-
-            quantity:
-              Math.max(
-                1,
-                Number(
-                  item.quantity || 1
-                )
-              ),
-
-            seller_id:
-              item.seller_id ||
-              null,
-
-            store:
-              item.store === "Edesvino"
-                ? "Eddy Digital Hub"
-                : (
-                    item.store ||
-                    "Eddy Digital Hub"
-                  ),
-
-            image:
-              item.image ||
-              ""
-
-          }));
-
-
-      renderCheckout();
-
-      return;
-
-    }
-
-
-    /*
-      BUY NOW CHECKOUT
-      If there is no cart, load
-      the requested product from Supabase.
-    */
-
-    if (productName) {
-
-      isCartCheckout = false;
-
-
-      const {
-        data,
-        error
-      } = await supabaseClient
-        .from("products")
-        .select(
-          "id,name,price,description,store,image_url,seller_id"
-        )
-        .eq(
-          "name",
-          productName
-        )
-        .limit(1)
-        .maybeSingle();
-
-
-      if (error) {
-
-        console.error(error);
-
-        throw new Error(
-          "Unable to load this product."
-        );
-
-      }
-
-
-      if (!data) {
-
-        throw new Error(
-          "Product unavailable."
-        );
-
-      }
-
-
-      checkoutItems = [{
-
-        id:
-          data.id,
-
-        name:
-          data.name,
-
-        description:
-          data.description ||
-          "",
-
-        price:
-          Number(
-            data.price || 0
-          ),
-
-        quantity: 1,
-
-        seller_id:
-          data.seller_id ||
-          null,
-
-        store:
-          data.store === "Edesvino"
-            ? "Eddy Digital Hub"
-            : (
-                data.store ||
-                "Eddy Digital Hub"
-              ),
-
-        image:
-          data.image_url ||
-          ""
-
-      }];
-
-
-      renderCheckout();
-
-      return;
-
-    }
-
-
-    document.getElementById("loading").style.display =
-      "none";
-
-    showMessage(
-      "No product or cart items were found.",
-      "error"
-    );
-
-
-  } catch (error) {
-
-    console.error(error);
-
-
-    document.getElementById("loading").style.display =
-      "none";
-
-    showMessage(
-      error.message ||
-      "Unable to load checkout.",
-      "error"
-    );
-
-  }
-
-}
-
-
-async function startPayment() {
-
-  try {
-
-    hideMessage();
-
-
-    if (
-      !checkoutItems ||
-      checkoutItems.length === 0
-    ) {
-
-      showMessage(
-        "There are no products to pay for."
-      );
-
-      return;
-
-    }
-
-
-    if (
-      !checkoutTotal ||
-      checkoutTotal <= 0
-    ) {
-
-      showMessage(
-        "A valid payment amount is required."
-      );
-
-      return;
-
-    }
-
-
-    const customerName =
-      document
-        .getElementById("customerName")
-        .value
-        .trim();
-
-
-    const customerPhone =
-      document
-        .getElementById("customerPhone")
-        .value
-        .trim();
-
-
-    const deliveryAddress =
-      document
-        .getElementById("deliveryAddress")
-        .value
-        .trim();
-
-
-    if (!customerName) {
-
-      showMessage(
-        "Please enter your full name."
-      );
-
-      return;
-
-    }
-
-
-    if (!customerPhone) {
-
-      showMessage(
-        "Please enter your phone number."
-      );
-
-      return;
-
-    }
-
-
-    if (!deliveryAddress) {
-
-      showMessage(
-        "Please enter your delivery address."
-      );
-
-      return;
-
-    }
-
-
-    const payButton =
-      document.getElementById("payButton");
-
-
-    payButton.disabled = true;
-
-    payButton.textContent =
-      "Preparing payment...";
-
-
-    /*
-      Confirm the authenticated customer
-      immediately before payment.
-    */
-
-    const {
-      data: {
-        user
-      },
-      error: userError
-    } =
-      await supabaseClient.auth.getUser();
-
-
-    if (userError || !user) {
-
-      payButton.disabled = false;
-
-      payButton.textContent =
-        "Pay with Paystack";
-
-
-      sessionStorage.setItem(
-        "edesvinoReturnToCheckout",
-        window.location.href
-      );
-
-
-      window.location.href =
-        "customer-login.html";
-
-
-      return;
-
-    }
-
-
-    saveCheckoutData();
-
-
-    const productSummary =
-      checkoutItems
-        .map(item => {
-
-          const quantity =
-            Math.max(
-              1,
-              Number(
-                item.quantity || 1
-              )
-            );
-
-          return quantity > 1
-            ? `${item.name} x${quantity}`
-            : item.name;
-
-        })
-        .join(", ");
-
-
-    /*
-      smart-task expects:
-      action: "initialize"
-
-      It converts the amount from
-      naira to kobo itself.
-    */
-
-    const response =
-      await fetch(
-        SUPABASE_FUNCTION_URL,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            "Authorization":
-              "Bearer " +
-              SUPABASE_KEY
-          },
-
-          body:
-            JSON.stringify({
-
-              action:
-                "initialize",
-
-              amount:
-                checkoutTotal,
-
-              email:
-                user.email,
-
-              callback_url:
-                window.location.href,
-
-              metadata: {
-
-                customer_name:
-                  customerName,
-
-                customer_phone:
-                  customerPhone,
-
-                delivery_address:
-                  deliveryAddress,
-
-                product_name:
-                  productSummary,
-
-                items:
-                  checkoutItems.map(
-                    item => ({
-
-                      name:
-                        item.name,
-
-                      price:
-                        Number(
-                          item.price || 0
-                        ),
-
-                      quantity:
-                        Math.max(
-                          1,
-                          Number(
-                            item.quantity || 1
-                          )
-                        ),
-
-                      seller_id:
-                        item.seller_id ||
-                        null
-
-                    })
-                  )
-
-              }
-
-            })
-
-        }
-      );
-
-
-    const result =
-      await response.json();
-
-
-    console.log(
-      "smart-task response:",
-      result
-    );
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        result.message ||
-        result.error ||
-        "Unable to initialize payment."
-      );
-
-    }
-
-
-    const authorizationUrl =
-      result.authorization_url ||
-      result.authorizationUrl ||
-      result.data?.authorization_url ||
-      result.data?.authorizationUrl;
-
-
-    if (!authorizationUrl) {
-
-      console.error(
-        "Unexpected payment response:",
-        result
-      );
-
-      throw new Error(
-        result.message ||
-        "Payment link was not returned."
-      );
-
-    }
-
-
-    window.location.href =
-      authorizationUrl;
-
-
-  } catch (error) {
-
-    console.error(error);
-
-
-    const payButton =
-      document.getElementById("payButton");
-
-
-    payButton.disabled = false;
-
-    payButton.textContent =
-      "Pay with Paystack";
-
-
-    showMessage(
-      error.message ||
-      "Unable to start payment."
-    );
-
-  }
-
-}
-
-
-async function verifyPayment(
-  reference
-) {
-
-  try {
-
-    const response =
-      await fetch(
-        QUICK_FUNCTION_URL,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            "Authorization":
-              "Bearer " +
-              SUPABASE_KEY
-          },
-
-          body:
-            JSON.stringify({
-              reference
-            })
-
-        }
-      );
-
-
-    const result =
-      await response.json();
-
-
-    console.log(
-      "quick-function response:",
-      result
-    );
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        result.message ||
-        result.error ||
-        "Payment verification failed."
-      );
-
-    }
-
-
-    return result;
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    throw error;
-
-  }
-
-}
-
-
-async function createOrder(
-  paymentResult
-) {
-
-  const {
-    data: {
-      user
-    },
-    error: userError
-  } =
-  await supabaseClient.auth.getUser();
-
-
-  if (userError || !user) {
-
-    throw new Error(
-      "Unable to identify customer."
-    );
-
-  }
-
-
-  const customerName =
-    document
-      .getElementById("customerName")
-      .value
-      .trim();
-
-
-  const customerPhone =
-    document
-      .getElementById("customerPhone")
-      .value
-      .trim();
-
-
-  const deliveryAddress =
-    document
-      .getElementById("deliveryAddress")
-      .value
-      .trim();
-
-
-  const productSummary =
-    checkoutItems
-      .map(item => {
-
-        const quantity =
-          Math.max(
-            1,
-            Number(
-              item.quantity || 1
-            )
-          );
-
-        return quantity > 1
-          ? `${item.name} x${quantity}`
-          : item.name;
-
-      })
-      .join(", ");
-
-
-  const reference =
-    paymentResult?.reference ||
-    paymentResult?.data?.reference ||
-    "";
-
-
-  const idempotencyKey =
-    reference
-      ? "edesvinoPayment_" +
-        reference
-      : null;
-
-
-  if (idempotencyKey) {
-
-    const {
-      data: existingOrder,
-      error: existingError
-    } =
-    await supabaseClient
-      .from("orders")
-      .select("*")
-      .eq(
-        "idempotency_key",
-        idempotencyKey
-      )
-      .maybeSingle();
-
-
-    if (
-      !existingError &&
-      existingOrder
-    ) {
-
-      return existingOrder;
-
-    }
-
-  }
-
-
-  const orderData = {
-
-    product_name:
-      productSummary,
-
-    price:
-      checkoutTotal,
-
-    customer_name:
-      customerName,
-
-    customer_phone:
-      customerPhone,
-
-    delivery_address:
-      deliveryAddress,
-
-    seller_id:
-      checkoutItems[0]?.seller_id ||
-      null,
-
-    customer_id:
-      user.id,
-
-    status:
-      "Pending"
-
-  };
-
-
-  const {
-    data: order,
-    error: orderError
-  } =
-  await supabaseClient
-    .from("orders")
-    .insert(
-      orderData
-    )
-    .select()
-    .single();
-
-
-  if (orderError) {
-
-    console.error(
-      "Order creation error:",
-      orderError
-    );
-
-    throw new Error(
-      orderError.message ||
-      "Unable to create order."
-    );
-
+    renderCheckout();
+    return;
   }
 
 
   /*
-    order_items schema:
-    id
-    order_id
-    product_name
-    price
-    quantity
-    seller_id
-    created_at
-
-    Quantity is therefore included here.
+    NEW BUY NOW FLOW
+    Uses the exact product ID.
   */
 
-  const orderItems =
-    checkoutItems.map(item => ({
+  if (productId) {
 
-      order_id:
-        order.id,
+    const { data, error } = await supabaseClient
+      .from("products")
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        seller_id,
+        store,
+        image,
+        image_url
+      `)
+      .eq("id", productId)
+      .maybeSingle();
 
-      product_name:
-        item.name,
+    if (error) {
 
-      price:
-        Number(
-          item.price || 0
-        ),
+      showMessage(
+        "Unable to load product: " + error.message,
+        "error"
+      );
 
-      quantity:
-        Math.max(
-          1,
-          Number(
-            item.quantity || 1
-          )
-        ),
+      return;
+    }
 
-      seller_id:
-        item.seller_id ||
-        null
+    if (!data) {
 
-    }));
+      showMessage(
+        "Product not found.",
+        "error"
+      );
 
+      return;
+    }
 
-  const {
-    error: itemsError
-  } =
-  await supabaseClient
-    .from("order_items")
-    .insert(
-      orderItems
-    );
+    checkoutItems = [{
+      id: data.id,
+      name: data.name,
+      description: data.description || "",
+      price: Number(data.price) || 0,
+      quantity: 1,
+      seller_id: data.seller_id || null,
+      store: data.store || "Eddy Digital Hub",
+      image: data.image || data.image_url || ""
+    }];
 
-
-  if (itemsError) {
-
-    console.error(
-      "Order items error:",
-      itemsError
-    );
-
-    throw new Error(
-      "Order was created, but the individual order items could not be saved. Please contact support."
-    );
-
+    renderCheckout();
+    return;
   }
 
 
-  if (isCartCheckout) {
+  /*
+    OLD PRODUCT-NAME FLOW
+    Kept for compatibility with older links.
+  */
 
-    localStorage.removeItem(
-      "edesvinoCart"
-    );
+  if (oldProductName) {
 
+    const { data, error } = await supabaseClient
+      .from("products")
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        seller_id,
+        store,
+        image,
+        image_url
+      `)
+      .eq("name", oldProductName)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+
+      showMessage(
+        "Unable to load product: " + error.message,
+        "error"
+      );
+
+      return;
+    }
+
+    if (!data) {
+
+      showMessage(
+        "Product not found.",
+        "error"
+      );
+
+      return;
+    }
+
+    checkoutItems = [{
+      id: data.id,
+      name: data.name,
+      description: data.description || "",
+      price: Number(data.price) || 0,
+      quantity: 1,
+      seller_id: data.seller_id || null,
+      store: data.store || "Eddy Digital Hub",
+      image: data.image || data.image_url || ""
+    }];
+
+    renderCheckout();
+    return;
   }
 
 
-  return order;
-
+  showMessage(
+    "No product or cart items were found.",
+    "error"
+  );
 }
 
 
-async function handlePaymentCallback() {
+/* --------------------------------------------------
+   RENDER CHECKOUT
+-------------------------------------------------- */
 
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
+function renderCheckout() {
 
+  const container = document.getElementById("checkoutContent");
 
-  const reference =
-    params.get("reference") ||
-    params.get("trxref");
+  if (!checkoutItems.length) {
 
-
-  if (!reference) {
+    container.innerHTML = `
+      <div class="message error" style="display:block;">
+        No product or cart items were found.
+      </div>
+    `;
 
     return;
-
   }
+
+  let total = 0;
+
+  let html = "";
+
+  checkoutItems.forEach(item => {
+
+    const subtotal =
+      Number(item.price) * Number(item.quantity);
+
+    total += subtotal;
+
+    html += `
+      <div class="product">
+
+        <h3>${escapeHtml(item.name)}</h3>
+
+        ${
+          item.description
+            ? `<p>${escapeHtml(item.description)}</p>`
+            : ""
+        }
+
+        <div>
+          Quantity: ${item.quantity}
+        </div>
+
+        <div class="price">
+          ₦${formatMoney(subtotal)}
+        </div>
+
+      </div>
+    `;
+  });
+
+
+  html += `
+
+    <div class="total">
+      Total: ₦${formatMoney(total)}
+    </div>
+
+    <h3>Delivery Information</h3>
+
+    <label>Full Name</label>
+
+    <input
+      type="text"
+      id="customerName"
+      placeholder="Enter your full name"
+    >
+
+    <label>Phone Number</label>
+
+    <input
+      type="tel"
+      id="customerPhone"
+      placeholder="Enter your phone number"
+    >
+
+    <label>Delivery Address</label>
+
+    <textarea
+      id="deliveryAddress"
+      placeholder="Enter your delivery address"
+    ></textarea>
+
+    <button
+      id="payButton"
+      onclick="startPayment()"
+    >
+      Pay ₦${formatMoney(total)}
+    </button>
+
+    <div id="message" class="message"></div>
+  `;
+
+  container.innerHTML = html;
+}
+
+
+/* --------------------------------------------------
+   START PAYMENT
+-------------------------------------------------- */
+
+async function startPayment() {
+
+  const name =
+    document.getElementById("customerName").value.trim();
+
+  const phone =
+    document.getElementById("customerPhone").value.trim();
+
+  const address =
+    document.getElementById("deliveryAddress").value.trim();
+
+  if (!name || !phone || !address) {
+
+    showMessage(
+      "Please fill in your name, phone number and delivery address.",
+      "error"
+    );
+
+    return;
+  }
+
+  const payButton =
+    document.getElementById("payButton");
+
+  payButton.disabled = true;
+  payButton.textContent = "Preparing payment...";
 
 
   try {
 
-    document.getElementById("loading").style.display =
-      "none";
-
-    document.getElementById("checkoutContent").style.display =
-      "none";
-
-
-    showMessage(
-      "Verifying your payment...",
-      "success"
+    const total = checkoutItems.reduce(
+      (sum, item) =>
+        sum + Number(item.price) * Number(item.quantity),
+      0
     );
 
 
-    const verification =
-      await verifyPayment(
-        reference
+    /*
+      Save checkout information so it can be restored
+      after Paystack redirects back.
+    */
+
+    sessionStorage.setItem(
+      "edesvinoCheckout",
+      JSON.stringify({
+        items: checkoutItems,
+        customer_name: name,
+        customer_phone: phone,
+        delivery_address: address,
+        isCartCheckout: isCartCheckout
+      })
+    );
+
+
+    /*
+      Include exact product IDs in Paystack metadata.
+    */
+
+    const metadataItems = checkoutItems.map(item => ({
+      id: item.id || null,
+      name: item.name,
+      price: Number(item.price),
+      quantity: Number(item.quantity),
+      seller_id: item.seller_id || null
+    }));
+
+
+    const { data: functionData, error: functionError } =
+      await supabaseClient.functions.invoke(
+        "smart-task",
+        {
+          body: {
+            action: "initialize",
+            amount: total,
+            email: currentUser.email,
+            callback_url:
+              window.location.origin +
+              window.location.pathname +
+              "?payment=success",
+
+            metadata: {
+              items: metadataItems,
+              customer_id: currentUser.id,
+              customer_name: name,
+              customer_phone: phone,
+              delivery_address: address
+            }
+          }
+        }
       );
 
 
-    const paymentData =
-      verification?.data ||
-      verification;
-
-
-    const paymentStatus =
-      String(
-        paymentData?.status ||
-        ""
-      ).toLowerCase();
-
+    if (functionError) {
+      throw functionError;
+    }
 
     if (
-      paymentStatus &&
-      paymentStatus !== "success"
+      !functionData ||
+      !functionData.authorization_url
     ) {
 
       throw new Error(
-        "Payment was not successful."
+        "Payment initialization failed."
       );
-
     }
 
 
-    const checkoutDataRaw =
-      sessionStorage.getItem(
-        "edesvinoCheckout"
+    window.location.href =
+      functionData.authorization_url;
+
+  } catch (error) {
+
+    console.error(error);
+
+    showMessage(
+      error.message || "Unable to start payment.",
+      "error"
+    );
+
+    payButton.disabled = false;
+
+    const total = checkoutItems.reduce(
+      (sum, item) =>
+        sum + Number(item.price) * Number(item.quantity),
+      0
+    );
+
+    payButton.textContent =
+      "Pay ₦" + formatMoney(total);
+  }
+}
+
+
+/* --------------------------------------------------
+   CREATE ORDER
+-------------------------------------------------- */
+
+async function createOrder(paymentResult) {
+
+  try {
+
+    const savedCheckout =
+      JSON.parse(
+        sessionStorage.getItem("edesvinoCheckout") || "null"
       );
 
+    if (!savedCheckout) {
 
-    if (checkoutDataRaw) {
+      throw new Error(
+        "Checkout information could not be restored."
+      );
+    }
 
-      const savedData =
-        JSON.parse(checkoutDataRaw);
+    checkoutItems =
+      savedCheckout.items || [];
 
+    const customerName =
+      savedCheckout.customer_name;
 
-      if (
-        savedData.items &&
-        Array.isArray(
-          savedData.items
-        )
-      ) {
+    const customerPhone =
+      savedCheckout.customer_phone;
 
-        checkoutItems =
-          savedData.items;
-
-      }
-
-
-      if (
-        savedData.total
-      ) {
-
-        checkoutTotal =
-          Number(
-            savedData.total
-          );
-
-      }
+    const deliveryAddress =
+      savedCheckout.delivery_address;
 
 
-      if (
-        savedData.customerName
-      ) {
+    /*
+      For a single-product order, store the exact
+      product ID directly on orders.
 
-        document
-          .getElementById(
-            "customerName"
-          )
-          .value =
-            savedData.customerName;
+      For a multi-product cart order, leave
+      orders.product_id NULL because exact IDs
+      are stored in order_items.
+    */
 
-      }
-
-
-      if (
-        savedData.customerPhone
-      ) {
-
-        document
-          .getElementById(
-            "customerPhone"
-          )
-          .value =
-            savedData.customerPhone;
-
-      }
+    const orderProductId =
+      checkoutItems.length === 1
+        ? checkoutItems[0]?.id || null
+        : null;
 
 
-      if (
-        savedData.deliveryAddress
-      ) {
-
-        document
-          .getElementById(
-            "deliveryAddress"
-          )
-          .value =
-            savedData.deliveryAddress;
-
-      }
+    const total = checkoutItems.reduce(
+      (sum, item) =>
+        sum +
+        Number(item.price) *
+        Number(item.quantity),
+      0
+    );
 
 
-      if (
-        typeof savedData.isCartCheckout ===
-        "boolean"
-      ) {
+    const firstItem =
+      checkoutItems[0] || {};
 
-        isCartCheckout =
-          savedData.isCartCheckout;
 
-      }
+    const orderData = {
 
+      product_id: orderProductId,
+
+      product_name:
+        checkoutItems.length === 1
+          ? firstItem.name
+          : checkoutItems
+              .map(item => item.name)
+              .join(", "),
+
+      price: total,
+
+      customer_name: customerName,
+
+      customer_phone: customerPhone,
+
+      delivery_address: deliveryAddress,
+
+      seller_id:
+        checkoutItems.length === 1
+          ? firstItem.seller_id || null
+          : null,
+
+      customer_id: currentUser.id,
+
+      status: "Pending"
+    };
+
+
+    /*
+      Insert order.
+    */
+
+    const { data: order, error: orderError } =
+      await supabaseClient
+        .from("orders")
+        .insert(orderData)
+        .select()
+        .single();
+
+
+    if (orderError) {
+      throw orderError;
     }
 
 
-    const order =
-      await createOrder({
+    /*
+      Insert exact product IDs into order_items.
+    */
 
-        reference,
+    const orderItems =
+      checkoutItems.map(item => ({
 
-        data:
-          paymentData
+        order_id: order.id,
 
-      });
+        product_id: item.id || null,
+
+        product_name: item.name,
+
+        price: Number(item.price),
+
+        quantity: Number(item.quantity),
+
+        seller_id: item.seller_id || null
+
+      }));
+
+
+    if (orderItems.length > 0) {
+
+      const {
+        error: itemsError
+      } = await supabaseClient
+        .from("order_items")
+        .insert(orderItems);
+
+      if (itemsError) {
+        throw itemsError;
+      }
+    }
+
+
+    /*
+      Clear cart only when this was a cart checkout.
+    */
+
+    if (savedCheckout.isCartCheckout) {
+
+      localStorage.removeItem(
+        "edesvinoCart"
+      );
+    }
 
 
     sessionStorage.removeItem(
@@ -1671,48 +749,178 @@ async function handlePaymentCallback() {
     );
 
 
-    document.getElementById("checkoutContent").style.display =
-      "block";
-
-
     showMessage(
-      "Payment successful! Your order has been created. Order #" +
-      order.id,
+      "Payment successful and order created.",
       "success"
     );
 
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    setTimeout(() => {
+
+      window.location.href =
+        "customer-orders.html";
+
+    }, 1500);
+
+
+  } catch (error) {
+
+    console.error(
+      "Order creation error:",
+      error
+    );
+
+    showMessage(
+      error.message ||
+      "Payment was successful, but order creation failed.",
+      "error"
+    );
+  }
+}
+
+
+/* --------------------------------------------------
+   PAYMENT CALLBACK
+-------------------------------------------------- */
+
+async function handlePaymentCallback() {
+
+  const paymentSuccess =
+    params.get("payment");
+
+  if (paymentSuccess !== "success") {
+    return;
+  }
+
+
+  const savedCheckout =
+    sessionStorage.getItem(
+      "edesvinoCheckout"
+    );
+
+  if (!savedCheckout) {
+    return;
+  }
+
+
+  const reference =
+    params.get("reference");
+
+
+  if (!reference) {
+
+    showMessage(
+      "Payment reference is missing.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  try {
+
+    showMessage(
+      "Verifying payment...",
+      "success"
+    );
+
+
+    const {
+      data,
+      error
+    } = await supabaseClient.functions.invoke(
+      "smart-task",
+      {
+        body: {
+          action: "verify",
+          reference: reference
+        }
+      }
+    );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    if (
+      !data ||
+      !data.status
+    ) {
+
+      throw new Error(
+        "Payment verification failed."
+      );
+    }
+
+
+    await createOrder(data);
 
 
   } catch (error) {
 
     console.error(error);
 
-
     showMessage(
       error.message ||
-      "Payment verification failed."
+      "Unable to verify payment.",
+      "error"
     );
-
   }
-
 }
 
 
-/*
-  Start checkout.
+/* --------------------------------------------------
+   HELPERS
+-------------------------------------------------- */
 
-  Authentication is checked before
-  loading the cart.
-*/
-loadCheckout();
+function formatMoney(amount) {
 
-handlePaymentCallback();
+  return Number(amount || 0)
+    .toLocaleString("en-NG");
+}
 
+
+function escapeHtml(value) {
+
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+function showMessage(message, type) {
+
+  const element =
+    document.getElementById("message");
+
+  if (!element) return;
+
+  element.textContent = message;
+
+  element.className =
+    "message " + type;
+
+  element.style.display = "block";
+}
+
+
+/* --------------------------------------------------
+   START
+-------------------------------------------------- */
+
+(async function() {
+
+  await loadCheckout();
+
+  await handlePaymentCallback();
+
+})();
 </script>
 
 </body>
