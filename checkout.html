@@ -126,25 +126,38 @@
     <div class="loading">Loading checkout...</div>
   </div>
 
+  <div id="message" class="message"></div>
+
 </div>
 
 <script>
-const SUPABASE_URL = "https://lxszilqypuglxyfyukdg.supabase.co";
-const SUPABASE_KEY = "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+const SUPABASE_URL =
+  "https://lxszilqypuglxyfyukdg.supabase.co";
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const SUPABASE_KEY =
+  "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
 
 let checkoutItems = [];
 let currentUser = null;
 let isCartCheckout = false;
 
-const params = new URLSearchParams(window.location.search);
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
 
-const productId = params.get("product_id");
-const oldProductName = params.get("product");
+const productId =
+  params.get("product_id");
+
+const oldProductName =
+  params.get("product");
 
 
 /* --------------------------------------------------
@@ -153,21 +166,47 @@ const oldProductName = params.get("product");
 
 async function checkAuth() {
 
-  const { data, error } = await supabaseClient.auth.getUser();
+  try {
 
-  if (error || !data.user) {
+    const {
+      data,
+      error
+    } = await supabaseClient.auth.getUser();
 
-    sessionStorage.setItem(
-      "edesvinoReturnToCheckout",
-      window.location.href
+
+    if (error || !data || !data.user) {
+
+      sessionStorage.setItem(
+        "edesvinoReturnToCheckout",
+        window.location.href
+      );
+
+      window.location.href =
+        "customer-login.html";
+
+      return false;
+    }
+
+
+    currentUser =
+      data.user;
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      "Authentication error:",
+      error
     );
 
-    window.location.href = "customer-login.html";
+    showMessage(
+      "Unable to check your login. Please refresh the page.",
+      "error"
+    );
+
     return false;
   }
-
-  currentUser = data.user;
-  return true;
 }
 
 
@@ -179,11 +218,16 @@ function getCart() {
 
   try {
 
-    const cart = JSON.parse(
-      localStorage.getItem("edesvinoCart") || "[]"
-    );
+    const cart =
+      JSON.parse(
+        localStorage.getItem(
+          "edesvinoCart"
+        ) || "[]"
+      );
 
-    return Array.isArray(cart) ? cart : [];
+    return Array.isArray(cart)
+      ? cart
+      : [];
 
   } catch (error) {
 
@@ -198,157 +242,273 @@ function getCart() {
 
 async function loadCheckout() {
 
-  const authenticated = await checkAuth();
+  try {
 
-  if (!authenticated) return;
+    const authenticated =
+      await checkAuth();
 
-  const cart = getCart();
 
-  /*
-    If cart contains items, use the cart checkout.
-  */
+    if (!authenticated) {
+      return;
+    }
 
-  if (cart.length > 0) {
 
-    isCartCheckout = true;
+    const cart =
+      getCart();
 
-    checkoutItems = cart.map(item => ({
-      id: item.id || null,
-      name: item.name,
-      description: item.description || "",
-      price: Number(item.price) || 0,
-      quantity: Number(item.quantity) || 1,
-      seller_id: item.seller_id || null,
-      store: item.store || "Eddy Digital Hub",
-      image: item.image || item.image_url || ""
-    }));
 
-    renderCheckout();
-    return;
+    /*
+      CART CHECKOUT
+    */
+
+    if (cart.length > 0) {
+
+      isCartCheckout = true;
+
+      checkoutItems =
+        cart.map(item => ({
+
+          id:
+            item.id || null,
+
+          name:
+            item.name,
+
+          description:
+            item.description || "",
+
+          price:
+            Number(item.price) || 0,
+
+          quantity:
+            Number(item.quantity) || 1,
+
+          seller_id:
+            item.seller_id || null,
+
+          store:
+            item.store ||
+            "Eddy Digital Hub",
+
+          image:
+            item.image || ""
+
+        }));
+
+
+      renderCheckout();
+
+      return;
+    }
+
+
+    /*
+      BUY NOW
+      EXACT PRODUCT ID
+    */
+
+    if (productId) {
+
+      const {
+        data,
+        error
+      } = await supabaseClient
+
+        .from("products")
+
+        .select(`
+          id,
+          name,
+          description,
+          price,
+          seller_id,
+          store,
+          image
+        `)
+
+        .eq(
+          "id",
+          productId
+        )
+
+        .maybeSingle();
+
+
+      if (error) {
+
+        console.error(
+          "Product loading error:",
+          error
+        );
+
+        showMessage(
+          "Unable to load product: " +
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (!data) {
+
+        showMessage(
+          "Product not found.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      checkoutItems = [{
+
+        id:
+          data.id,
+
+        name:
+          data.name,
+
+        description:
+          data.description || "",
+
+        price:
+          Number(data.price) || 0,
+
+        quantity:
+          1,
+
+        seller_id:
+          data.seller_id || null,
+
+        store:
+          data.store ||
+          "Eddy Digital Hub",
+
+        image:
+          data.image || ""
+
+      }];
+
+
+      renderCheckout();
+
+      return;
+    }
+
+
+    /*
+      OLD PRODUCT NAME LINK
+      KEPT FOR COMPATIBILITY
+    */
+
+    if (oldProductName) {
+
+      const {
+        data,
+        error
+      } = await supabaseClient
+
+        .from("products")
+
+        .select(`
+          id,
+          name,
+          description,
+          price,
+          seller_id,
+          store,
+          image
+        `)
+
+        .eq(
+          "name",
+          oldProductName
+        )
+
+        .limit(1)
+
+        .maybeSingle();
+
+
+      if (error) {
+
+        showMessage(
+          "Unable to load product: " +
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (!data) {
+
+        showMessage(
+          "Product not found.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      checkoutItems = [{
+
+        id:
+          data.id,
+
+        name:
+          data.name,
+
+        description:
+          data.description || "",
+
+        price:
+          Number(data.price) || 0,
+
+        quantity:
+          1,
+
+        seller_id:
+          data.seller_id || null,
+
+        store:
+          data.store ||
+          "Eddy Digital Hub",
+
+        image:
+          data.image || ""
+
+      }];
+
+
+      renderCheckout();
+
+      return;
+    }
+
+
+    showMessage(
+      "No product or cart items were found.",
+      "error"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Checkout loading error:",
+      error
+    );
+
+    showMessage(
+      "Unable to load checkout: " +
+      error.message,
+      "error"
+    );
   }
-
-
-  /*
-    NEW BUY NOW FLOW
-    Uses the exact product ID.
-  */
-
-  if (productId) {
-
-    const { data, error } = await supabaseClient
-      .from("products")
-      .select(`
-        id,
-        name,
-        description,
-        price,
-        seller_id,
-        store,
-        image,
-        image_url
-      `)
-      .eq("id", productId)
-      .maybeSingle();
-
-    if (error) {
-
-      showMessage(
-        "Unable to load product: " + error.message,
-        "error"
-      );
-
-      return;
-    }
-
-    if (!data) {
-
-      showMessage(
-        "Product not found.",
-        "error"
-      );
-
-      return;
-    }
-
-    checkoutItems = [{
-      id: data.id,
-      name: data.name,
-      description: data.description || "",
-      price: Number(data.price) || 0,
-      quantity: 1,
-      seller_id: data.seller_id || null,
-      store: data.store || "Eddy Digital Hub",
-      image: data.image || data.image_url || ""
-    }];
-
-    renderCheckout();
-    return;
-  }
-
-
-  /*
-    OLD PRODUCT-NAME FLOW
-    Kept for compatibility with older links.
-  */
-
-  if (oldProductName) {
-
-    const { data, error } = await supabaseClient
-      .from("products")
-      .select(`
-        id,
-        name,
-        description,
-        price,
-        seller_id,
-        store,
-        image,
-        image_url
-      `)
-      .eq("name", oldProductName)
-      .limit(1)
-      .maybeSingle();
-
-    if (error) {
-
-      showMessage(
-        "Unable to load product: " + error.message,
-        "error"
-      );
-
-      return;
-    }
-
-    if (!data) {
-
-      showMessage(
-        "Product not found.",
-        "error"
-      );
-
-      return;
-    }
-
-    checkoutItems = [{
-      id: data.id,
-      name: data.name,
-      description: data.description || "",
-      price: Number(data.price) || 0,
-      quantity: 1,
-      seller_id: data.seller_id || null,
-      store: data.store || "Eddy Digital Hub",
-      image: data.image || data.image_url || ""
-    }];
-
-    renderCheckout();
-    return;
-  }
-
-
-  showMessage(
-    "No product or cart items were found.",
-    "error"
-  );
 }
 
 
@@ -358,12 +518,17 @@ async function loadCheckout() {
 
 function renderCheckout() {
 
-  const container = document.getElementById("checkoutContent");
+  const container =
+    document.getElementById(
+      "checkoutContent"
+    );
+
 
   if (!checkoutItems.length) {
 
     container.innerHTML = `
-      <div class="message error" style="display:block;">
+      <div class="message error"
+           style="display:block;">
         No product or cart items were found.
       </div>
     `;
@@ -371,50 +536,75 @@ function renderCheckout() {
     return;
   }
 
+
   let total = 0;
 
   let html = "";
 
-  checkoutItems.forEach(item => {
 
-    const subtotal =
-      Number(item.price) * Number(item.quantity);
+  checkoutItems.forEach(
+    item => {
 
-    total += subtotal;
+      const subtotal =
+        Number(item.price) *
+        Number(item.quantity);
 
-    html += `
-      <div class="product">
 
-        <h3>${escapeHtml(item.name)}</h3>
+      total += subtotal;
 
-        ${
-          item.description
-            ? `<p>${escapeHtml(item.description)}</p>`
-            : ""
-        }
 
-        <div>
-          Quantity: ${item.quantity}
+      html += `
+
+        <div class="product">
+
+          <h3>
+            ${escapeHtml(item.name)}
+          </h3>
+
+          ${
+            item.description
+              ? `
+                <p>
+                  ${escapeHtml(
+                    item.description
+                  )}
+                </p>
+              `
+              : ""
+          }
+
+          <div>
+            Quantity:
+            ${item.quantity}
+          </div>
+
+          <div class="price">
+            ₦${formatMoney(subtotal)}
+          </div>
+
         </div>
 
-        <div class="price">
-          ₦${formatMoney(subtotal)}
-        </div>
-
-      </div>
-    `;
-  });
+      `;
+    }
+  );
 
 
   html += `
 
     <div class="total">
-      Total: ₦${formatMoney(total)}
+      Total:
+      ₦${formatMoney(total)}
     </div>
 
-    <h3>Delivery Information</h3>
 
-    <label>Full Name</label>
+    <h3>
+      Delivery Information
+    </h3>
+
+
+    <label>
+      Full Name
+    </label>
 
     <input
       type="text"
@@ -422,7 +612,10 @@ function renderCheckout() {
       placeholder="Enter your full name"
     >
 
-    <label>Phone Number</label>
+
+    <label>
+      Phone Number
+    </label>
 
     <input
       type="tel"
@@ -430,12 +623,16 @@ function renderCheckout() {
       placeholder="Enter your phone number"
     >
 
-    <label>Delivery Address</label>
+
+    <label>
+      Delivery Address
+    </label>
 
     <textarea
       id="deliveryAddress"
       placeholder="Enter your delivery address"
     ></textarea>
+
 
     <button
       id="payButton"
@@ -444,10 +641,11 @@ function renderCheckout() {
       Pay ₦${formatMoney(total)}
     </button>
 
-    <div id="message" class="message"></div>
   `;
 
-  container.innerHTML = html;
+
+  container.innerHTML =
+    html;
 }
 
 
@@ -458,15 +656,37 @@ function renderCheckout() {
 async function startPayment() {
 
   const name =
-    document.getElementById("customerName").value.trim();
+    document
+      .getElementById(
+        "customerName"
+      )
+      .value
+      .trim();
+
 
   const phone =
-    document.getElementById("customerPhone").value.trim();
+    document
+      .getElementById(
+        "customerPhone"
+      )
+      .value
+      .trim();
+
 
   const address =
-    document.getElementById("deliveryAddress").value.trim();
+    document
+      .getElementById(
+        "deliveryAddress"
+      )
+      .value
+      .trim();
 
-  if (!name || !phone || !address) {
+
+  if (
+    !name ||
+    !phone ||
+    !address
+  ) {
 
     showMessage(
       "Please fill in your name, phone number and delivery address.",
@@ -476,80 +696,148 @@ async function startPayment() {
     return;
   }
 
+
   const payButton =
-    document.getElementById("payButton");
+    document.getElementById(
+      "payButton"
+    );
+
 
   payButton.disabled = true;
-  payButton.textContent = "Preparing payment...";
+
+  payButton.textContent =
+    "Preparing payment...";
 
 
   try {
 
-    const total = checkoutItems.reduce(
-      (sum, item) =>
-        sum + Number(item.price) * Number(item.quantity),
-      0
-    );
+    const total =
+      checkoutItems.reduce(
+        (
+          sum,
+          item
+        ) =>
+          sum +
+          Number(item.price) *
+          Number(item.quantity),
+        0
+      );
 
 
     /*
-      Save checkout information so it can be restored
-      after Paystack redirects back.
+      Save checkout data.
     */
 
     sessionStorage.setItem(
       "edesvinoCheckout",
+
       JSON.stringify({
-        items: checkoutItems,
-        customer_name: name,
-        customer_phone: phone,
-        delivery_address: address,
-        isCartCheckout: isCartCheckout
+
+        items:
+          checkoutItems,
+
+        customer_name:
+          name,
+
+        customer_phone:
+          phone,
+
+        delivery_address:
+          address,
+
+        isCartCheckout:
+          isCartCheckout
+
       })
     );
 
 
     /*
-      Include exact product IDs in Paystack metadata.
+      Include exact product IDs.
     */
 
-    const metadataItems = checkoutItems.map(item => ({
-      id: item.id || null,
-      name: item.name,
-      price: Number(item.price),
-      quantity: Number(item.quantity),
-      seller_id: item.seller_id || null
-    }));
+    const metadataItems =
+      checkoutItems.map(
+        item => ({
 
+          id:
+            item.id || null,
 
-    const { data: functionData, error: functionError } =
-      await supabaseClient.functions.invoke(
-        "smart-task",
-        {
-          body: {
-            action: "initialize",
-            amount: total,
-            email: currentUser.email,
-            callback_url:
-              window.location.origin +
-              window.location.pathname +
-              "?payment=success",
+          name:
+            item.name,
 
-            metadata: {
-              items: metadataItems,
-              customer_id: currentUser.id,
-              customer_name: name,
-              customer_phone: phone,
-              delivery_address: address
-            }
-          }
-        }
+          price:
+            Number(item.price),
+
+          quantity:
+            Number(item.quantity),
+
+          seller_id:
+            item.seller_id || null
+
+        })
       );
+
+
+    const {
+      data:
+        functionData,
+
+      error:
+        functionError
+
+    } =
+      await supabaseClient
+        .functions
+        .invoke(
+          "smart-task",
+          {
+
+            body: {
+
+              action:
+                "initialize",
+
+              amount:
+                total,
+
+              email:
+                currentUser.email,
+
+              callback_url:
+                window.location.origin +
+                window.location.pathname +
+                "?payment=success",
+
+              metadata: {
+
+                items:
+                  metadataItems,
+
+                customer_id:
+                  currentUser.id,
+
+                customer_name:
+                  name,
+
+                customer_phone:
+                  phone,
+
+                delivery_address:
+                  address
+
+              }
+
+            }
+
+          }
+        );
 
 
     if (functionError) {
       throw functionError;
     }
+
 
     if (
       !functionData ||
@@ -565,25 +853,42 @@ async function startPayment() {
     window.location.href =
       functionData.authorization_url;
 
+
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Payment error:",
+      error
+    );
+
 
     showMessage(
-      error.message || "Unable to start payment.",
+      error.message ||
+      "Unable to start payment.",
       "error"
     );
 
-    payButton.disabled = false;
 
-    const total = checkoutItems.reduce(
-      (sum, item) =>
-        sum + Number(item.price) * Number(item.quantity),
-      0
-    );
+    payButton.disabled =
+      false;
+
+
+    const total =
+      checkoutItems.reduce(
+        (
+          sum,
+          item
+        ) =>
+          sum +
+          Number(item.price) *
+          Number(item.quantity),
+        0
+      );
+
 
     payButton.textContent =
-      "Pay ₦" + formatMoney(total);
+      "Pay ₦" +
+      formatMoney(total);
   }
 }
 
@@ -592,14 +897,19 @@ async function startPayment() {
    CREATE ORDER
 -------------------------------------------------- */
 
-async function createOrder(paymentResult) {
+async function createOrder(
+  paymentResult
+) {
 
   try {
 
     const savedCheckout =
       JSON.parse(
-        sessionStorage.getItem("edesvinoCheckout") || "null"
+        sessionStorage.getItem(
+          "edesvinoCheckout"
+        ) || "null"
       );
+
 
     if (!savedCheckout) {
 
@@ -608,26 +918,30 @@ async function createOrder(paymentResult) {
       );
     }
 
+
     checkoutItems =
       savedCheckout.items || [];
+
 
     const customerName =
       savedCheckout.customer_name;
 
+
     const customerPhone =
       savedCheckout.customer_phone;
+
 
     const deliveryAddress =
       savedCheckout.delivery_address;
 
 
     /*
-      For a single-product order, store the exact
-      product ID directly on orders.
+      Single product:
+      store exact product ID on orders.
 
-      For a multi-product cart order, leave
-      orders.product_id NULL because exact IDs
-      are stored in order_items.
+      Multiple products:
+      keep orders.product_id NULL.
+      Exact IDs remain in order_items.
     */
 
     const orderProductId =
@@ -636,13 +950,17 @@ async function createOrder(paymentResult) {
         : null;
 
 
-    const total = checkoutItems.reduce(
-      (sum, item) =>
-        sum +
-        Number(item.price) *
-        Number(item.quantity),
-      0
-    );
+    const total =
+      checkoutItems.reduce(
+        (
+          sum,
+          item
+        ) =>
+          sum +
+          Number(item.price) *
+          Number(item.quantity),
+        0
+      );
 
 
     const firstItem =
@@ -651,39 +969,57 @@ async function createOrder(paymentResult) {
 
     const orderData = {
 
-      product_id: orderProductId,
+      product_id:
+        orderProductId,
 
       product_name:
         checkoutItems.length === 1
           ? firstItem.name
           : checkoutItems
-              .map(item => item.name)
+              .map(
+                item =>
+                  item.name
+              )
               .join(", "),
 
-      price: total,
+      price:
+        total,
 
-      customer_name: customerName,
+      customer_name:
+        customerName,
 
-      customer_phone: customerPhone,
+      customer_phone:
+        customerPhone,
 
-      delivery_address: deliveryAddress,
+      delivery_address:
+        deliveryAddress,
 
       seller_id:
         checkoutItems.length === 1
-          ? firstItem.seller_id || null
+          ? firstItem.seller_id ||
+            null
           : null,
 
-      customer_id: currentUser.id,
+      customer_id:
+        currentUser.id,
 
-      status: "Pending"
+      status:
+        "Pending"
     };
 
 
     /*
-      Insert order.
+      Create order.
     */
 
-    const { data: order, error: orderError } =
+    const {
+      data:
+        order,
+
+      error:
+        orderError
+
+    } =
       await supabaseClient
         .from("orders")
         .insert(orderData)
@@ -697,34 +1033,51 @@ async function createOrder(paymentResult) {
 
 
     /*
-      Insert exact product IDs into order_items.
+      Create order items with
+      exact product IDs.
     */
 
     const orderItems =
-      checkoutItems.map(item => ({
+      checkoutItems.map(
+        item => ({
 
-        order_id: order.id,
+          order_id:
+            order.id,
 
-        product_id: item.id || null,
+          product_id:
+            item.id || null,
 
-        product_name: item.name,
+          product_name:
+            item.name,
 
-        price: Number(item.price),
+          price:
+            Number(item.price),
 
-        quantity: Number(item.quantity),
+          quantity:
+            Number(item.quantity),
 
-        seller_id: item.seller_id || null
+          seller_id:
+            item.seller_id ||
+            null
 
-      }));
+        })
+      );
 
 
-    if (orderItems.length > 0) {
+    if (
+      orderItems.length > 0
+    ) {
 
       const {
-        error: itemsError
-      } = await supabaseClient
-        .from("order_items")
-        .insert(orderItems);
+        error:
+          itemsError
+      } =
+        await supabaseClient
+          .from("order_items")
+          .insert(
+            orderItems
+          );
+
 
       if (itemsError) {
         throw itemsError;
@@ -733,10 +1086,12 @@ async function createOrder(paymentResult) {
 
 
     /*
-      Clear cart only when this was a cart checkout.
+      Clear cart only for cart checkout.
     */
 
-    if (savedCheckout.isCartCheckout) {
+    if (
+      savedCheckout.isCartCheckout
+    ) {
 
       localStorage.removeItem(
         "edesvinoCart"
@@ -755,12 +1110,15 @@ async function createOrder(paymentResult) {
     );
 
 
-    setTimeout(() => {
+    setTimeout(
+      () => {
 
-      window.location.href =
-        "customer-orders.html";
+        window.location.href =
+          "customer-orders.html";
 
-    }, 1500);
+      },
+      1500
+    );
 
 
   } catch (error) {
@@ -769,6 +1127,7 @@ async function createOrder(paymentResult) {
       "Order creation error:",
       error
     );
+
 
     showMessage(
       error.message ||
@@ -786,9 +1145,16 @@ async function createOrder(paymentResult) {
 async function handlePaymentCallback() {
 
   const paymentSuccess =
-    params.get("payment");
+    params.get(
+      "payment"
+    );
 
-  if (paymentSuccess !== "success") {
+
+  if (
+    paymentSuccess !==
+    "success"
+  ) {
+
     return;
   }
 
@@ -798,13 +1164,16 @@ async function handlePaymentCallback() {
       "edesvinoCheckout"
     );
 
+
   if (!savedCheckout) {
     return;
   }
 
 
   const reference =
-    params.get("reference");
+    params.get(
+      "reference"
+    );
 
 
   if (!reference) {
@@ -829,15 +1198,25 @@ async function handlePaymentCallback() {
     const {
       data,
       error
-    } = await supabaseClient.functions.invoke(
-      "smart-task",
-      {
-        body: {
-          action: "verify",
-          reference: reference
-        }
-      }
-    );
+    } =
+      await supabaseClient
+        .functions
+        .invoke(
+          "smart-task",
+          {
+
+            body: {
+
+              action:
+                "verify",
+
+              reference:
+                reference
+
+            }
+
+          }
+        );
 
 
     if (error) {
@@ -856,12 +1235,18 @@ async function handlePaymentCallback() {
     }
 
 
-    await createOrder(data);
+    await createOrder(
+      data
+    );
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "Verification error:",
+      error
+    );
+
 
     showMessage(
       error.message ||
@@ -876,37 +1261,74 @@ async function handlePaymentCallback() {
    HELPERS
 -------------------------------------------------- */
 
-function formatMoney(amount) {
+function formatMoney(
+  amount
+) {
 
-  return Number(amount || 0)
-    .toLocaleString("en-NG");
+  return Number(
+    amount || 0
+  ).toLocaleString(
+    "en-NG"
+  );
 }
 
 
-function escapeHtml(value) {
+function escapeHtml(
+  value
+) {
 
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  return String(
+    value || ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 }
 
 
-function showMessage(message, type) {
+function showMessage(
+  message,
+  type
+) {
 
   const element =
-    document.getElementById("message");
+    document.getElementById(
+      "message"
+    );
 
-  if (!element) return;
 
-  element.textContent = message;
+  if (!element) {
+    return;
+  }
+
+
+  element.textContent =
+    message;
+
 
   element.className =
     "message " + type;
 
-  element.style.display = "block";
+
+  element.style.display =
+    "block";
 }
 
 
