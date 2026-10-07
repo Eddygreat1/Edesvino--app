@@ -1,14 +1,7 @@
-to<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Checkout - Edesvino</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Checkout - Edesvino</title>  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
     * {
       box-sizing: border-box;
     }
@@ -197,54 +190,30 @@ to<!DOCTYPE html>
         white-space: normal;
       }
     }
-  </style>
-</head>
+  </style></head><body><header>
+  <div class="header-inner"><a class="logo" href="index.html">
+  Edesvino
+</a>
 
-<body>
-
-<header>
-  <div class="header-inner">
-
-    <a class="logo" href="index.html">
-      Edesvino
-    </a>
-
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="index.html#products-section">Shop</a>
-      <a href="cart.html">Cart</a>
-      <a href="track-order.html">Track Order</a>
-    </nav>
+<nav>
+  <a href="index.html">Home</a>
+  <a href="index.html#products-section">Shop</a>
+  <a href="cart.html">Cart</a>
+  <a href="track-order.html">Track Order</a>
+</nav>
 
   </div>
-</header>
-
-<main>
-
-  <a class="back-link" href="index.html">
+</header><main>  <a class="back-link" href="index.html">
     ← Back to Marketplace
-  </a>
+  </a>  <div id="message" class="message"></div>  <div id="checkoutContent" class="checkout-card"><div class="loading">
+  <h2>Loading checkout...</h2>
+  <p>Please wait.</p>
+</div>
 
-  <div id="message" class="message"></div>
-
-  <div id="checkoutContent" class="checkout-card">
-
-    <div class="loading">
-      <h2>Loading checkout...</h2>
-      <p>Please wait.</p>
-    </div>
-
-  </div>
-
-</main>
-
-<footer>
+  </div></main><footer>
   <strong>Edesvino Marketplace</strong><br>
   Buy. Sell. Grow.
-</footer>
-
-
-<script>
+</footer><script>
 
   /* ==================================================
      SUPABASE
@@ -257,14 +226,14 @@ to<!DOCTYPE html>
     "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
   const supabaseClient =
-    supabase.createClient(
+    window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_KEY
     );
 
 
   /* ==================================================
-     STORAGE KEYS
+     STORAGE
   ================================================== */
 
   const CART_KEY =
@@ -279,14 +248,10 @@ to<!DOCTYPE html>
   ================================================== */
 
   const checkoutContent =
-    document.getElementById(
-      "checkoutContent"
-    );
+    document.getElementById("checkoutContent");
 
   const messageBox =
-    document.getElementById(
-      "message"
-    );
+    document.getElementById("message");
 
 
   /* ==================================================
@@ -308,13 +273,9 @@ to<!DOCTYPE html>
      MESSAGE
   ================================================== */
 
-  function showMessage(
-    text,
-    type = "error"
-  ) {
+  function showMessage(text, type = "error") {
 
-    messageBox.textContent =
-      text;
+    messageBox.textContent = text;
 
     messageBox.className =
       "message " + type;
@@ -324,37 +285,25 @@ to<!DOCTYPE html>
   }
 
 
+  function hideMessage() {
+
+    messageBox.style.display =
+      "none";
+  }
+
+
   /* ==================================================
      HTML ESCAPE
   ================================================== */
 
-  function escapeHTML(
-    value
-  ) {
+  function escapeHTML(value) {
 
-    return String(
-      value || ""
-    )
-      .replace(
-        /&/g,
-        "&amp;"
-      )
-      .replace(
-        /</g,
-        "&lt;"
-      )
-      .replace(
-        />/g,
-        "&gt;"
-      )
-      .replace(
-        /"/g,
-        "&quot;"
-      )
-      .replace(
-        /'/g,
-        "&#039;"
-      );
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
 
@@ -362,15 +311,10 @@ to<!DOCTYPE html>
      MONEY
   ================================================== */
 
-  function formatMoney(
-    amount
-  ) {
+  function formatMoney(amount) {
 
-    return Number(
-      amount || 0
-    ).toLocaleString(
-      "en-NG"
-    );
+    return Number(amount || 0)
+      .toLocaleString("en-NG");
   }
 
 
@@ -384,9 +328,7 @@ to<!DOCTYPE html>
 
       const cart =
         JSON.parse(
-          localStorage.getItem(
-            CART_KEY
-          ) || "[]"
+          localStorage.getItem(CART_KEY) || "[]"
         );
 
       return Array.isArray(cart)
@@ -417,9 +359,7 @@ to<!DOCTYPE html>
         data,
         error
       } =
-        await supabaseClient
-          .auth
-          .getUser();
+        await supabaseClient.auth.getUser();
 
 
       if (
@@ -463,11 +403,6 @@ to<!DOCTYPE html>
 
   /* ==================================================
      LOAD CHECKOUT
-     
-     PRIORITY:
-     
-     1. product_id = BUY NOW
-     2. cart = CART CHECKOUT
   ================================================== */
 
   async function loadCheckout() {
@@ -490,35 +425,26 @@ to<!DOCTYPE html>
 
 
       const productId =
-  params.get("product_id") ||
-  params.get("product") ||
-  params.get("id");
+        params.get("product_id") ||
+        params.get("product") ||
+        params.get("id");
 
 
-      /*
-        BUY NOW
-
-        Product-details.html sends:
-
-        checkout.html?product_id=9
-
-        This MUST take priority over
-        the cart.
-      */
+      /* ==============================================
+         BUY NOW
+      ============================================== */
 
       if (productId) {
 
-        isCartCheckout =
-          false;
+        isCartCheckout = false;
+
 
         const {
           data,
           error
         } =
           await supabaseClient
-
             .from("products")
-
             .select(`
               id,
               name,
@@ -528,12 +454,7 @@ to<!DOCTYPE html>
               image_url,
               seller_id
             `)
-
-            .eq(
-              "id",
-              productId
-            )
-
+            .eq("id", productId)
             .maybeSingle();
 
 
@@ -559,13 +480,8 @@ to<!DOCTYPE html>
 
           checkoutContent.innerHTML = `
             <div class="loading">
-
               <h2>Product unavailable</h2>
-
-              <p>
-                This product could not be found.
-              </p>
-
+              <p>This product could not be found.</p>
             </div>
           `;
 
@@ -578,29 +494,16 @@ to<!DOCTYPE html>
 
 
         checkoutItems = [{
-
-          id:
-            data.id,
-
-          name:
-            data.name,
-
-          price:
-            Number(
-              data.price || 0
-            ),
-
-          quantity:
-            1,
-
+          id: data.id,
+          name: data.name,
+          price: Number(data.price || 0),
+          quantity: 1,
           store:
             data.store ||
             "Eddy Digital Hub",
-
           seller_id:
             data.seller_id ||
             null
-
         }];
 
 
@@ -610,30 +513,22 @@ to<!DOCTYPE html>
       }
 
 
-      /*
-        CART CHECKOUT
-
-        Only used when there is
-        no product_id.
-      */
+      /* ==============================================
+         CART CHECKOUT
+      ============================================== */
 
       const cart =
         getCart();
 
 
-      if (
-        cart.length > 0
-      ) {
+      if (cart.length > 0) {
 
-        isCartCheckout =
-          true;
+        isCartCheckout = true;
 
         checkoutItems = [];
 
 
-        for (
-          const item of cart
-        ) {
+        for (const item of cart) {
 
           if (!item.id) {
             continue;
@@ -645,9 +540,7 @@ to<!DOCTYPE html>
             error
           } =
             await supabaseClient
-
               .from("products")
-
               .select(`
                 id,
                 name,
@@ -657,12 +550,7 @@ to<!DOCTYPE html>
                 image_url,
                 seller_id
               `)
-
-              .eq(
-                "id",
-                item.id
-              )
-
+              .eq("id", item.id)
               .maybeSingle();
 
 
@@ -688,44 +576,27 @@ to<!DOCTYPE html>
           const quantity =
             Math.max(
               1,
-              Number(
-                item.quantity || 1
-              )
+              Number(item.quantity || 1)
             );
 
 
           checkoutItems.push({
-
-            id:
-              data.id,
-
-            name:
-              data.name,
-
-            price:
-              Number(
-                data.price || 0
-              ),
-
-            quantity:
-              quantity,
-
+            id: data.id,
+            name: data.name,
+            price: Number(data.price || 0),
+            quantity: quantity,
             store:
               data.store ||
               "Eddy Digital Hub",
-
             seller_id:
               data.seller_id ||
               item.seller_id ||
               null
-
           });
         }
 
 
-        if (
-          checkoutItems.length === 0
-        ) {
+        if (checkoutItems.length === 0) {
 
           showMessage(
             "No valid products were found in your cart."
@@ -733,13 +604,8 @@ to<!DOCTYPE html>
 
           checkoutContent.innerHTML = `
             <div class="loading">
-
               <h2>No cart items</h2>
-
-              <p>
-                Please return to the marketplace.
-              </p>
-
+              <p>Please return to the marketplace.</p>
             </div>
           `;
 
@@ -753,9 +619,9 @@ to<!DOCTYPE html>
       }
 
 
-      /*
-        NOTHING SELECTED
-      */
+      /* ==============================================
+         NOTHING SELECTED
+      ============================================== */
 
       showMessage(
         "No product or cart items were found."
@@ -763,14 +629,11 @@ to<!DOCTYPE html>
 
       checkoutContent.innerHTML = `
         <div class="loading">
-
           <h2>No product selected</h2>
-
           <p>
             Please return to the marketplace
             and select a product.
           </p>
-
         </div>
       `;
 
@@ -788,16 +651,13 @@ to<!DOCTYPE html>
 
       checkoutContent.innerHTML = `
         <div class="loading">
-
           <h2>Unable to load checkout</h2>
-
           <p>
             ${escapeHTML(
               error.message ||
               "Please try again."
             )}
           </p>
-
         </div>
       `;
     }
@@ -812,10 +672,7 @@ to<!DOCTYPE html>
 
     totalAmount =
       checkoutItems.reduce(
-        (
-          sum,
-          item
-        ) =>
+        (sum, item) =>
           sum +
           (
             Number(item.price) *
@@ -829,20 +686,16 @@ to<!DOCTYPE html>
       checkoutItems
         .map(
           item => `
-
             <div class="product-item">
 
               <div>
 
                 <div class="product-name">
-                  ${escapeHTML(
-                    item.name
-                  )}
+                  ${escapeHTML(item.name)}
                 </div>
 
                 <div class="product-meta">
-                  Quantity:
-                  ${item.quantity}
+                  Quantity: ${item.quantity}
                 </div>
 
                 <div class="product-meta">
@@ -855,7 +708,6 @@ to<!DOCTYPE html>
 
               </div>
 
-
               <div class="product-price">
                 ₦${formatMoney(
                   Number(item.price) *
@@ -864,7 +716,6 @@ to<!DOCTYPE html>
               </div>
 
             </div>
-
           `
         )
         .join("");
@@ -872,40 +723,25 @@ to<!DOCTYPE html>
 
     checkoutContent.innerHTML = `
 
-      <h1>
-        Checkout
-      </h1>
-
+      <h1>Checkout</h1>
 
       <div class="product-list">
-
         ${productHTML}
-
       </div>
-
 
       <div class="total">
 
-        <span>
-          Total
-        </span>
+        <span>Total</span>
 
         <span>
-          ₦${formatMoney(
-            totalAmount
-          )}
+          ₦${formatMoney(totalAmount)}
         </span>
 
       </div>
 
+      <form id="checkoutForm">
 
-      <form
-        id="checkoutForm"
-      >
-
-        <label
-          for="customerName"
-        >
+        <label for="customerName">
           Full Name
         </label>
 
@@ -916,10 +752,7 @@ to<!DOCTYPE html>
           placeholder="Enter your full name"
         >
 
-
-        <label
-          for="customerPhone"
-        >
+        <label for="customerPhone">
           Phone Number
         </label>
 
@@ -930,10 +763,7 @@ to<!DOCTYPE html>
           placeholder="Enter your phone number"
         >
 
-
-        <label
-          for="deliveryAddress"
-        >
+        <label for="deliveryAddress">
           Delivery Address
         </label>
 
@@ -941,354 +771,387 @@ to<!DOCTYPE html>
           id="deliveryAddress"
           required
           placeholder="Enter your delivery address"
-        ></textarea>
+        ></textarea>    <button
+      type="submit"
+      id="payButton"
+    >
+      Proceed to Payment
+    </button>
+
+  </form>
+`;
 
 
-        <button
-          type="submit"
-          id="payButton"
-        >
-          Proceed to Payment
-        </button>
-
-      </form>
-
-    `;
+const form =
+  document.getElementById(
+    "checkoutForm"
+  );
 
 
-    document
-      .getElementById(
-        "checkoutForm"
-      )
-      .addEventListener(
-        "submit",
-        handleCheckout
-      );
-  }
+if (!form) {
+
+  showMessage(
+    "Checkout form could not be loaded."
+  );
+
+  return;
+}
 
 
-  /* ==================================================
-     PAYMENT INITIALIZATION
-  ================================================== */
+form.addEventListener(
+  "submit",
+  handleCheckout
+);
 
-  async function handleCheckout(
-    event
+}
+
+/* ==================================================
+PAYMENT
+================================================== */
+
+async function handleCheckout(event) {
+
+event.preventDefault();
+
+hideMessage();
+
+
+const payButton =
+  document.getElementById(
+    "payButton"
+  );
+
+
+if (!payButton) {
+
+  showMessage(
+    "Payment button could not be found."
+  );
+
+  return;
+}
+
+
+const customerName =
+  document
+    .getElementById("customerName")
+    .value
+    .trim();
+
+
+const customerPhone =
+  document
+    .getElementById("customerPhone")
+    .value
+    .trim();
+
+
+const deliveryAddress =
+  document
+    .getElementById("deliveryAddress")
+    .value
+    .trim();
+
+
+if (
+  !customerName ||
+  !customerPhone ||
+  !deliveryAddress
+) {
+
+  showMessage(
+    "Please complete all delivery details."
+  );
+
+  return;
+}
+
+
+if (
+  !checkoutItems.length ||
+  totalAmount <= 0
+) {
+
+  showMessage(
+    "There is no valid product to pay for."
+  );
+
+  return;
+}
+
+
+payButton.disabled = true;
+
+payButton.textContent =
+  "Preparing payment...";
+
+
+try {
+
+  /* ==============================================
+     VERIFY LOGIN
+  ============================================== */
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.getUser();
+
+
+  if (
+    error ||
+    !data ||
+    !data.user
   ) {
 
-    event.preventDefault();
-
-
-    const payButton =
-      document.getElementById(
-        "payButton"
-      );
-
-
-    const customerName =
-      document
-        .getElementById(
-          "customerName"
-        )
-        .value
-        .trim();
-
-
-    const customerPhone =
-      document
-        .getElementById(
-          "customerPhone"
-        )
-        .value
-        .trim();
-
-
-    const deliveryAddress =
-      document
-        .getElementById(
-          "deliveryAddress"
-        )
-        .value
-        .trim();
-
-
-    if (
-      !customerName ||
-      !customerPhone ||
-      !deliveryAddress
-    ) {
-
-      showMessage(
-        "Please complete all delivery details."
-      );
-
-      return;
-    }
-
-
-    payButton.disabled =
-      true;
-
-    payButton.textContent =
-      "Preparing payment...";
-
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .auth
-          .getUser();
-
-
-      if (
-        error ||
-        !data ||
-        !data.user
-      ) {
-
-        throw new Error(
-          "Your login session has expired. Please log in again."
-        );
-      }
-
-
-      currentUser =
-        data.user;
-
-
-      /*
-        Save checkout information.
-
-        No order is created here.
-      */
-
-      const checkoutData = {
-
-        customer_id:
-          currentUser.id,
-
-        customer_name:
-          customerName,
-
-        customer_phone:
-          customerPhone,
-
-        delivery_address:
-          deliveryAddress,
-
-        items:
-          checkoutItems,
-
-        total_amount:
-          totalAmount,
-
-        product_id:
-          singleProductId,
-
-        isCartCheckout:
-          isCartCheckout
-
-      };
-
-
-      sessionStorage.setItem(
-        CHECKOUT_KEY,
-        JSON.stringify(
-          checkoutData
-        )
-      );
-
-
-      /*
-        Prepare exact product information.
-      */
-
-      const metadataItems =
-        checkoutItems.map(
-          item => ({
-
-            id:
-              item.id,
-
-            name:
-              item.name,
-
-            price:
-              Number(item.price),
-
-            quantity:
-              Number(item.quantity),
-
-            seller_id:
-              item.seller_id ||
-              null
-
-          })
-        );
-
-
-      /*
-        Existing smart-task
-        payment initialization.
-      */
-
-      const functionUrl =
-        SUPABASE_URL +
-        "/functions/v1/smart-task";
-
-
-      const response =
-        await fetch(
-          functionUrl,
-          {
-
-            method:
-              "POST",
-
-            headers: {
-
-              "Content-Type":
-                "application/json",
-
-              "apikey":
-                SUPABASE_KEY,
-
-              "Authorization":
-                "Bearer " +
-                SUPABASE_KEY
-
-            },
-
-            body:
-              JSON.stringify({
-
-                action:
-                  "initialize_payment",
-
-                customer_id:
-                  currentUser.id,
-
-                customer_name:
-                  customerName,
-
-                customer_phone:
-                  customerPhone,
-
-                delivery_address:
-                  deliveryAddress,
-
-                amount:
-                  totalAmount,
-
-                product_id:
-                  singleProductId,
-
-                items:
-                  metadataItems
-
-              })
-
-          }
-        );
-
-
-      const result =
-        await response.json();
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          result.error ||
-          result.message ||
-          "Unable to initialize payment."
-        );
-      }
-
-
-      /*
-        Accept the known
-        Paystack authorization
-        response formats.
-      */
-
-      const authorizationUrl =
-        result.authorization_url ||
-        result.data?.authorization_url ||
-        result.url;
-
-
-      if (
-        authorizationUrl
-      ) {
-
-        window.location.href =
-          authorizationUrl;
-
-        return;
-      }
-
-
-      if (
-        result.success
-      ) {
-
-        showMessage(
-          result.message ||
-          "Payment initialized successfully.",
-          "success"
-        );
-
-        payButton.disabled =
-          false;
-
-        payButton.textContent =
-          "Proceed to Payment";
-
-        return;
-      }
-
-
-      throw new Error(
-        result.error ||
-        result.message ||
-        "Payment initialization failed."
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "Payment initialization error:",
-        error
-      );
-
-
-      showMessage(
-        error.message ||
-        "Unable to start payment."
-      );
-
-
-      payButton.disabled =
-        false;
-
-      payButton.textContent =
-        "Proceed to Payment";
-    }
+    throw new Error(
+      "Your login session has expired. Please log in again."
+    );
   }
 
 
-  /* ==================================================
-     START
-  ================================================== */
+  currentUser =
+    data.user;
 
-  loadCheckout();
 
-</script>
+  /* ==============================================
+     SAVE CHECKOUT DATA
+  ============================================== */
 
-</body>
+  const checkoutData = {
+
+    customer_id:
+      currentUser.id,
+
+    customer_name:
+      customerName,
+
+    customer_phone:
+      customerPhone,
+
+    delivery_address:
+      deliveryAddress,
+
+    items:
+      checkoutItems,
+
+    total_amount:
+      totalAmount,
+
+    product_id:
+      singleProductId,
+
+    isCartCheckout:
+      isCartCheckout
+  };
+
+
+  sessionStorage.setItem(
+    CHECKOUT_KEY,
+    JSON.stringify(checkoutData)
+  );
+
+
+  /* ==============================================
+     PAYMENT ITEMS
+  ============================================== */
+
+  const metadataItems =
+    checkoutItems.map(item => ({
+      id:
+        item.id,
+
+      name:
+        item.name,
+
+      price:
+        Number(item.price),
+
+      quantity:
+        Number(item.quantity),
+
+      seller_id:
+        item.seller_id ||
+        null
+    }));
+
+
+  /* ==============================================
+     SMART TASK
+  ============================================== */
+
+  const functionUrl =
+    SUPABASE_URL +
+    "/functions/v1/smart-task";
+
+
+  showMessage(
+    "Connecting to payment service...",
+    "success"
+  );
+
+
+  const response =
+    await fetch(
+      functionUrl,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "apikey":
+            SUPABASE_KEY,
+
+          "Authorization":
+            "Bearer " +
+            SUPABASE_KEY
+        },
+
+        body:
+          JSON.stringify({
+
+            action:
+              "initialize_payment",
+
+            customer_id:
+              currentUser.id,
+
+            customer_name:
+              customerName,
+
+            customer_phone:
+              customerPhone,
+
+            delivery_address:
+              deliveryAddress,
+
+            amount:
+              totalAmount,
+
+            product_id:
+              singleProductId,
+
+            items:
+              metadataItems
+          })
+      }
+    );
+
+
+  /* ==============================================
+     READ RESPONSE SAFELY
+  ============================================== */
+
+  const responseText =
+    await response.text();
+
+
+  let result = {};
+
+  try {
+
+    result =
+      responseText
+        ? JSON.parse(responseText)
+        : {};
+
+  } catch (parseError) {
+
+    console.error(
+      "Invalid payment response:",
+      responseText
+    );
+
+    throw new Error(
+      "Payment service returned an invalid response."
+    );
+  }
+
+
+  console.log(
+    "Payment initialization response:",
+    result
+  );
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      result.error ||
+      result.message ||
+      `Payment service error (${response.status}).`
+    );
+  }
+
+
+  /* ==============================================
+     PAYSTACK URL
+  ============================================== */
+
+  const authorizationUrl =
+    result.authorization_url ||
+    result.data?.authorization_url ||
+    result.data?.authorizationUrl ||
+    result.url;
+
+
+  if (authorizationUrl) {
+
+    showMessage(
+      "Payment page ready. Redirecting...",
+      "success"
+    );
+
+
+    window.location.assign(
+      authorizationUrl
+    );
+
+    return;
+  }
+
+
+  /* ==============================================
+     NO PAYSTACK URL
+  ============================================== */
+
+  throw new Error(
+    result.error ||
+    result.message ||
+    "Payment was not initialized. No Paystack payment link was returned."
+  );
+
+} catch (error) {
+
+  console.error(
+    "Payment initialization error:",
+    error
+  );
+
+
+  showMessage(
+    error.message ||
+    "Unable to start payment."
+  );
+
+
+  payButton.disabled =
+    false;
+
+  payButton.textContent =
+    "Proceed to Payment";
+}
+
+}
+
+/* ==================================================
+START CHECKOUT
+================================================== */
+
+loadCheckout();
+
+</script></body>
 </html>
