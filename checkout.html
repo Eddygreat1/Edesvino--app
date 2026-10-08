@@ -1,66 +1,699 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout - Edesvino</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details - Edesvino</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+*{box-sizing:border-box}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #111827;
-    }
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f7fa;
+  color:#111827;
+}
 
-    header {
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 16px 20px;
-    }
+header{
+  background:#fff;
+  border-bottom:1px solid #e5e7eb;
+  padding:16px 20px;
+}
 
-    .header-inner {
-      max-width: 1000px;
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-    }
+.header-inner{
+  max-width:1000px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
 
-    .logo {
-      font-size: 22px;
-      font-weight: bold;
-      color: #111827;
-      text-decoration: none;
-    }
+.logo{
+  font-size:22px;
+  font-weight:bold;
+  color:#111827;
+  text-decoration:none;
+}
 
-    nav {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
+nav{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+}
 
-    nav a {
-      color: #374151;
-      text-decoration: none;
-      font-size: 14px;
-    }
+nav a{
+  color:#374151;
+  text-decoration:none;
+  font-size:14px;
+}
 
-    main {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 0 16px;
-    }
+main{
+  max-width:900px;
+  margin:30px auto;
+  padding:0 16px;
+}
 
-    .checkout-card {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 4px 16px rgba(0, 0,
+.back-link{
+  display:inline-block;
+  margin-bottom:18px;
+  color:#374151;
+  text-decoration:none;
+  font-size:14px;
+}
+
+.product-card{
+  background:#fff;
+  border-radius:14px;
+  padding:24px;
+  box-shadow:0 4px 16px rgba(0,0,0,.06);
+}
+
+.product-image{
+  width:100%;
+  max-height:420px;
+  object-fit:contain;
+  border-radius:12px;
+  background:#f3f4f6;
+  margin-bottom:24px;
+}
+
+.no-image{
+  width:100%;
+  height:300px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f3f4f6;
+  border-radius:12px;
+  color:#6b7280;
+  margin-bottom:24px;
+}
+
+h1{
+  margin:0 0 12px;
+  font-size:30px;
+}
+
+.price{
+  font-size:26px;
+  font-weight:bold;
+  margin:15px 0;
+}
+
+.store{
+  color:#4b5563;
+  margin-bottom:20px;
+}
+
+.description{
+  color:#4b5563;
+  line-height:1.6;
+  margin-bottom:25px;
+}
+
+.actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+button{
+  flex:1;
+  min-width:180px;
+  padding:15px;
+  border:none;
+  border-radius:9px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.buy-button{
+  background:#111827;
+  color:#fff;
+}
+
+.cart-button{
+  background:#e5e7eb;
+  color:#111827;
+}
+
+.message{
+  padding:14px;
+  border-radius:8px;
+  margin-bottom:18px;
+  display:none;
+}
+
+.error{
+  background:#fef2f2;
+  color:#991b1b;
+}
+
+.success{
+  background:#ecfdf5;
+  color:#065f46;
+}
+
+.loading{
+  text-align:center;
+  padding:50px 20px;
+  background:#fff;
+  border-radius:14px;
+}
+
+footer{
+  text-align:center;
+  padding:30px 15px;
+  color:#6b7280;
+  font-size:13px;
+}
+
+@media(max-width:600px){
+  .product-card{padding:18px}
+  h1{font-size:25px}
+  .actions{flex-direction:column}
+  button{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="header-inner">
+
+<a class="logo" href="index.html">Edesvino</a>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="index.html#products-section">Shop</a>
+<a href="cart.html">Cart</a>
+<a href="track-order.html">Track Order</a>
+</nav>
+
+</div>
+</header>
+
+<main>
+
+<a class="back-link" href="index.html">
+← Back to Marketplace
+</a>
+
+<div id="message" class="message"></div>
+
+<div id="productContainer">
+
+<div class="loading">
+<h2>Loading product...</h2>
+<p>Please wait.</p>
+</div>
+
+</div>
+
+</main>
+
+<footer>
+<strong>Edesvino Marketplace</strong><br>
+Buy. Sell. Grow.
+</footer>
+
+<script>
+
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+
+const supabaseClient =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+const productContainer =
+document.getElementById("productContainer");
+
+const messageBox =
+document.getElementById("message");
+
+
+function showMessage(text,type="error"){
+
+messageBox.textContent=text;
+messageBox.className="message "+type;
+messageBox.style.display="block";
+
+}
+
+
+function escapeHTML(value){
+
+return String(value || "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function formatMoney(amount){
+
+return Number(amount || 0)
+.toLocaleString("en-NG");
+
+}
+
+
+function getProductValue(){
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+return (
+params.get("product_id") ||
+params.get("product") ||
+null
+);
+
+
+}
+
+
+async function loadProduct(){
+
+try{
+
+const productValue =
+getProductValue();
+
+if(!productValue){
+
+showMessage(
+"No product was selected."
+);
+
+productContainer.innerHTML=`
+<div class="loading">
+<h2>No product selected</h2>
+<p>Please return to the marketplace and select a product.</p>
+</div>
+`;
+
+return;
+
+}
+
+let data=null;
+
+const numericId =
+Number(productValue);
+
+if(
+productValue.trim() !== "" &&
+Number.isInteger(numericId) &&
+numericId > 0
+){
+
+const result =
+await supabaseClient
+.from("products")
+.select(`
+id,
+name,
+description,
+price,
+store,
+image_url,
+seller_id
+`)
+.eq("id",numericId)
+.maybeSingle();
+
+if(result.error){
+
+throw result.error;
+
+}
+
+data=result.data;
+
+}
+
+if(!data){
+
+const result =
+await supabaseClient
+.from("products")
+.select(`
+id,
+name,
+description,
+price,
+store,
+image_url,
+seller_id
+`)
+.ilike("name",productValue)
+.limit(1)
+.maybeSingle();
+
+if(result.error){
+
+throw result.error;
+
+}
+
+data=result.data;
+
+}
+
+if(!data){
+
+showMessage(
+"Product not found."
+);
+
+productContainer.innerHTML=`
+<div class="loading">
+<h2>Product not found</h2>
+<p>This product could not be found.</p>
+</div>
+`;
+
+return;
+
+}
+
+renderProduct(data);
+
+}catch(error){
+
+console.error(
+"Product details error:",
+error
+);
+
+showMessage(
+error.message ||
+"Unable to load product."
+);
+
+productContainer.innerHTML=`
+<div class="loading">
+<h2>Unable to load product</h2>
+<p>${escapeHTML(
+error.message ||
+"Please try again."
+)}</p>
+</div>
+`;
+
+}
+
+}
+
+
+function renderProduct(product){
+
+const imageHTML =
+product.image_url
+?
+`
+<img
+class="product-image"
+src="${escapeHTML(product.image_url)}"
+alt="${escapeHTML(product.name)}"
+onerror="
+this.style.display='none';
+document.getElementById('imageFallback').style.display='flex';
+"
+>
+
+<div
+id="imageFallback"
+class="no-image"
+style="display:none;"
+>
+No product image available
+</div>
+`
+:
+`
+<div class="no-image">
+No product image available
+</div>
+`;
+
+productContainer.innerHTML=`
+
+<div class="product-card">
+
+${imageHTML}
+
+<h1>
+${escapeHTML(product.name)}
+</h1>
+
+<div class="price">
+₦${formatMoney(product.price)}
+</div>
+
+<div class="store">
+Store:
+<strong>
+${escapeHTML(
+product.store ||
+"Edesvino Seller"
+)}
+</strong>
+</div>
+
+<div class="description">
+${
+product.description
+?
+escapeHTML(product.description)
+:
+"No description available."
+}
+</div>
+
+<div class="actions">
+
+<button
+class="buy-button"
+id="buyButton"
+>
+Buy Now
+</button>
+
+<button
+class="cart-button"
+id="cartButton"
+>
+Add to Cart
+</button>
+
+</div>
+
+</div>
+`;
+
+document
+.getElementById("buyButton")
+.addEventListener(
+"click",
+function(){
+
+buyNow(product);
+
+}
+);
+
+document
+.getElementById("cartButton")
+.addEventListener(
+"click",
+function(){
+
+addToCart(product);
+
+}
+);
+
+}
+
+
+/* =========================================
+   BUY NOW
+========================================= */
+
+function buyNow(product){
+
+try{
+
+const buyNowProduct = {
+
+id:product.id,
+
+name:product.name,
+
+description:
+product.description || "",
+
+price:Number(product.price || 0),
+
+quantity:1,
+
+store:
+product.store ||
+"Edesvino Seller",
+
+image_url:
+product.image_url || "",
+
+seller_id:
+product.seller_id || null
+
+};
+
+localStorage.setItem(
+"edesvinoBuyNow",
+JSON.stringify(buyNowProduct)
+);
+
+window.location.href =
+"checkout.html";
+
+}catch(error){
+
+console.error(
+"Buy Now error:",
+error
+);
+
+showMessage(
+"Unable to continue to checkout."
+);
+
+}
+
+}
+
+
+/* =========================================
+   ADD TO CART
+========================================= */
+
+function addToCart(product){
+
+try{
+
+let cart=[];
+
+try{
+
+cart=
+JSON.parse(
+localStorage.getItem(
+"edesvinoCart"
+) || "[]"
+);
+
+if(!Array.isArray(cart)){
+cart=[];
+}
+
+}catch(error){
+
+cart=[];
+
+}
+
+const existingIndex =
+cart.findIndex(
+item =>
+String(item.id) ===
+String(product.id)
+);
+
+if(existingIndex >= 0){
+
+cart[existingIndex].quantity =
+Number(
+cart[existingIndex].quantity || 1
+) + 1;
+
+}else{
+
+cart.push({
+
+id:product.id,
+
+name:product.name,
+
+description:
+product.description || "",
+
+price:
+Number(product.price || 0),
+
+quantity:1,
+
+store:
+product.store ||
+"Edesvino Seller",
+
+image_url:
+product.image_url || "",
+
+seller_id:
+product.seller_id || null
+
+});
+
+}
+
+localStorage.setItem(
+"edesvinoCart",
+JSON.stringify(cart)
+);
+
+showMessage(
+product.name +
+" is added to your cart.",
+"success"
+);
+
+}catch(error){
+
+console.error(
+"Add to cart error:",
+error
+);
+
+showMessage(
+"Unable to add product to cart."
+);
+
+}
+
+}
+
+loadProduct();
+
+</script>
+
+</body>
+</html>
