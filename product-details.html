@@ -273,14 +273,20 @@
 
       const params = new URLSearchParams(
         window.location.search
-      );
 
-      const productId =
-        params.get("product_id") ||
-        params.get("id");
 
-      const productName =
-        params.get("product");
+const rawProduct = params.get("product");
+
+const productId =
+  params.get("product_id") ||
+  params.get("id") ||
+  (rawProduct && /^\d+$/.test(rawProduct) ? rawProduct : null);
+
+const productName =
+  rawProduct && !/^\d+$/.test(rawProduct) ? rawProduct : null;
+
+
+        
 
       let product = null;
 
