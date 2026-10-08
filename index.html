@@ -153,8 +153,9 @@ function displayProducts(products) {
     const card = document.createElement("div");
     card.className = "product";
 
-    const link = "product-details.html?product=" +
+    const link = "product-details.html?product_id=" +
       encodeURIComponent(product.id);
+    
 
     const image = document.createElement("div");
 
