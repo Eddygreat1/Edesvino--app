@@ -1,822 +1,693 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details - Edesvino</title>
 
-  <title>Product Details - Edesvino</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f7fa;
+  color:#111827;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #111827;
-    }
+header{
+  background:#fff;
+  border-bottom:1px solid #e5e7eb;
+  padding:16px 20px;
+}
 
-    header {
-      background: #ffffff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 16px 20px;
-    }
+.header-inner{
+  max-width:1000px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
 
-    .header-inner {
-      max-width: 1000px;
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-    }
+.logo{
+  font-size:22px;
+  font-weight:bold;
+  color:#111827;
+  text-decoration:none;
+}
 
-    .logo {
-      font-size: 22px;
-      font-weight: bold;
-      color: #111827;
-      text-decoration: none;
-    }
+nav{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+}
 
-    nav {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
+nav a{
+  color:#374151;
+  text-decoration:none;
+  font-size:14px;
+}
 
-    nav a {
-      color: #374151;
-      text-decoration: none;
-      font-size: 14px;
-    }
+main{
+  max-width:900px;
+  margin:30px auto;
+  padding:0 16px;
+}
 
-    main {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 0 16px;
-    }
+.back-link{
+  display:inline-block;
+  margin-bottom:18px;
+  color:#374151;
+  text-decoration:none;
+  font-size:14px;
+}
 
-    .back-link {
-      display: inline-block;
-      margin-bottom: 18px;
-      color: #374151;
-      text-decoration: none;
-      font-size: 14px;
-    }
+.product-card{
+  background:#fff;
+  border-radius:14px;
+  padding:24px;
+  box-shadow:0 4px 16px rgba(0,0,0,.06);
+}
 
-    .product-card {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 24px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    }
+.product-image{
+  width:100%;
+  max-height:420px;
+  object-fit:contain;
+  border-radius:12px;
+  background:#f3f4f6;
+  margin-bottom:24px;
+}
 
-    .product-image {
-      width: 100%;
-      max-height: 420px;
-      object-fit: contain;
-      border-radius: 12px;
-      background: #f3f4f6;
-      margin-bottom: 24px;
-    }
+.no-image{
+  width:100%;
+  height:300px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f3f4f6;
+  border-radius:12px;
+  color:#6b7280;
+  margin-bottom:24px;
+}
 
-    .no-image {
-      width: 100%;
-      height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f3f4f6;
-      border-radius: 12px;
-      color: #6b7280;
-      margin-bottom: 24px;
-    }
+h1{
+  margin:0 0 12px;
+  font-size:30px;
+}
 
-    h1 {
-      margin: 0 0 12px;
-      font-size: 30px;
-    }
+.price{
+  font-size:26px;
+  font-weight:bold;
+  margin:15px 0;
+}
 
-    .price {
-      font-size: 26px;
-      font-weight: bold;
-      margin: 15px 0;
-    }
+.store{
+  color:#4b5563;
+  margin-bottom:20px;
+}
 
-    .store {
-      color: #4b5563;
-      margin-bottom: 20px;
-    }
+.description{
+  color:#4b5563;
+  line-height:1.6;
+  margin-bottom:25px;
+}
 
-    .description {
-      color: #4b5563;
-      line-height: 1.6;
-      margin-bottom: 25px;
-    }
+.actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
 
-    .actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+button{
+  flex:1;
+  min-width:180px;
+  padding:15px;
+  border:none;
+  border-radius:9px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
 
-    button {
-      flex: 1;
-      min-width: 180px;
-      padding: 15px;
-      border: none;
-      border-radius: 9px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.buy-button{
+  background:#111827;
+  color:#fff;
+}
 
-    .buy-button {
-      background: #111827;
-      color: #ffffff;
-    }
+.cart-button{
+  background:#e5e7eb;
+  color:#111827;
+}
 
-    .cart-button {
-      background: #e5e7eb;
-      color: #111827;
-    }
+.message{
+  padding:14px;
+  border-radius:8px;
+  margin-bottom:18px;
+  display:none;
+}
 
-    .message {
-      padding: 14px;
-      border-radius: 8px;
-      margin-bottom: 18px;
-      display: none;
-    }
+.error{
+  background:#fef2f2;
+  color:#991b1b;
+}
 
-    .error {
-      background: #fef2f2;
-      color: #991b1b;
-    }
+.success{
+  background:#ecfdf5;
+  color:#065f46;
+}
 
-    .success {
-      background: #ecfdf5;
-      color: #065f46;
-    }
+.loading{
+  text-align:center;
+  padding:50px 20px;
+  background:#fff;
+  border-radius:14px;
+}
 
-    .loading {
-      text-align: center;
-      padding: 50px 20px;
-      background: #ffffff;
-      border-radius: 14px;
-    }
+footer{
+  text-align:center;
+  padding:30px 15px;
+  color:#6b7280;
+  font-size:13px;
+}
 
-    footer {
-      text-align: center;
-      padding: 30px 15px;
-      color: #6b7280;
-      font-size: 13px;
-    }
-
-    @media (max-width: 600px) {
-      .product-card {
-        padding: 18px;
-      }
-
-      h1 {
-        font-size: 25px;
-      }
-
-      .actions {
-        flex-direction: column;
-      }
-
-      button {
-        width: 100%;
-      }
-    }
-  </style>
+@media(max-width:600px){
+  .product-card{padding:18px}
+  h1{font-size:25px}
+  .actions{flex-direction:column}
+  button{width:100%}
+}
+</style>
 </head>
 
 <body>
 
 <header>
-  <div class="header-inner">
+<div class="header-inner">
 
-    <a class="logo" href="index.html">
-      Edesvino
-    </a>
+<a class="logo" href="index.html">Edesvino</a>
 
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="index.html#products-section">Shop</a>
-      <a href="cart.html">Cart</a>
-      <a href="track-order.html">Track Order</a>
-    </nav>
+<nav>
+<a href="index.html">Home</a>
+<a href="index.html#products-section">Shop</a>
+<a href="cart.html">Cart</a>
+<a href="track-order.html">Track Order</a>
+</nav>
 
-  </div>
+</div>
 </header>
 
 <main>
 
-  <a class="back-link" href="index.html">
-    ← Back to Marketplace
-  </a>
+<a class="back-link" href="index.html">
+← Back to Marketplace
+</a>
 
-  <div id="message" class="message"></div>
+<div id="message" class="message"></div>
 
-  <div id="productContainer">
+<div id="productContainer">
 
-    <div class="loading">
-      <h2>Loading product...</h2>
-      <p>Please wait.</p>
-    </div>
+<div class="loading">
+<h2>Loading product...</h2>
+<p>Please wait.</p>
+</div>
 
-  </div>
+</div>
 
 </main>
 
 <footer>
-  <strong>Edesvino Marketplace</strong><br>
-  Buy. Sell. Grow.
+<strong>Edesvino Marketplace</strong><br>
+Buy. Sell. Grow.
 </footer>
-
 
 <script>
 
-  /* ==================================================
-     SUPABASE
-  ================================================== */
-
-  const SUPABASE_URL =
-    "https://lxszilqypuglxyfyukdg.supabase.co";
-
-  const SUPABASE_KEY =
-    "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
-
-  const supabaseClient =
-    supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
-
-
-  /* ==================================================
-     ELEMENTS
-  ================================================== */
-
-  const productContainer =
-    document.getElementById(
-      "productContainer"
-    );
-
-  const messageBox =
-    document.getElementById(
-      "message"
-    );
-
-
-  /* ==================================================
-     HELPERS
-  ================================================== */
+const SUPABASE_URL =
+"https://lxszilqypuglxyfyukdg.supabase.co";
 
-  function showMessage(
-    text,
-    type = "error"
-  ) {
+const SUPABASE_KEY =
+"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-    messageBox.textContent =
-      text;
+const supabaseClient =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
 
-    messageBox.className =
-      "message " + type;
+const productContainer =
+document.getElementById("productContainer");
 
-    messageBox.style.display =
-      "block";
-  }
+const messageBox =
+document.getElementById("message");
 
 
-  function escapeHTML(
-    value
-  ) {
+function showMessage(text,type="error"){
 
-    return String(
-      value || ""
-    )
-      .replace(
-        /&/g,
-        "&amp;"
-      )
-      .replace(
-        /</g,
-        "&lt;"
-      )
-      .replace(
-        />/g,
-        "&gt;"
-      )
-      .replace(
-        /"/g,
-        "&quot;"
-      )
-      .replace(
-        /'/g,
-        "&#039;"
-      );
-  }
+messageBox.textContent=text;
+messageBox.className="message "+type;
+messageBox.style.display="block";
 
+}
 
-  function formatMoney(
-    amount
-  ) {
 
-    return Number(
-      amount || 0
-    ).toLocaleString(
-      "en-NG"
-    );
-  }
+function escapeHTML(value){
 
+return String(value || "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 
-  /* ==================================================
-     GET PRODUCT ID
-     
-     Supports BOTH:
-       product-details.html?product=9
-       product-details.html?product_id=9
-  ================================================== */
+}
 
-  function getProductId() {
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+function formatMoney(amount){
 
-    const productId =
-      params.get("product_id");
+return Number(amount || 0)
+.toLocaleString("en-NG");
 
-    const oldProductId =
-      params.get("product");
+}
 
-    return productId ||
-      oldProductId ||
-      null;
-  }
 
+/* =========================================
+   GET VALUE FROM URL
+========================================= */
 
-  /* ==================================================
-     LOAD PRODUCT
-  ================================================== */
+function getProductValue(){
 
-  async function loadProduct() {
+const params =
+new URLSearchParams(
+window.location.search
+);
 
-    try {
+return (
+params.get("product_id") ||
+params.get("product") ||
+null
+);
 
-      const productId =
-        getProductId();
+}
 
 
-      if (!productId) {
+/* =========================================
+   LOAD PRODUCT
+========================================= */
 
-        showMessage(
-          "No product was selected."
-        );
+async function loadProduct(){
 
-        productContainer.innerHTML = `
-          <div class="loading">
+try{
 
-            <h2>No product selected</h2>
+const productValue =
+getProductValue();
 
-            <p>
-              Please return to the marketplace
-              and select a product.
-            </p>
+if(!productValue){
 
-          </div>
-        `;
+showMessage(
+"No product was selected."
+);
 
-        return;
-      }
+productContainer.innerHTML=`
+<div class="loading">
+<h2>No product selected</h2>
+<p>Please return to the marketplace and select a product.</p>
+</div>
+`;
 
+return;
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
+}
 
-          .from("products")
 
-          .select(`
-            id,
-            name,
-            description,
-            price,
-            store,
-            image_url,
-            seller_id
-          `)
+/*
+   FIRST:
+   Try numeric ID.
+*/
 
-          .eq(
-            "id",
-            productId
-          )
+let data=null;
 
-          .maybeSingle();
+const numericId =
+Number(productValue);
 
+if(
+productValue.trim() !== "" &&
+Number.isInteger(numericId) &&
+numericId > 0
+){
 
-      if (error) {
+const result =
+await supabaseClient
+.from("products")
+.select(`
+id,
+name,
+description,
+price,
+store,
+image_url,
+seller_id
+`)
+.eq("id",numericId)
+.maybeSingle();
 
-        console.error(
-          "Product loading error:",
-          error
-        );
+if(result.error){
 
-        throw new Error(
-          "Unable to load product: " +
-          error.message
-        );
-      }
+throw result.error;
 
+}
 
-      if (!data) {
+data=result.data;
 
-        showMessage(
-          "Product not found."
-        );
+}
 
-        productContainer.innerHTML = `
-          <div class="loading">
 
-            <h2>Product not found</h2>
+/*
+   SECOND:
+   If it wasn't a numeric ID,
+   search by product name.
+*/
 
-            <p>
-              This product could not be found.
-            </p>
+if(!data){
 
-          </div>
-        `;
+const result =
+await supabaseClient
+.from("products")
+.select(`
+id,
+name,
+description,
+price,
+store,
+image_url,
+seller_id
+`)
+.ilike("name",productValue)
+.limit(1)
+.maybeSingle();
 
-        return;
-      }
+if(result.error){
 
+throw result.error;
 
-      renderProduct(
-        data
-      );
+}
 
-    } catch (error) {
+data=result.data;
 
-      console.error(
-        "Product details error:",
-        error
-      );
+}
 
-      showMessage(
-        error.message ||
-        "Unable to load product."
-      );
 
-      productContainer.innerHTML = `
-        <div class="loading">
+if(!data){
 
-          <h2>Unable to load product</h2>
+showMessage(
+"Product not found."
+);
+
+productContainer.innerHTML=`
+<div class="loading">
+<h2>Product not found</h2>
+<p>This product could not be found.</p>
+</div>
+`;
+
+return;
+
+}
+
+
+renderProduct(data);
+
+}catch(error){
+
+console.error(
+"Product details error:",
+error
+);
+
+showMessage(
+error.message ||
+"Unable to load product."
+);
+
+productContainer.innerHTML=`
+<div class="loading">
+<h2>Unable to load product</h2>
+<p>${escapeHTML(
+error.message ||
+"Please try again."
+)}</p>
+</div>
+`;
+
+}
+
+}
+
+
+/* =========================================
+   RENDER PRODUCT
+========================================= */
+
+function renderProduct(product){
 
-          <p>
-            ${escapeHTML(
-              error.message ||
-              "Please try again."
-            )}
-          </p>
+const imageHTML =
+product.image_url
+?
+`
+<img
+class="product-image"
+src="${escapeHTML(product.image_url)}"
+alt="${escapeHTML(product.name)}"
+onerror="
+this.style.display='none';
+document.getElementById('imageFallback').style.display='flex';
+"
+>
 
-        </div>
-      `;
-    }
-  }
+<div
+id="imageFallback"
+class="no-image"
+style="display:none;"
+>
+No product image available
+</div>
+`
+:
+`
+<div class="no-image">
+No product image available
+</div>
+`;
 
 
-  /* ==================================================
-     RENDER PRODUCT
-  ================================================== */
+productContainer.innerHTML=`
 
-  function renderProduct(
-    product
-  ) {
+<div class="product-card">
 
-    const imageHTML =
-      product.image_url
-        ? `
-          <img
-            class="product-image"
-            src="${escapeHTML(
-              product.image_url
-            )}"
-            alt="${escapeHTML(
-              product.name
-            )}"
-            onerror="
-              this.style.display='none';
-              document.getElementById('imageFallback').style.display='flex';
-            "
-          >
+${imageHTML}
 
-          <div
-            id="imageFallback"
-            class="no-image"
-            style="display:none;"
-          >
-            No product image available
-          </div>
-        `
-        : `
-          <div class="no-image">
-            No product image available
-          </div>
-        `;
+<h1>
+${escapeHTML(product.name)}
+</h1>
 
+<div class="price">
+₦${formatMoney(product.price)}
+</div>
 
-    productContainer.innerHTML = `
+<div class="store">
+Store:
+<strong>
+${escapeHTML(
+product.store ||
+"Edesvino Seller"
+)}
+</strong>
+</div>
 
-      <div class="product-card">
+<div class="description">
+${
+product.description
+?
+escapeHTML(product.description)
+:
+"No description available."
+}
+</div>
 
-        ${imageHTML}
+<div class="actions">
 
+<button
+class="buy-button"
+id="buyButton"
+>
+Buy Now
+</button>
 
-        <h1>
-          ${escapeHTML(
-            product.name
-          )}
-        </h1>
+<button
+class="cart-button"
+id="cartButton"
+>
+Add to Cart
+</button>
 
+</div>
 
-        <div class="price">
-          ₦${formatMoney(
-            product.price
-          )}
-        </div>
+</div>
 
+`;
 
-        <div class="store">
-          Store:
-          <strong>
-            ${escapeHTML(
-              product.store ||
-              "Eddy Digital Hub"
-            )}
-          </strong>
-        </div>
 
+document
+.getElementById("buyButton")
+.addEventListener(
+"click",
+function(){
 
-        <div class="description">
+buyNow(product.id);
 
-          ${
-            product.description
-              ? escapeHTML(
-                  product.description
-                )
-              : "No description available."
-          }
+}
+);
 
-        </div>
 
+document
+.getElementById("cartButton")
+.addEventListener(
+"click",
+function(){
 
-        <div class="actions">
+addToCart(product);
 
-          <button
-            class="buy-button"
-            onclick="
-              buyNow(
-                '${escapeHTML(
-                  product.id
-                )}'
-              )
-            "
-          >
-            Buy Now
-          </button>
+}
+);
 
+}
 
-          <button
-            class="cart-button"
-            onclick="
-              addToCart(
-                '${escapeHTML(
-                  product.id
-                )}'
-              )
-            "
-          >
-            Add to Cart
-          </button>
 
-        </div>
+/* =========================================
+   BUY NOW
+========================================= */
 
-      </div>
+function buyNow(productId){
 
-    `;
-  }
+window.location.href =
+"checkout.html?product_id=" +
+encodeURIComponent(productId);
 
+}
 
-  /* ==================================================
-     BUY NOW
-     
-     IMPORTANT:
-     Checkout expects product_id.
-  ================================================== */
 
-  function buyNow(
-    productId
-  ) {
+/* =========================================
+   ADD TO CART
+========================================= */
 
-    if (!productId) {
+function addToCart(product){
 
-      showMessage(
-        "Product ID is missing."
-      );
+try{
 
-      return;
-    }
+let cart=[];
 
+try{
 
-    /*
-      Send the EXACT product ID
-      to checkout.html.
+cart=
+JSON.parse(
+localStorage.getItem(
+"edesvinoCart"
+) || "[]"
+);
 
-      Example:
-      checkout.html?product_id=9
-    */
+if(!Array.isArray(cart)){
+cart=[];
+}
 
-    window.location.href =
-      "checkout.html?product_id=" +
-      encodeURIComponent(
-        productId
-      );
-  }
+}catch(error){
 
+cart=[];
 
-  /* ==================================================
-     ADD TO CART
-  ================================================== */
+}
 
-  async function addToCart(
-    productId
-  ) {
 
-    try {
+const existingIndex =
+cart.findIndex(
+item =>
+String(item.id) ===
+String(product.id)
+);
 
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
 
-          .from("products")
+if(existingIndex >= 0){
 
-          .select(`
-            id,
-            name,
-            description,
-            price,
-            store,
-            image_url,
-            seller_id
-          `)
+cart[existingIndex].quantity =
+Number(
+cart[existingIndex].quantity || 1
+) + 1;
 
-          .eq(
-            "id",
-            productId
-          )
+}else{
 
-          .maybeSingle();
+cart.push({
 
+id:product.id,
 
-      if (error) {
+name:product.name,
 
-        throw error;
-      }
+description:
+product.description || "",
 
+price:
+Number(product.price || 0),
 
-      if (!data) {
+quantity:1,
 
-        throw new Error(
-          "Product not found."
-        );
-      }
+store:
+product.store ||
+"Edesvino Seller",
 
+image_url:
+product.image_url || "",
 
-      let cart = [];
+seller_id:
+product.seller_id || null
 
-      try {
+});
 
-        cart =
-          JSON.parse(
-            localStorage.getItem(
-              "edesvinoCart"
-            ) || "[]"
-          );
+}
 
-        if (!Array.isArray(cart)) {
-          cart = [];
-        }
 
-      } catch (error) {
+localStorage.setItem(
+"edesvinoCart",
+JSON.stringify(cart)
+);
 
-        cart = [];
-      }
 
+showMessage(
+product.name +
+" is added to your cart.",
+"success"
+);
 
-      const existingIndex =
-        cart.findIndex(
-          item =>
-            String(item.id) ===
-            String(data.id)
-        );
 
+}catch(error){
 
-      if (
-        existingIndex >= 0
-      ) {
+console.error(
+"Add to cart error:",
+error
+);
 
-        cart[
-          existingIndex
-        ].quantity =
-          Number(
-            cart[
-              existingIndex
-            ].quantity || 1
-          ) + 1;
+showMessage(
+"Unable to add product to cart."
+);
 
-      } else {
+}
 
-        cart.push({
+}
 
-          id:
-            data.id,
 
-          name:
-            data.name,
+/* =========================================
+   START
+========================================= */
 
-          description:
-            data.description ||
-            "",
-
-          price:
-            Number(
-              data.price || 0
-            ),
-
-          quantity:
-            1,
-
-          store:
-            data.store ||
-            "Eddy Digital Hub",
-
-          image_url:
-            data.image_url ||
-            "",
-
-          seller_id:
-            data.seller_id ||
-            null
-
-        });
-      }
-
-
-      localStorage.setItem(
-        "edesvinoCart",
-        JSON.stringify(
-          cart
-        )
-      );
-
-
-      showMessage(
-        "Product added to cart.",
-        "success"
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "Add to cart error:",
-        error
-      );
-
-      showMessage(
-        error.message ||
-        "Unable to add product to cart."
-      );
-    }
-  }
-
-
-  /* ==================================================
-     START
-  ================================================== */
-
-  loadProduct();
+loadProduct();
 
 </script>
 
