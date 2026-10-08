@@ -271,11 +271,13 @@
 
     try {
 
-      const params = new URLSearchParams(
-        window.location.search
-
+      
+const params = new URLSearchParams(
+  window.location.search
+);
 
 const rawProduct = params.get("product");
+
 
 const productId =
   params.get("product_id") ||
