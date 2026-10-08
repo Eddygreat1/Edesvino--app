@@ -370,14 +370,26 @@ const productName =
         }
       }
 
-      if (!product) {
+    
 
-        showError(
-          "No product was selected. Please return to the marketplace and select a product."
-        );
+      
+if (!product) {
 
-        return;
-      }
+  showError(
+    "DEBUG: Product ID received = " +
+    (productId || "NONE") +
+    " | Product name = " +
+    (productName || "NONE") +
+    " | URL = " +
+    window.location.href
+  );
+
+  return;
+}
+        
+
+    
+      
 
       currentProduct = product;
 
