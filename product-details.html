@@ -53,10 +53,6 @@
       font-size: 14px;
     }
 
-    nav a:hover {
-      text-decoration: underline;
-    }
-
     .container {
       max-width: 900px;
       margin: 25px auto;
@@ -257,47 +253,68 @@
   function showError(message) {
     document.getElementById("loading").style.display = "none";
 
-    const errorBox = document.getElementById("error");
+    const errorBox =
+      document.getElementById("error");
 
     errorBox.textContent = message;
     errorBox.style.display = "block";
   }
 
   function formatPrice(price) {
-    return "₦" + Number(price || 0).toLocaleString("en-NG");
+    return "₦" +
+      Number(price || 0).toLocaleString("en-NG");
   }
 
   async function loadProduct() {
 
     try {
 
-      
-const params = new URLSearchParams(
-  window.location.search
-);
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
 
-const rawProduct = params.get("product");
+      /*
+        The marketplace sends:
 
+        product-details.html?product=9
 
-const productId =
-  params.get("product_id") ||
-  params.get("id") ||
-  (rawProduct && /^\d+$/.test(rawProduct) ? rawProduct : null);
+        Therefore "product" can contain
+        the numeric product ID.
+      */
 
-const productName =
-  rawProduct && !/^\d+$/.test(rawProduct) ? rawProduct : null;
+      const rawProduct =
+        params.get("product");
 
+      let productId =
+        params.get("product_id") ||
+        params.get("id");
 
-        
+      if (
+        !productId &&
+        rawProduct &&
+        /^\d+$/.test(rawProduct)
+      ) {
+        productId = rawProduct;
+      }
+
+      const productName =
+        rawProduct &&
+        !/^\d+$/.test(rawProduct)
+          ? rawProduct
+          : null;
 
       let product = null;
 
       /*
         FIRST:
-        Try numeric product ID.
+        Load directly by numeric product ID.
       */
 
-      if (productId && /^\d+$/.test(productId)) {
+      if (
+        productId &&
+        /^\d+$/.test(String(productId))
+      ) {
 
         const { data, error } =
           await supabaseClient
@@ -307,7 +324,16 @@ const productName =
             .maybeSingle();
 
         if (error) {
-          console.error(error);
+          console.error(
+            "Product ID query error:",
+            error
+          );
+
+          showError(
+            "Unable to load this product from the marketplace."
+          );
+
+          return;
         }
 
         product = data;
@@ -315,8 +341,8 @@ const productName =
 
       /*
         SECOND:
-        If no product was found,
-        try the product name.
+        If no numeric ID was supplied,
+        try a product name.
       */
 
       if (!product && productName) {
@@ -329,18 +355,23 @@ const productName =
             .limit(1);
 
         if (error) {
-          console.error(error);
+          console.error(
+            "Product name query error:",
+            error
+          );
         }
 
-        if (data && data.length > 0) {
+        if (
+          data &&
+          data.length > 0
+        ) {
           product = data[0];
         }
       }
 
       /*
         THIRD:
-        Try a product_id stored in
-        localStorage if available.
+        Try previously saved product ID.
       */
 
       if (!product) {
@@ -363,41 +394,47 @@ const productName =
               .maybeSingle();
 
           if (error) {
-            console.error(error);
+            console.error(
+              "Saved product query error:",
+              error
+            );
           }
 
           product = data;
         }
       }
 
-    
+      if (!product) {
 
-      
-if (!product) {
+        showError(
+          "No product was found. Please return to the marketplace and select a product."
+        );
 
-  showError(
-    "DEBUG: Product ID received = " +
-    (productId || "NONE") +
-    " | Product name = " +
-    (productName || "NONE") +
-    " | URL = " +
-    window.location.href
-  );
-
-  return;
-}
-        
-
-    
-      
+        return;
+      }
 
       currentProduct = product;
+
+      /*
+        Remember the selected product.
+      */
+
+      if (product.id) {
+
+        localStorage.setItem(
+          "edesvinoSelectedProductId",
+          String(product.id)
+        );
+      }
 
       displayProduct(product);
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Product loading error:",
+        error
+      );
 
       showError(
         "Unable to load this product. Please try again."
@@ -435,24 +472,29 @@ if (!product) {
     const imageArea =
       document.getElementById("imageArea");
 
+    imageArea.innerHTML = "";
+
     if (product.image_url) {
 
       const image =
         document.createElement("img");
 
-      image.className = "product-image";
+      image.className =
+        "product-image";
 
-      image.src = product.image_url;
+      image.src =
+        product.image_url;
 
       image.alt =
         product.name || "Product";
 
-      image.onerror = function() {
+      image.onerror =
+        function() {
 
-        imageArea.innerHTML =
-          '<div class="no-image">Product image unavailable</div>';
+          imageArea.innerHTML =
+            '<div class="no-image">Product image unavailable</div>';
 
-      };
+        };
 
       imageArea.appendChild(image);
 
@@ -463,13 +505,15 @@ if (!product) {
     }
 
     document.getElementById("buyNowButton")
-      .onclick = function() {
+      .onclick =
+      function() {
 
         buyNow(product);
       };
 
     document.getElementById("addCartButton")
-      .onclick = function() {
+      .onclick =
+      function() {
 
         addToCart(product);
       };
@@ -477,12 +521,6 @@ if (!product) {
 
   /*
     BUY NOW
-    --------------------------------
-    Save the complete product locally
-    before opening checkout.
-
-    This means checkout does NOT need
-    to guess which product was selected.
   */
 
   function buyNow(product) {
@@ -491,9 +529,11 @@ if (!product) {
 
       const checkoutProduct = {
 
-        id: product.id,
+        id:
+          product.id,
 
-        name: product.name,
+        name:
+          product.name,
 
         description:
           product.description || "",
@@ -501,7 +541,8 @@ if (!product) {
         price:
           Number(product.price || 0),
 
-        quantity: 1,
+        quantity:
+          1,
 
         store:
           product.store ||
@@ -517,12 +558,10 @@ if (!product) {
 
       localStorage.setItem(
         "edesvinoBuyNow",
-        JSON.stringify(checkoutProduct)
+        JSON.stringify(
+          checkoutProduct
+        )
       );
-
-      /*
-        Also remember the selected product ID.
-      */
 
       if (product.id) {
 
@@ -531,10 +570,6 @@ if (!product) {
           String(product.id)
         );
       }
-
-      /*
-        Open checkout directly.
-      */
 
       window.location.href =
         "checkout.html";
@@ -568,7 +603,8 @@ if (!product) {
 
         try {
 
-          cart = JSON.parse(savedCart);
+          cart =
+            JSON.parse(savedCart);
 
           if (!Array.isArray(cart)) {
             cart = [];
@@ -598,14 +634,17 @@ if (!product) {
 
         cart.push({
 
-          id: product.id,
+          id:
+            product.id,
 
-          name: product.name,
+          name:
+            product.name,
 
           price:
             Number(product.price || 0),
 
-          quantity: 1,
+          quantity:
+            1,
 
           description:
             product.description || "",
