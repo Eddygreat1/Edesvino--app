@@ -1,694 +1,629 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Details - Edesvino</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Product Details - Edesvino</title>
 
-<style>
-*{box-sizing:border-box}
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f5f7fa;
-  color:#111827;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-header{
-  background:#fff;
-  border-bottom:1px solid #e5e7eb;
-  padding:16px 20px;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
 
-.header-inner{
-  max-width:1000px;
-  margin:auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-}
+    header {
+      background: #111;
+      color: white;
+      padding: 15px 20px;
+    }
 
-.logo{
-  font-size:22px;
-  font-weight:bold;
-  color:#111827;
-  text-decoration:none;
-}
+    .header-inner {
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
 
-nav{
-  display:flex;
-  gap:14px;
-  flex-wrap:wrap;
-}
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
 
-nav a{
-  color:#374151;
-  text-decoration:none;
-  font-size:14px;
-}
+    nav {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
 
-main{
-  max-width:900px;
-  margin:30px auto;
-  padding:0 16px;
-}
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
 
-.back-link{
-  display:inline-block;
-  margin-bottom:18px;
-  color:#374151;
-  text-decoration:none;
-  font-size:14px;
-}
+    nav a:hover {
+      text-decoration: underline;
+    }
 
-.product-card{
-  background:#fff;
-  border-radius:14px;
-  padding:24px;
-  box-shadow:0 4px 16px rgba(0,0,0,.06);
-}
+    .container {
+      max-width: 900px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
 
-.product-image{
-  width:100%;
-  max-height:420px;
-  object-fit:contain;
-  border-radius:12px;
-  background:#f3f4f6;
-  margin-bottom:24px;
-}
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #111;
+      text-decoration: none;
+      font-weight: bold;
+    }
 
-.no-image{
-  width:100%;
-  height:300px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#f3f4f6;
-  border-radius:12px;
-  color:#6b7280;
-  margin-bottom:24px;
-}
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
 
-h1{
-  margin:0 0 12px;
-  font-size:30px;
-}
+    .product-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: #f1f1f1;
+      margin-bottom: 20px;
+    }
 
-.price{
-  font-size:26px;
-  font-weight:bold;
-  margin:15px 0;
-}
+    .no-image {
+      width: 100%;
+      height: 250px;
+      background: #eee;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #777;
+      margin-bottom: 20px;
+    }
 
-.store{
-  color:#4b5563;
-  margin-bottom:20px;
-}
+    h1 {
+      margin-top: 0;
+      font-size: 30px;
+    }
 
-.description{
-  color:#4b5563;
-  line-height:1.6;
-  margin-bottom:25px;
-}
+    .price {
+      font-size: 25px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
 
-.actions{
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-}
+    .store {
+      margin: 10px 0;
+      color: #555;
+    }
 
-button{
-  flex:1;
-  min-width:180px;
-  padding:15px;
-  border:none;
-  border-radius:9px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-}
+    .description {
+      line-height: 1.6;
+      color: #444;
+      margin: 20px 0;
+    }
 
-.buy-button{
-  background:#111827;
-  color:#fff;
-}
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 25px;
+    }
 
-.cart-button{
-  background:#e5e7eb;
-  color:#111827;
-}
+    button {
+      border: none;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-.message{
-  padding:14px;
-  border-radius:8px;
-  margin-bottom:18px;
-  display:none;
-}
+    .buy-btn {
+      background: #111;
+      color: white;
+    }
 
-.error{
-  background:#fef2f2;
-  color:#991b1b;
-}
+    .cart-btn {
+      background: #e8e8e8;
+      color: #111;
+    }
 
-.success{
-  background:#ecfdf5;
-  color:#065f46;
-}
+    button:active {
+      transform: scale(0.98);
+    }
 
-.loading{
-  text-align:center;
-  padding:50px 20px;
-  background:#fff;
-  border-radius:14px;
-}
+    .loading,
+    .error {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+    }
 
-footer{
-  text-align:center;
-  padding:30px 15px;
-  color:#6b7280;
-  font-size:13px;
-}
+    .error {
+      color: #b00020;
+    }
 
-@media(max-width:600px){
-  .product-card{padding:18px}
-  h1{font-size:25px}
-  .actions{flex-direction:column}
-  button{width:100%}
-}
-</style>
+    footer {
+      text-align: center;
+      padding: 30px 15px;
+      color: #666;
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-<div class="header-inner">
+  <div class="header-inner">
+    <div class="logo">Edesvino</div>
 
-<a class="logo" href="index.html">Edesvino</a>
-
-<nav>
-<a href="index.html">Home</a>
-<a href="index.html#products-section">Shop</a>
-<a href="cart.html">Cart</a>
-<a href="track-order.html">Track Order</a>
-</nav>
-
-</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="index.html#products-section">Shop</a>
+      <a href="cart.html">Cart</a>
+      <a href="track-order.html">Track Order</a>
+    </nav>
+  </div>
 </header>
 
-<main>
+<div class="container">
 
-<a class="back-link" href="index.html">
-← Back to Marketplace
-</a>
+  <a class="back-link" href="index.html">← Back to Marketplace</a>
 
-<div id="message" class="message"></div>
+  <div id="loading" class="loading">
+    Loading product...
+  </div>
 
-<div id="productContainer">
+  <div id="error" class="error" style="display:none;"></div>
 
-<div class="loading">
-<h2>Loading product...</h2>
-<p>Please wait.</p>
+  <div id="productArea" style="display:none;">
+
+    <div class="product-card">
+
+      <div id="imageArea"></div>
+
+      <h1 id="productName"></h1>
+
+      <div class="price" id="productPrice"></div>
+
+      <div class="store">
+        Store: <strong id="productStore"></strong>
+      </div>
+
+      <div class="description" id="productDescription"></div>
+
+      <div class="buttons">
+
+        <button
+          class="buy-btn"
+          id="buyNowButton">
+          Buy Now
+        </button>
+
+        <button
+          class="cart-btn"
+          id="addCartButton">
+          Add to Cart
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
-
-</div>
-
-</main>
 
 <footer>
-<strong>Edesvino Marketplace</strong><br>
-Buy. Sell. Grow.
+  <strong>Edesvino Marketplace</strong><br>
+  Buy. Sell. Grow.
 </footer>
 
 <script>
+  const SUPABASE_URL =
+    "https://lxszilqypuglxyfyukdg.supabase.co";
 
-const SUPABASE_URL =
-"https://lxszilqypuglxyfyukdg.supabase.co";
+  const SUPABASE_KEY =
+    "sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
 
-const SUPABASE_KEY =
-"sb_publishable_s0nfQzd5aJVQjHSNAxsJsg_2ZVe5UQh";
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
 
-const supabaseClient =
-window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
+  let currentProduct = null;
+
+  function showError(message) {
+    document.getElementById("loading").style.display = "none";
 
-const productContainer =
-document.getElementById("productContainer");
+    const errorBox = document.getElementById("error");
 
-const messageBox =
-document.getElementById("message");
+    errorBox.textContent = message;
+    errorBox.style.display = "block";
+  }
 
+  function formatPrice(price) {
+    return "₦" + Number(price || 0).toLocaleString("en-NG");
+  }
 
-function showMessage(text,type="error"){
+  async function loadProduct() {
 
-messageBox.textContent=text;
-messageBox.className="message "+type;
-messageBox.style.display="block";
+    try {
 
-}
+      const params = new URLSearchParams(
+        window.location.search
+      );
 
+      const productId =
+        params.get("product_id") ||
+        params.get("id");
 
-function escapeHTML(value){
+      const productName =
+        params.get("product");
 
-return String(value || "")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+      let product = null;
 
-}
+      /*
+        FIRST:
+        Try numeric product ID.
+      */
 
+      if (productId && /^\d+$/.test(productId)) {
 
-function formatMoney(amount){
+        const { data, error } =
+          await supabaseClient
+            .from("products")
+            .select("*")
+            .eq("id", Number(productId))
+            .maybeSingle();
 
-return Number(amount || 0)
-.toLocaleString("en-NG");
+        if (error) {
+          console.error(error);
+        }
 
-}
+        product = data;
+      }
 
+      /*
+        SECOND:
+        If no product was found,
+        try the product name.
+      */
 
-/* =========================================
-   GET VALUE FROM URL
-========================================= */
+      if (!product && productName) {
 
-function getProductValue(){
+        const { data, error } =
+          await supabaseClient
+            .from("products")
+            .select("*")
+            .ilike("name", productName)
+            .limit(1);
 
-const params =
-new URLSearchParams(
-window.location.search
-);
+        if (error) {
+          console.error(error);
+        }
 
-return (
-params.get("product_id") ||
-params.get("product") ||
-null
-);
+        if (data && data.length > 0) {
+          product = data[0];
+        }
+      }
 
-}
+      /*
+        THIRD:
+        Try a product_id stored in
+        localStorage if available.
+      */
 
+      if (!product) {
 
-/* =========================================
-   LOAD PRODUCT
-========================================= */
+        const savedId =
+          localStorage.getItem(
+            "edesvinoSelectedProductId"
+          );
 
-async function loadProduct(){
+        if (
+          savedId &&
+          /^\d+$/.test(savedId)
+        ) {
 
-try{
+          const { data, error } =
+            await supabaseClient
+              .from("products")
+              .select("*")
+              .eq("id", Number(savedId))
+              .maybeSingle();
 
-const productValue =
-getProductValue();
+          if (error) {
+            console.error(error);
+          }
 
-if(!productValue){
+          product = data;
+        }
+      }
 
-showMessage(
-"No product was selected."
-);
+      if (!product) {
 
-productContainer.innerHTML=`
-<div class="loading">
-<h2>No product selected</h2>
-<p>Please return to the marketplace and select a product.</p>
-</div>
-`;
+        showError(
+          "No product was selected. Please return to the marketplace and select a product."
+        );
 
-return;
+        return;
+      }
 
-}
+      currentProduct = product;
 
+      displayProduct(product);
 
-/*
-   FIRST:
-   Try numeric ID.
-*/
+    } catch (error) {
 
-let data=null;
+      console.error(error);
 
-const numericId =
-Number(productValue);
+      showError(
+        "Unable to load this product. Please try again."
+      );
+    }
+  }
 
-if(
-productValue.trim() !== "" &&
-Number.isInteger(numericId) &&
-numericId > 0
-){
+  function displayProduct(product) {
 
-const result =
-await supabaseClient
-.from("products")
-.select(`
-id,
-name,
-description,
-price,
-store,
-image_url,
-seller_id
-`)
-.eq("id",numericId)
-.maybeSingle();
+    document.getElementById("loading")
+      .style.display = "none";
 
-if(result.error){
+    document.getElementById("productArea")
+      .style.display = "block";
 
-throw result.error;
+    document.getElementById("productName")
+      .textContent =
+      product.name || "Product";
 
-}
+    document.getElementById("productPrice")
+      .textContent =
+      formatPrice(product.price);
 
-data=result.data;
+    document.getElementById("productStore")
+      .textContent =
+      product.store ||
+      product.store_name ||
+      "Edesvino Seller";
 
-}
+    document.getElementById("productDescription")
+      .textContent =
+      product.description ||
+      "No description available.";
 
+    const imageArea =
+      document.getElementById("imageArea");
 
-/*
-   SECOND:
-   If it wasn't a numeric ID,
-   search by product name.
-*/
+    if (product.image_url) {
 
-if(!data){
+      const image =
+        document.createElement("img");
 
-const result =
-await supabaseClient
-.from("products")
-.select(`
-id,
-name,
-description,
-price,
-store,
-image_url,
-seller_id
-`)
-.ilike("name",productValue)
-.limit(1)
-.maybeSingle();
+      image.className = "product-image";
 
-if(result.error){
+      image.src = product.image_url;
 
-throw result.error;
+      image.alt =
+        product.name || "Product";
 
-}
+      image.onerror = function() {
 
-data=result.data;
+        imageArea.innerHTML =
+          '<div class="no-image">Product image unavailable</div>';
 
-}
+      };
 
+      imageArea.appendChild(image);
 
-if(!data){
+    } else {
 
-showMessage(
-"Product not found."
-);
-
-productContainer.innerHTML=`
-<div class="loading">
-<h2>Product not found</h2>
-<p>This product could not be found.</p>
-</div>
-`;
-
-return;
-
-}
-
-
-renderProduct(data);
-
-}catch(error){
-
-console.error(
-"Product details error:",
-error
-);
-
-showMessage(
-error.message ||
-"Unable to load product."
-);
-
-productContainer.innerHTML=`
-<div class="loading">
-<h2>Unable to load product</h2>
-<p>${escapeHTML(
-error.message ||
-"Please try again."
-)}</p>
-</div>
-`;
-
-}
-
-}
-
-
-/* =========================================
-   RENDER PRODUCT
-========================================= */
-
-function renderProduct(product){
+      imageArea.innerHTML =
+        '<div class="no-image">No product image</div>';
+    }
 
-const imageHTML =
-product.image_url
-?
-`
-<img
-class="product-image"
-src="${escapeHTML(product.image_url)}"
-alt="${escapeHTML(product.name)}"
-onerror="
-this.style.display='none';
-document.getElementById('imageFallback').style.display='flex';
-"
->
+    document.getElementById("buyNowButton")
+      .onclick = function() {
 
-<div
-id="imageFallback"
-class="no-image"
-style="display:none;"
->
-No product image available
-</div>
-`
-:
-`
-<div class="no-image">
-No product image available
-</div>
-`;
+        buyNow(product);
+      };
 
+    document.getElementById("addCartButton")
+      .onclick = function() {
 
-productContainer.innerHTML=`
+        addToCart(product);
+      };
+  }
 
-<div class="product-card">
+  /*
+    BUY NOW
+    --------------------------------
+    Save the complete product locally
+    before opening checkout.
 
-${imageHTML}
+    This means checkout does NOT need
+    to guess which product was selected.
+  */
 
-<h1>
-${escapeHTML(product.name)}
-</h1>
+  function buyNow(product) {
 
-<div class="price">
-₦${formatMoney(product.price)}
-</div>
+    try {
 
-<div class="store">
-Store:
-<strong>
-${escapeHTML(
-product.store ||
-"Edesvino Seller"
-)}
-</strong>
-</div>
+      const checkoutProduct = {
 
-<div class="description">
-${
-product.description
-?
-escapeHTML(product.description)
-:
-"No description available."
-}
-</div>
+        id: product.id,
 
-<div class="actions">
+        name: product.name,
 
-<button
-class="buy-button"
-id="buyButton"
->
-Buy Now
-</button>
+        description:
+          product.description || "",
 
-<button
-class="cart-button"
-id="cartButton"
->
-Add to Cart
-</button>
+        price:
+          Number(product.price || 0),
 
-</div>
+        quantity: 1,
 
-</div>
+        store:
+          product.store ||
+          product.store_name ||
+          "Edesvino Seller",
 
-`;
+        image_url:
+          product.image_url || "",
 
+        seller_id:
+          product.seller_id || null
+      };
 
-document
-.getElementById("buyButton")
-.addEventListener(
-"click",
-function(){
+      localStorage.setItem(
+        "edesvinoBuyNow",
+        JSON.stringify(checkoutProduct)
+      );
 
-buyNow(product.id);
+      /*
+        Also remember the selected product ID.
+      */
 
-}
-);
+      if (product.id) {
 
+        localStorage.setItem(
+          "edesvinoSelectedProductId",
+          String(product.id)
+        );
+      }
 
-document
-.getElementById("cartButton")
-.addEventListener(
-"click",
-function(){
+      /*
+        Open checkout directly.
+      */
 
-addToCart(product);
+      window.location.href =
+        "checkout.html";
 
-}
-);
+    } catch (error) {
 
-}
+      console.error(error);
 
+      alert(
+        "Unable to start checkout. Please try again."
+      );
+    }
+  }
 
-/* =========================================
-   BUY NOW
-========================================= */
+  /*
+    ADD TO CART
+  */
 
-function buyNow(productId){
+  function addToCart(product) {
 
-window.location.href =
-"checkout.html?product_id=" +
-encodeURIComponent(productId);
+    try {
 
-}
+      let cart = [];
 
+      const savedCart =
+        localStorage.getItem(
+          "edesvinoCart"
+        );
 
-/* =========================================
-   ADD TO CART
-========================================= */
+      if (savedCart) {
 
-function addToCart(product){
+        try {
 
-try{
+          cart = JSON.parse(savedCart);
 
-let cart=[];
+          if (!Array.isArray(cart)) {
+            cart = [];
+          }
 
-try{
+        } catch (error) {
 
-cart=
-JSON.parse(
-localStorage.getItem(
-"edesvinoCart"
-) || "[]"
-);
+          cart = [];
+        }
+      }
 
-if(!Array.isArray(cart)){
-cart=[];
-}
+      const existingIndex =
+        cart.findIndex(
+          item =>
+            String(item.id) ===
+            String(product.id)
+        );
 
-}catch(error){
+      if (existingIndex !== -1) {
 
-cart=[];
+        cart[existingIndex].quantity =
+          Number(
+            cart[existingIndex].quantity || 1
+          ) + 1;
 
-}
+      } else {
 
+        cart.push({
 
-const existingIndex =
-cart.findIndex(
-item =>
-String(item.id) ===
-String(product.id)
-);
+          id: product.id,
 
+          name: product.name,
 
-if(existingIndex >= 0){
+          price:
+            Number(product.price || 0),
 
-cart[existingIndex].quantity =
-Number(
-cart[existingIndex].quantity || 1
-) + 1;
+          quantity: 1,
 
-}else{
+          description:
+            product.description || "",
 
-cart.push({
+          image_url:
+            product.image_url || "",
 
-id:product.id,
+          store:
+            product.store ||
+            product.store_name ||
+            "Edesvino Seller",
 
-name:product.name,
+          seller_id:
+            product.seller_id || null
+        });
+      }
 
-description:
-product.description || "",
+      localStorage.setItem(
+        "edesvinoCart",
+        JSON.stringify(cart)
+      );
 
-price:
-Number(product.price || 0),
+      alert(
+        product.name +
+        " is added to your cart."
+      );
 
-quantity:1,
+    } catch (error) {
 
-store:
-product.store ||
-"Edesvino Seller",
+      console.error(error);
 
-image_url:
-product.image_url || "",
+      alert(
+        "Unable to add this product to cart."
+      );
+    }
+  }
 
-seller_id:
-product.seller_id || null
-
-});
-
-}
-
-
-localStorage.setItem(
-"edesvinoCart",
-JSON.stringify(cart)
-);
-
-
-showMessage(
-product.name +
-" is added to your cart.",
-"success"
-);
-
-
-}catch(error){
-
-console.error(
-"Add to cart error:",
-error
-);
-
-showMessage(
-"Unable to add product to cart."
-);
-
-}
-
-}
-
-
-/* =========================================
-   START
-========================================= */
-
-loadProduct();
-
+  loadProduct();
 </script>
 
 </body>
